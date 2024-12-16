@@ -1,0 +1,3786 @@
+openapi: 3.0.0
+info:
+  title: Multi-Vendor E-Commerce(OrbitBazaar) API DocumentationI
+  description: >
+    This API enables vendors to manage products, orders, and inventory, while buyers can browse and purchase items.
+    The platform supports features like product management, order processing, user management, and more.
+  version: 1.0.0
+
+  contact:
+    name: Support Team
+    email: support@example.com
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development environment
+
+tags:
+  - name: Authentication
+  - name: User
+  - name: Category
+  - name: Product
+  - name: Review
+  - name: Wishlist
+  - name: Report
+  - name: Cart
+  - name: Order
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+  
+      #components for Schema/Entity/Model
+      User:
+       type: object
+       properties:
+          id:
+            type: string
+            example: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6"
+          name:
+            type: string
+            example: john doe
+          image:
+            type: string
+            format: uri
+            example: "https://example.com/image.jpg"
+          email:
+            type: string
+            format: email
+            example: "john.doe@example.com"
+          password:
+            type: string
+            format: password
+            example: "P@ssw0rd"
+          phoneNumber:
+            type: string
+            example: "+1234567890"
+          role:
+            type: string
+            enum:
+              - user
+              - vendor
+              - admin
+              - super-admin
+            example: "user"
+          status:
+            type: string
+            enum:
+              - active
+              - block
+              - pending
+              - approved
+              - decline
+            example: "active"
+          createdAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T12:00:00Z"
+          updatedAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T12:30:00Z"
+       required:
+        - name
+        - email
+        - password
+      
+      Category:
+       type: object
+       properties:
+        id:
+          type: string
+          example: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6"
+        image:
+          type: string
+          format: uri
+          example: "https://example.com/category-image.jpg"
+        name:
+          type: string
+          example: "Electronics"
+        description:
+          type: string
+          example: "Category for electronic devices and gadgets."
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T11:00:00Z"
+       required:
+        - name
+        - image
+        - description
+        
+      Product:
+       type: object
+       properties:
+          id:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+          name:
+            type: string
+            example: "Wireless Headphones"
+          description:
+            type: string
+            example: "High-quality wireless headphones with noise cancellation."
+          categoryId:
+            $ref: '#/components/schemas/Category'
+          vendorEmail:
+            type: string
+            format: email
+            example: "vendor@example.com"
+          price:
+            type: number
+            format: float
+            example: 99.99
+          stock:
+            type: integer
+            example: 150
+          images:
+            type: array
+            items:
+              type: string
+              format: uri
+              example: "https://example.com/product-image.jpg"
+          ratings:
+            type: number
+            format: float
+            example: 4.5
+          isFeatured:
+            type: boolean
+            example: true
+          isArchived:
+            type: boolean
+            example: false
+          salesCount:
+            type: integer
+            example: 1200
+          totalRevenue:
+            type: number
+            format: float
+            example: 119988.00
+          analytics:
+           type: object
+           properties:
+            views:
+              type: integer
+              example: 5000
+            clicks:
+              type: integer
+              example: 1200
+
+          createdAt:
+              type: string
+              format: date-time
+              example: "2024-12-01T10:00:00Z"
+          updatedAt:
+              type: string
+              format: date-time
+              example: "2024-12-01T11:00:00Z"
+       required:
+        - id
+        - name
+        - categoryId
+        - price
+        - stock
+        - vendorEmail
+      
+      Review:
+       type: object
+       properties:
+          id:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+          productId:
+            $ref: '#/components/schemas/Product'
+          userEmail:
+            type: string
+            format: email
+            example: "jonhthedon@example.com"
+          rating:
+            type: number
+            format: float
+            example: 4.5
+          comment:
+            type: string
+            example: "Product quality is good"
+          createdAt:
+              type: string
+              format: date-time
+              example: "2024-12-01T10:00:00Z"
+          updatedAt:
+              type: string
+              format: date-time
+              example: "2024-12-01T11:00:00Z"
+      
+      Wishlist:
+       type: object
+       properties:
+        id:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+        userEmail:
+          type: string
+          format: email
+          example: "user@example.com"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+                format: uuid
+                example: "123e4567-e89b-12d3-a456-426614174000"
+              addedAt:
+                type: string
+                format: date-time
+                example: "2024-12-01T10:15:00Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T11:00:00Z"
+       required:
+        - userEmail
+        - items
+        
+      Report:
+        type: object
+        properties:
+          id:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+          productId:
+            $ref: '#/components/schemas/Product'
+          userEmail:
+            type: string
+            example: 'montumia24@gmail.com'
+          reason:
+            type: string
+            example: 'Inaccurate product description'
+          comments:
+            type: string
+            example: "The product description doesn't match the actual product."
+          status:
+            type: string
+            enum:
+              - pending
+              - resolved
+              - rejected
+            example: "pending"
+          createdAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T10:00:00Z"
+          updatedAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T11:00:00Z" 
+        required:
+          - reason
+          - comments
+      
+      Cart:
+       type: object
+       properties:
+          id:
+            type: string
+            example:  "123e4567-e89b-12d3-a456-426614174000"
+          userEmail:
+            type: string
+            example:  "johndoe@gmail.com"
+          items:
+            type: array
+            items:
+              type: object
+              properties:
+                productId:
+                  $ref: '#/components/schemas/Product'
+                quantity:
+                  type: integer
+                  example: 2
+                price:
+                  type: number
+                  format: float
+                  example: 49.99
+                totalItemPrice:
+                  type: number
+                  format: float
+                  example: 99.98
+          totalQuantity:
+              type: integer
+              example: 5
+          totalPrice:
+              type: number
+              format: float
+              example: 249.95
+          createdAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T10:00:00Z"
+          updatedAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T11:00:00Z"
+            
+      Order:
+        type: object
+        properties:
+          id:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+          userEmail:
+            type: string
+            example: 'johnTheDon@gmail.com'
+          orderItems:
+            type: array
+            items:
+              type: object
+              properties:
+                productId:
+                  $ref: '#/components/schemas/Product'
+                quantity:
+                  type: integer
+                  example: 2
+                price:
+                  type: number
+                  format: float
+                  example: 49.99
+                totalItemPrice:
+                  type: number
+                  format: float
+                  example: 99.98
+          totalQuantity:
+            type: integer
+            example: 5
+          totalPrice:
+            type: number
+            format: float
+            example: 249.95
+          shippingAddress:
+            type: object
+            properties:
+              street:
+                type: string
+                example: "123 Main Street"
+              city:
+                type: string
+                example: "New York"
+              state:
+                type: string
+                example: "NY"
+              postalCode:
+                type: string
+                example: "10001"
+ 
+          status:
+            type: string
+            enum:
+              - confirmed
+              - processing
+              - shipped
+              - delivered
+              - cancelled
+            example: "pending"
+          createdAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T10:00:00Z"
+          updatedAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T11:00:00Z"
+            
+      #components for authentication
+      LoginRequest:
+        type: object
+        properties:
+          email:
+            type: string
+            format: email
+            example: "user@example.com"
+          password:
+            type: string
+            format: password
+            example: "password123"
+            
+      RegisterRequest:
+        type: object
+        properties:
+          name:
+            type: string
+            example: "John Doe"
+          email:
+            type: string
+            format: email
+            example: "john@example.com"
+          password:
+            type: string
+            format: password
+            example: "password123"
+            
+      LoginResponse:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: true
+          message:
+            type: string
+            example: "Login successful"
+          data:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR..."
+              refreshToken:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR..."
+              user:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "123456"
+                  name:
+                    type: string
+                    example: "John Doe"
+                  email:
+                    type: string
+                    format: email
+                    example: "john.doe@example.com"
+                  role:
+                    type: string
+                    example: "user"
+      UserProfile:
+        type: object
+        properties:
+          id:
+            type: string
+            example: "1234567890"
+          name:
+            type: string
+            example: "John Doe"
+          email:
+            type: string
+            format: email
+            example: "john.doe@example.com"
+          phoneNumber:
+            type: string
+            example: "+1234567890"
+          role:
+            type: string
+            example: "user"
+          status:
+            type: string
+            enum: [active, blocked]
+            example: "active"
+          createdAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T10:00:00Z"
+          updatedAt:
+            type: string
+            format: date-time
+            example: "2024-12-01T11:00:00Z"
+      
+  parameters:
+     pageParam:
+          name: page
+          in: query
+          description: The page number for pagination.
+          required: false
+          schema:
+            type: integer
+            example: 1
+     limitParam:
+          name: limit
+          in: query
+          description: maximum items to be returned
+          required: false
+          schema:
+            type: integer
+            example: 10
+     sortTypeParam:
+         name: sort_type
+         in: query
+         description: type of sort(asc,dsc)
+         schema:
+            type: string
+            enum: [asc,dsc]
+            example: asc
+    
+     sortByParam:
+         name: sort_by
+         in: query
+         description: sort key
+         schema:
+            type: string
+            example: createdAt
+     
+     searchParam:
+         name: search
+         in: query
+         description: search term
+         schema:
+            type: string
+            example: xyz
+     filterByParam:
+         name: filter
+         in: query
+         description: Filters based on specific criteria 
+         schema:
+            type: string
+            example: "status:active"
+    
+  
+paths:
+  /admin/login:
+      post:
+        tags: 
+        - Authentication
+        summary : Admin Login
+        description : Allows admins to log in. Only users with admin credentials can authenticate.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginRequest'
+        responses:
+          200:
+            description: Successful login
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/LoginResponse'
+          401:
+            description: Unauthorized
+  /users/login:
+      post:
+       tags:
+         - Authentication
+       summary: User or Vendor Login
+       description: Allows regular users and vendors to log in.
+       requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/LoginRequest'
+       responses:
+         200:
+           description: Successful login
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/LoginResponse'
+         401:
+           description: Unauthorized
+  /users/register:
+    post:
+      tags:
+        - Authentication
+      summary: User Registration
+      description: Allows new users to register an account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+
+      responses:
+        201:
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              examples:
+                successResponse:
+                  value:
+                    success: true
+                    message: "Successfully registered"
+                    data:
+                      accessToken: "eyJhbGciOiJIUzI1NiIsInR..."
+                      refreshToken: "eyJhbGciOiJIUzI1NiIsInR..."
+                      user:
+                        id: "123456"
+                        name: "John Doe"
+                        email: "john.doe@example.com"
+                        role: "user"
+        400:
+          description: Bad Request
+          
+  /admin/users:
+    get:
+      tags:
+        - User
+      summary: Retrieve all users (Admin)
+      description: |
+        Retrieves a list of users with support for pagination, sorting, and filtering.  
+        **Note:** This endpoint is restricted to admin users only.  
+        A valid JWT token with 'admin' role is required.
+      security:
+        - BearerAuth: []  # JWT Token required
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+        - $ref: '#/components/parameters/filterByParam'
+      responses:
+        '200':
+          description: A list of users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Users retrieved successfully."
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    type: object
+                    properties:
+                      totalItems:
+                        type: integer
+                        example: 100
+                      totalPages:
+                        type: integer
+                        example: 10
+                      currentPage:
+                        type: integer
+                        example: 1
+                      pageSize:
+                        type: integer
+                        example: 10
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - Admin role required
+    post:
+     tags:
+      - User
+     summary: Add a new user(Admin)
+     description: |
+      Allows an admin to register or add a new user. The admin provides the necessary information to create a user account.
+     security:
+       - BearerAuth: []  
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             type: object
+             properties:
+               name:
+                 type: string
+                 example: "John Doe"
+               email:
+                 type: string
+                 format: email
+                 example: "john.doe@example.com"
+               password:
+                 type: string
+                 example: "password123"
+               phoneNumber:
+                type: string
+                example: "+1234567890"
+               role:
+                type: string
+                enum: ["user", "admin", "vendor"]
+                example: "user"
+               status:
+                type: string
+                enum: ["active", "inactive"]
+                example: "active"
+     responses:
+      '201':
+        description: User successfully created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "User added successfully."
+                data:
+                  $ref: '#/components/schemas/User'  
+      '400':
+        description: Bad Request - Invalid input data
+      '401':
+        description: Unauthorized - Missing or invalid token
+      '403':
+        description: Forbidden - Admin role required
+      '409':
+        description: Conflict - User already exists
+  /admin/users/{userId}/status:
+    patch:
+      tags:
+        - User
+      summary: Toggle user account status (Admin)
+      description: |
+        Allows admins to toggle the status of a user account between active (unblocked) and inactive (blocked).  
+        **Note:** This endpoint is restricted to admin users only.  
+        A valid JWT token with 'admin' role is required.
+      security:
+        - BearerAuth: []  # JWT Token required
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user whose status needs to be updated.
+          required: true
+          schema:
+            type: string
+            example: "63a7b8cfc2d5496b5c5a34e9"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  description: The desired status for the user account.
+                  example: "active"
+      responses:
+        '200':
+          description: User status updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "User status updated successfully."
+                  data:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        example: "63a7b8cfc2d5496b5c5a34e9"
+                      name:
+                        type: string
+                        example: "John Doe"
+                      email:
+                        type: string
+                        format: email
+                        example: "john.doe@example.com"
+                      role:
+                        type: string
+                        example: "user"
+                      status:
+                        type: string
+                        example: "active"
+        '400':
+          description: Bad Request - Invalid input data.
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '403':
+          description: Forbidden - Admin role required.
+        '404':
+          description: User not found.
+  /admin/users/{userId}:
+    delete:
+     tags:
+       - User
+     summary: Permanently delete a user account, and all associated data will be removed.(Admin)
+     description: Allows an admin to permanently delete a user account and remove all associated data.
+     security:
+       - BearerAuth: []  # JWT or other token-based auth
+     parameters:
+       - name: userId
+         in: path
+         required: true
+         description: The unique identifier of the user to be deleted.
+         schema:
+          type: string
+          example: "63a7b8cfc2d5496b5c5a34e9"
+     responses:
+      '200':
+        description: User deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "User deleted successfully."
+      '400':
+        description: Bad Request - Invalid userId
+      '401':
+        description: Unauthorized - Missing or invalid token
+      '403':
+        description: Forbidden - Admin role required
+      '404':
+        description: Not Found - User not found
+  /admin/vendors/{userId}/approve:
+   patch:
+    tags:
+      - User
+    summary: Approve vendor request(Admin)
+    description: |
+      Allows an admin to approve a vendor request. The admin can use this endpoint to change the status of a vendor from "pending" to "approved".
+    security:
+      - BearerAuth: []  
+    parameters:
+      - name: userId
+        in: path
+        description: The ID of the user/vendor to approve.
+        required: true
+        schema:
+          type: string
+          example: "123456"
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: ["approved"]
+                example: "approved"
+    responses:
+      '200':
+        description: Vendor request approved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "Vendor request approved successfully."
+                data:
+                  $ref: '#/components/schemas/User'   
+      '400':
+        description: Bad Request - Invalid input data
+      '401':
+        description: Unauthorized - Missing or invalid token
+      '403':
+        description: Forbidden - Admin role required
+      '404':
+        description: Not Found - User/vendor with the given ID does not exist
+  /super-admin/entity/{entityId}:
+   delete:
+    tags:
+      - User
+    summary: Permanently delete a user or admin account and all associated data will be removed(super-admin)
+    description: |
+      Allows a super-admin to permanently delete a user or admin account.  
+      All associated data will be removed as required.
+    security:
+      - BearerAuth: []  # Requires valid token for authentication
+    parameters:
+      - name: entityId
+        in: path
+        required: true
+        description: The unique identifier of the user or admin to be deleted.
+        schema:
+          type: string
+          example: "63a7b8cfc2d5496b5c5a34e9"
+    responses:
+      '200':
+        description: Entity deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "User/Admin deleted successfully."
+      '400':
+        description: Bad Request - Invalid entityId
+      '401':
+        description: Unauthorized - Missing or invalid token
+      '403':
+        description: Forbidden - Super-admin role required
+      '404':
+        description: Not Found - User/Admin not found
+  /super-admin/{entityId}/role:
+   patch:
+    tags:
+      - User
+    summary: Change or assign a new role to a user(Super-admin)
+    description: |
+      Allows a super-admin to change or assign a new role to an existing user. This can be used to modify a user's role, such as upgrading a user to admin or changing their role as required.
+    security:
+      - BearerAuth: []  # Requires valid JWT token for authentication
+    parameters:
+      - name: entityId
+        in: path
+        description: The ID of the user whose role needs to be changed.
+        required: true
+        schema:
+          type: string
+          example: "123456"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: ["user", "admin", "vendor", "super-admin"]
+                example: "admin"
+                description: The new role to assign to the user.
+    responses:
+      '200':
+        description: Role successfully updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "Role updated successfully."
+                data:
+                  $ref: '#/components/schemas/User'  # Return the updated user data with the new role
+      '400':
+        description: Bad Request - Invalid input data
+      '401':
+        description: Unauthorized - Missing or invalid token
+      '403':
+        description: Forbidden - Super-admin role required
+      '404':
+        description: Not Found - User with the given ID does not exist
+      '409':
+        description: Conflict - Cannot change role to super-admin (if applicable)
+  /super-admin/add-user:
+   post:
+    tags:
+      - User
+    summary: Register or add a new user(super-admin)
+    description: |
+      Allows a super-admin to register or add a new user to the system. The request includes the necessary details for the new user account, and upon successful registration, the user will be granted general user privileges.
+    security:
+      - BearerAuth: [] 
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "John Smith"
+                description: "The name of the new user."
+              email:
+                type: string
+                example: "john.smith@example.com"
+                description: "The email of the new user."
+              password:
+                type: string
+                example: "securePassword123"
+                description: "The password for the new user account."
+              role:
+                type: string
+                enum: ["user", "vendor", "admin"]
+                example: "user"
+                description: "The role to assign to the new user (e.g., 'user', 'vendor')."
+    responses:
+      '201':
+        description: User successfully added
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "User added successfully."
+                data:
+                  $ref: '#/components/schemas/User'  # Return the details of the newly added user
+      '400':
+        description: Bad Request - Invalid input data
+      '401':
+        description: Unauthorized - Missing or invalid token
+      '403':
+        description: Forbidden - Super-admin role required
+      '409':
+        description: Conflict - Email already exists or other conflict
+  /profile:
+    get:
+      tags:
+        - User
+      summary: Retrieve a user's profile data
+      description: |
+        This endpoint allows a logged-in user to retrieve their own profile data, including personal details such as name, email, role, and other relevant information.
+        **Note:** A valid JWT token is required for authentication.
+      security:
+        - BearerAuth: []  
+      responses:
+        '200':
+          description: Successfully retrieved user's profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Profile retrieved successfully"
+                  data:
+                    $ref: '#/components/schemas/UserProfile' 
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '404':
+          description: Not Found - User profile not found
+        '500':
+          description: Internal Server Error - Unexpected error occurred
+  /users/profile-image:
+    put:
+      tags:
+        - User
+      summary: Update profile image
+      description: Allows a user to upload and update their profile image. The image will be processed and stored.
+      security:
+        - BearerAuth: []  # JWT token required for authentication
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profileImage:
+                  type: string
+                  format: binary
+                  description: The new profile image file to upload.
+      responses:
+        '200':
+          description: Profile image updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Profile image updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      imageUrl:
+                        type: string
+                        example: "https://example.com/uploads/user123/profile.jpg"
+        '400':
+          description: Bad Request - Invalid file or format
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '500':
+          description: Internal Server Error
+  /users/{userId}/profile:
+    put:
+      tags:
+        - User
+      summary: Update user profile
+      description: Allows a user to update their personal information, such as name, email, phone number, or other profile details.
+      security:
+        - BearerAuth: []  
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user whose profile is being updated.
+          schema:
+            type: string
+            example: "123456"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                phone:
+                  type: string
+                  example: "+1234567890"
+                address:
+                  type: string
+                  example: "123 Main St, Anytown, USA"
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Profile updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        example: "123456"
+                      name:
+                        type: string
+                        example: "John Doe"
+                      email:
+                        type: string
+                        example: "john.doe@example.com"
+                      phone:
+                        type: string
+                        example: "+1234567890"
+                      address:
+                        type: string
+                        example: "123 Main St, Anytown, USA"
+        '400':
+          description: Bad Request - Invalid input data
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '404':
+          description: User not found
+        '500':
+          description: Internal Server Error
+  /user/change-password:
+    put:
+      tags:
+        - User
+      summary: Change user password
+      description: Allows a user to update their password. The user must provide their current password and the new password.
+      security:
+        - BearerAuth: []   
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                  description: The current password of the user.
+                  example: "OldPassword123"
+                newPassword:
+                  type: string
+                  description: The new password to set.
+                  example: "NewSecurePassword456"
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Password updated successfully"
+        '400':
+          description: Bad Request - Invalid input or validation error
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - Incorrect current password
+        '500':
+          description: Internal Server Error
+          
+  /categories:
+    get:
+      tags:
+        - Category
+      summary: Retrieve all categories (Public)
+      description: Retrieves a list of all categories.
+      responses:
+        '200':
+          description: A list of categories.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Categories retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+        '400':
+          description: Bad Request
+  /admin/categories:
+    get:
+      tags:
+        - Category
+      summary: Retrieve all categories (Admin)
+      description: |
+        Retrieves a list of all categories with optional pagination, sorting, and filtering.  
+        **Note:** This endpoint is restricted to admin users only.  
+        A valid JWT token with 'admin' role is required.
+      security:
+        - BearerAuth: []   
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/searchParam'
+      responses:
+        '200':
+          description: A list of categories.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Categories retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                  pagination:
+                    type: object
+                    properties:
+                      totalItems:
+                        type: integer
+                        example: 100
+                      totalPages:
+                        type: integer
+                        example: 10
+                      currentPage:
+                        type: integer
+                        example: 1
+                      pageSize:
+                        type: integer
+                        example: 10
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - Admin role required
+    post:
+      tags:
+        - Category
+      summary: Create a new category (Admin)
+      description: Allows admin users to create a new category.
+      security:
+        - BearerAuth: []  # JWT Token required
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '201':
+          description: Category created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Category created successfully."
+                  data:
+                    $ref: '#/components/schemas/Category'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - Admin role required
+  /admin/categories/{id}:
+    put:
+      tags:
+        - Category
+      summary: Update an existing category (Admin)
+      description: Allows admin users to update an existing category by its ID.
+      security:
+        - BearerAuth: []  # JWT Token required
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the category to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '200':
+          description: Category updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Category updated successfully."
+                  data:
+                    $ref: '#/components/schemas/Category'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - Admin role required
+
+    delete:
+      tags:
+        - Category
+      summary: Delete a category (Admin)
+      description: Allows admin users to delete a category by its ID.
+      security:
+        - BearerAuth: []  # JWT Token required
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the category to delete.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Category deleted successfully."
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '403':
+          description: Forbidden - Admin role required
+  
+  /products:
+      get:
+        tags:
+          - Product
+        summary: Retrieve all products for public view
+        description: |
+          Retrieves a list of all products with optional filtering, sorting, and pagination for public view.
+          Users can filter by category or price range, sort by various fields, and paginate results.
+        parameters:
+          - $ref: '#/components/parameters/pageParam'
+          - $ref: '#/components/parameters/limitParam'
+          - $ref: '#/components/parameters/sortByParam'
+          - $ref: '#/components/parameters/filterByParam'
+        responses:
+         '200':
+          description: A list of products.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Products retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  pagination:
+                    type: object
+                    properties:
+                      totalItems:
+                        type: integer
+                        example: 100
+                      totalPages:
+                        type: integer
+                        example: 10
+                      currentPage:
+                        type: integer
+                        example: 1
+                      pageSize:
+                        type: integer
+                        example: 10
+         '400':
+          description: Bad Request - Invalid query parameters
+         '500':
+          description: Internal Server Error
+      post:
+        tags:
+          - Product
+        summary: Create a new product(vendor)
+        description: Allows vendors to add a new product to the store. The vendor must provide product details such as name, description, price, category, and stock.
+        security:
+          - BearerAuth: []   
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Name of the product
+                    example: "Wireless Earbuds"
+                  description:
+                    type: string
+                    description: Detailed description of the product
+                    example: "High-quality earbuds with noise cancellation and Bluetooth connectivity."
+                  price:
+                    type: number
+                    description: Price of the product
+                    example: 99.99
+                  category:
+                    type: string
+                    description: Category the product belongs to
+                    example: "electronics"
+                  stock:
+                    type: integer
+                    description: Number of items in stock
+                    example: 100
+                  imageUrl:
+                    type: string
+                    format: binary
+                    description: Image file of the product
+        responses:
+          '201':
+            description: Product created successfully
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                      example: true
+                    message:
+                      type: string
+                      example: "Product created successfully"
+                    data:
+                      $ref: '#/components/schemas/Product'
+          '400':
+            description: Bad Request - Invalid input data
+          '401':
+            description: Unauthorized - Missing or invalid token
+          '403':
+            description: Forbidden - Vendor access required
+          '500':
+            description: Internal Server Error
+  /products/featured:
+    get:
+      tags:
+        - Product
+      summary: Retrieve featured products
+      description: Retrieves a list of all featured products for public viewing.
+      parameters:
+          - $ref: '#/components/parameters/pageParam'
+          - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: List of featured products retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Featured products retrieved successfully."
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  pagination:
+                    type: object
+                    properties:
+                      totalItems:
+                        type: integer
+                        example: 100
+                      totalPages:
+                        type: integer
+                        example: 10
+                      currentPage:
+                        type: integer
+                        example: 1
+                      pageSize:
+                        type: integer
+                        example: 10
+        '404':
+          description: No featured products found.
+        '500':
+          description: Internal Server Error.
+  /vendor/products:
+      get:
+        tags:
+          - Product
+        summary: Retrieve all products for the vendor
+        description: |
+         Retrieves a list of all products associated with the vendor. Supports search, filtering, sorting, and pagination.
+          **Note:** This endpoint is accessible only to authenticated vendors.
+        security:
+          - BearerAuth: []  
+        parameters:
+           - $ref: '#/components/parameters/pageParam'
+           - $ref: '#/components/parameters/limitParam'
+           - $ref: '#/components/parameters/filterByParam'
+           - $ref: '#/components/parameters/searchParam'
+           - $ref: '#/components/parameters/sortTypeParam'
+        responses:
+          '200':
+            description: A list of vendor products.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                      example: true
+                    message:
+                      type: string
+                      example: "Vendor products retrieved successfully"
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Product'
+                    pagination:
+                       type: object
+                       properties:
+                        totalItems:
+                          type: integer
+                          example: 100
+                        totalPages:
+                          type: integer
+                          example: 10
+                        currentPage:
+                          type: integer
+                          example: 1
+                        pageSize:
+                          type: integer
+                          example: 10
+          '400':
+            description: Bad Request - Invalid query parameters
+          '401':
+            description: Unauthorized - Missing or invalid token
+          '500':
+            description: Internal Server Error
+  /products/archived:
+    get:
+      tags:
+        - Product
+      summary: View archived products(vendor)
+      description: Allows vendors to view a list of their own archived products.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+      responses:
+        '200':
+          description: Archived products retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Archived products retrieved successfully."
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  totalItems:
+                    type: integer
+                    example: 5
+                  totalPages:
+                    type: integer
+                    example: 1
+                  currentPage:
+                    type: integer
+                    example: 1
+        '401':
+          description: Unauthorized - Invalid or missing token.
+        '403':
+          description: Forbidden - Vendor role required.
+        '500':
+          description: Internal Server Error.
+  /products/{productId}:
+    get:
+      tags:
+        - Product
+      summary: Retrieve detailed information about a specific product
+      description: Fetches detailed information about a product by its unique ID.
+      parameters:
+        - name: productId
+          in: path
+          description: The unique identifier of the product.
+          required: true
+          schema:
+            type: string
+            example: "64b8ecfa2a1234abc5678d9e"
+      responses:
+        '200':
+          description: Detailed information about the product.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product retrieved successfully"
+                  data:
+                    $ref: '#/components/schemas/Product'
+                  
+        '404':
+          description: Product not found
+        '400':
+          description: Bad Request - Invalid product ID format
+        '500':
+          description: Internal Server Error
+    put:
+      tags:
+        - Product
+      summary: Update product details(vendor)
+      description: Enables vendors to update their own product details such as name, description, price, category, stock, and image.
+      security:
+        - BearerAuth: []  
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The ID of the product to update.
+          schema:
+            type: string
+            example: "64f123abc2e123456789abcd"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Updated product name.
+                  example: "Updated Laptop"
+                description:
+                  type: string
+                  description: Updated product description.
+                  example: "A high-performance laptop with improved battery life."
+                price:
+                  type: number
+                  description: Updated product price.
+                  example: 1299.99
+                category:
+                  type: string
+                  description: Updated product category.
+                  example: "electronics"
+                stock:
+                  type: integer
+                  description: Updated stock quantity.
+                  example: 25
+                image:
+                  type: string
+                  format: binary
+                  description: New product image (optional).
+      responses:
+        '200':
+          description: Product updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product updated successfully."
+                  data:
+                    $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad Request - Invalid input or data format.
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '403':
+          description: Forbidden - Vendor access required.
+        '404':
+          description: Not Found - Product not found.
+        '500':
+          description: Internal Server Error.
+    delete:
+      tags:
+        - Product
+      summary: Delete a product by its ID(vendor)
+      description: Allows vendors or admins to permanently delete a product by its unique ID. Once deleted, the product and its associated data will be removed from the system.
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product to be deleted.
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9a10f3a8c5f8a1c5"
+      responses:
+        '200':
+          description: Product successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product successfully deleted."
+        '400':
+          description: Bad Request - Invalid product ID or malformed request.
+        '403':
+          description: Forbidden - User does not have permission to delete this product.
+        '404':
+          description: Not Found - Product not found for the provided ID.
+        '500':
+          description: Internal Server Error - Error occurred while deleting the product.
+  /products/search:
+    get:
+      tags:
+        - Product
+      summary: Retrieve products matching the search keyword
+      description: Fetches products that match the given search keyword in their name or description.
+      parameters:
+        - $ref: '#/components/parameters/searchParam'
+      responses:
+        '200':
+          description: List of products matching the search keyword.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Products retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad Request - Missing or invalid query parameter
+        '404':
+          description: No products found matching the search criteria
+        '500':
+          description: Internal Server Error
+  /products/bulk-upload:
+    post:
+      tags:
+        - Product
+      summary: Bulk upload products(vendor)
+      description: Allows vendors or admins to upload multiple products in bulk using a CSV or Excel file.
+      security:
+        - BearerAuth: []  
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CSV or Excel file containing product data.
+      responses:
+        '200':
+          description: Products uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Products uploaded successfully."
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad Request - Invalid file format or data.
+        '401':
+          description: Unauthorized - Missing or invalid token.
+        '403':
+          description: Forbidden - Vendor or admin access required.
+        '500':
+          description: Internal Server Error.
+  /products/{productId}/view:
+    post:
+      tags:
+        - Product
+      summary: Track product page view
+      description: Tracks when a product page is viewed by a user. This can be used for analytics and user interaction tracking.
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product being viewed.
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9a10f3a8c5f8a1c5"
+      responses:
+        '200':
+          description: Product view successfully recorded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product view successfully recorded."
+        '400':
+          description: Bad Request - Invalid product ID or malformed request.
+        '404':
+          description: Not Found - Product not found for the provided ID.
+        '500':
+          description: Internal Server Error - Error occurred while tracking product view.
+  /products/{productId}/click:
+    post:
+      tags:
+        - Product
+      summary: Track product click
+      description: Tracks when a product is clicked, such as from a product listing or search result. This is useful for analytics and determining which products attract the most user attention.
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product that was clicked.
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9a10f3a8c5f8a1c5"
+      responses:
+        '200':
+          description: Product click successfully recorded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product click successfully recorded."
+        '400':
+          description: Bad Request - Invalid product ID or malformed request.
+        '404':
+          description: Not Found - Product not found for the provided ID.
+        '500':
+          description: Internal Server Error - Error occurred while tracking product click.
+  /products/{productId}/feature:
+    patch:
+      tags:
+        - Product
+      summary: Mark a product as featured or remove it from the featured list(vendor)
+      description: Allows a vendor to mark a product as featured or remove it from the featured list. Featured products may receive special prominence on the platform.
+      security:
+          - BearerAuth: []   
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product to be marked as featured or removed from featured.
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9a10f3a8c5f8a1c5"
+        - name: isFeatured
+          in: query
+          description: Boolean flag indicating whether to mark the product as featured (`true`) or remove it from the featured list (`false`).
+          required: true
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: Product featured status successfully updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product featured status successfully updated."
+        '400':
+          description: Bad Request - Invalid product ID or malformed request.
+        '404':
+          description: Not Found - Product not found for the provided ID.
+        '500':
+          description: Internal Server Error - Error occurred while updating product featured status.
+  
+  /reviews:
+    post:
+      tags:
+        - Review
+      summary: Create a new review and update the product’s ratings
+      description: Allows users to submit a new review for a product. After submission, the product’s rating is updated based on the new review score.
+      security:
+          - BearerAuth: []   
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+                - rating
+                - comment
+              properties:
+                productId:
+                  type: string
+                  description: The ID of the product being reviewed.
+                  example: "60c72b2f9a10f3a8c5f8a1c5"
+                rating:
+                  type: number
+                  format: float
+                  description: The rating given by the user, typically a value between 1 and 5.
+                  example: 4.5
+                comment:
+                  type: string
+                  description: The content of the review provided by the user.
+                  example: "Great product, highly recommend it!"
+      responses:
+        '201':
+          description: Review created successfully and product rating updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Review successfully added and product rating updated."
+        '400':
+          description: Bad Request - Missing required fields or invalid data.
+        '404':
+          description: Not Found - Product not found for the provided ID.
+        '409':
+          description: Conflict - User has already submitted a review for this product.
+        '500':
+          description: Internal Server Error - Error occurred while creating the review.
+    get:
+      tags:
+        - Review
+      summary: Fetch all reviews for a given product
+      description: Retrieves a list of all reviews for a specific product, including the rating, comment, and review date.
+      parameters:
+        - in: query
+          name: productId
+          required: true
+          schema:
+            type: string
+          description: The ID of the product for which reviews are being fetched.
+          example: "60c72b2f9a10f3a8c5f8a1c5"
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+      responses:
+        '200':
+          description: A list of reviews for the given product.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                          description: The ID of the user who submitted the review.
+                          example: "60c72b2f9a10f3a8c5f8a1c1"
+                        rating:
+                          type: number
+                          format: float
+                          description: The rating given by the user.
+                          example: 4.5
+                        comment:
+                          type: string
+                          description: The review comment.
+                          example: "Great product, works as expected!"
+                        date:
+                          type: string
+                          format: date-time
+                          description: The date when the review was submitted.
+                          example: "2024-12-04T12:34:56Z"
+                  pagination:
+                    type: object
+                    properties:
+                      currentPage:
+                        type: integer
+                        description: The current page number.
+                        example: 1
+                      totalPages:
+                        type: integer
+                        description: The total number of pages.
+                        example: 5
+                      totalReviews:
+                        type: integer
+                        description: The total number of reviews for the product.
+                        example: 50
+        '400':
+          description: Bad Request - Invalid or missing parameters.
+        '404':
+          description: Not Found - Product not found for the given ID.
+        '500':
+          description: Internal Server Error - Error occurred while fetching reviews.
+    put:
+      tags:
+        - Review
+      summary: Update a user's review
+      description:  Allows a user to update their own review by its ID. This endpoint also recalculates the product's overall rating based on the updated review.
+      security:
+        - BearerAuth: []   
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reviewId:
+                  type: string
+                  description: The ID of the review to be updated.
+                  example: "60c72b2f9a10f3a8c5f8a1c9"
+                rating:
+                  type: number
+                  format: float
+                  description: The updated rating value (e.g., 1 to 5).
+                  example: 4.5
+                comment:
+                  type: string
+                  description: The updated comment for the review.
+                  example: "Updated review: Still a great product!"
+      responses:
+        '200':
+          description: Review updated successfully, and product ratings recalculated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review updated successfully."
+                  review:
+                    type: object
+                    properties:
+                      reviewId:
+                        type: string
+                        example: "60c72b2f9a10f3a8c5f8a1c9"
+                      rating:
+                        type: number
+                        example: 4.5
+                      comment:
+                        type: string
+                        example: "Updated review: Still a great product!"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2024-12-04T15:00:00Z"
+        '400':
+          description: Bad Request - Invalid input data or missing required fields.
+        '404':
+          description: Not Found - Review with the specified ID not found.
+        '403':
+          description: Forbidden - User not authorized to update this review.
+        '500':
+          description: Internal Server Error - Error occurred while updating the review or recalculating ratings.
+  /reviews/user:
+    get:
+      tags:
+        - Review
+      summary: Retrieve all reviews created by a specific user
+      description: Fetches a list of all reviews written by the authenticated user, allowing them to view their review history.
+      security:
+          - BearerAuth: []   
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The ID of the user whose reviews are being fetched.
+          example: "60c72b2f9a10f3a8c5f8a1c1"
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+      responses:
+        '200':
+          description: A list of reviews created by the user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: string
+                          description: The ID of the product being reviewed.
+                          example: "60c72b2f9a10f3a8c5f8a1c5"
+                        rating:
+                          type: number
+                          format: float
+                          description: The rating given by the user.
+                          example: 4.5
+                        comment:
+                          type: string
+                          description: The review comment.
+                          example: "Great product, would recommend it!"
+                        date:
+                          type: string
+                          format: date-time
+                          description: The date when the review was submitted.
+                          example: "2024-12-04T12:34:56Z"
+                  pagination:
+                    type: object
+                    properties:
+                      currentPage:
+                        type: integer
+                        description: The current page number.
+                        example: 1
+                      totalPages:
+                        type: integer
+                        description: The total number of pages.
+                        example: 5
+                      totalReviews:
+                        type: integer
+                        description: The total number of reviews created by the user.
+                        example: 20
+        '400':
+          description: Bad Request - Invalid or missing parameters.
+        '404':
+          description: Not Found - User not found for the given ID or no reviews found.
+        '500':
+          description: Internal Server Error - Error occurred while fetching reviews.
+  /reviews/user/{reviewId}:
+    delete:
+      summary: Delete a user's review
+      description: Allows a user to delete their own review by its ID. This action also recalculates the product's overall rating to reflect the removal of the review.
+      security:
+        - BearerAuth: []
+      tags:
+        - Review
+
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          description: The ID of the review to be deleted
+          schema:
+            type: string
+      responses:
+        200:
+          description: Review deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review deleted successfully. Product ratings updated."
+        404:
+          description: Review not found
+        403:
+          description: Unauthorized access to review
+          
+  /wishlist:
+    post:
+      summary: Add a product to the user's wishlist
+      description: Adds a product to the authenticated user's wishlist, allowing them to save products for future reference.
+      tags:
+        - Wishlist
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  description: The ID of the product to add to the wishlist
+                  example: "647a1f2b4f8b9c0012d4e123"
+      responses:
+        200:
+          description: Product added to wishlist successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product added to wishlist successfully."
+        400:
+          description: Bad request (e.g., product already in wishlist)
+        404:
+          description: Product not found
+        401:
+          description: Unauthorized (user not authenticated)
+    get:
+      summary: Retrieve the user's wishlist
+      description: Retrieves the list of products saved in the authenticated user's wishlist.
+      tags:
+        - Wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+      responses:
+        200:
+          description: Wishlist retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wishlist:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: string
+                          description: ID of the product in the wishlist
+                          example: "647a1f2b4f8b9c0012d4e123"
+                        name:
+                          type: string
+                          description: Name of the product
+                          example: "Wireless Headphones"
+                        price:
+                          type: number
+                          description: Price of the product
+                          example: 99.99
+                        imageUrl:
+                          type: string
+                          description: URL of the product image
+                          example: "https://example.com/images/product.jpg"
+                  pagination:
+                    type: object
+                    properties:
+                      currentPage:
+                        type: integer
+                        description: The current page number.
+                        example: 1
+                      totalPages:
+                        type: integer
+                        description: The total number of pages.
+                        example: 5
+                      totalReviews:
+                        type: integer
+                        description: The total number of reviews for the product.
+                        example: 50
+                      
+                     
+                          
+        401:
+          description: Unauthorized (user not authenticated)
+        500:
+          description: Server error
+    delete:
+      summary: Clear all items from the user's wishlist
+      description: Deletes all products from the authenticated user's wishlist.
+      tags:
+        - Wishlist
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Wishlist cleared successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Wishlist cleared successfully."
+        401:
+          description: Unauthorized (user not authenticated)
+
+        500:
+          description: Server error
+  /wishlist/{productId}:
+    delete:
+      summary: Remove a product from the user's wishlist
+      description: Deletes a specific product from the authenticated user's wishlist.
+      tags:
+        - Wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product to remove from the wishlist
+          required: true
+          schema:
+            type: string
+            example: "647a1f2b4f8b9c0012d4e123"
+      responses:
+        200:
+          description: Product removed from the wishlist successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product successfully removed from the wishlist."
+        404:
+          description: Product not found in the wishlist
+
+        401:
+          description: Unauthorized (user not authenticated)
+
+        500:
+          description: Server error
+          
+  /reports:
+    post:
+      summary: Submit a product report
+      description: Allows an authenticated user to submit a report for a specific product, detailing any issues or concerns.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  description: ID of the product being reported
+                  example: "64a1b23c9f4d3e0012abc456"
+                reason:
+                  type: string
+                  description: The reason for reporting the product
+                  example: "Inappropriate content or misleading information."
+                comments:
+                  type: string
+                  description: Additional details or description about the report
+                  example: "The product description contains false claims about the warranty."
+      responses:
+        201:
+          description: Report submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Report submitted successfully."
+                  reportId:
+                    type: string
+                    example: "64b2c56d8f3a9e0013def789"
+        400:
+          description: Invalid input or missing data
+ 
+        401:
+          description: Unauthorized (user not authenticated)
+ 
+        500:
+          description: Server error
+  /reports/vendor/{vendorEmail}:
+    get:
+      summary: Retrieve reports related to vendor's products
+      description: Allows an authenticated vendor to fetch all reports submitted for their own products.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: vendorEmail
+          in: path
+          required: true
+          description: The unique identifier of the user.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+      responses:
+        200:
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reports retrieved successfully."
+                  reports:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        reportId:
+                          type: string
+                          example: "64b3d76e8f4a9f0012abc567"
+                        productId:
+                          type: string
+                          example: "64a1b23c9f4d3e0012abc456"
+                        reason:
+                          type: string
+                          example: "Misleading information."
+                        details:
+                          type: string
+                          example: "The product description claims features that are inaccurate."
+                        createdAt:
+                          type: string
+                          format: date-time
+                          example: "2024-12-01T14:32:00Z"
+        401:
+          description: Unauthorized (user not authenticated or not a vendor)
+
+        404:
+          description: Vendor not found or no reports available
+
+        500:
+          description: Server error
+  /reports/product/{productId}:
+    get:
+      summary: Retrieve reports for a specific product
+      description: Allows an authenticated vendor to fetch all reports submitted for a specific product they own.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The ID of the product for which reports are being retrieved.
+          schema:
+            type: string
+            example: "64c2d45e9a3b8d0014abc789"
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+      responses:
+        200:
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reports retrieved successfully."
+                  reports:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        reportId:
+                          type: string
+                          example: "64e3f78b9f5c6a0023def789"
+                        reason:
+                          type: string
+                          example: "Inappropriate content."
+                        details:
+                          type: string
+                          example: "The product contains offensive language in its description."
+                        createdAt:
+                          type: string
+                          format: date-time
+                          example: "2024-12-01T14:45:00Z"
+        401:
+          description: Unauthorized (user not authenticated or not authorized)
+ 
+        404:
+          description: Product not found or no reports available
+ 
+        500:
+          description: Server error
+  /reports/{reportId}:
+    get:
+      summary: Retrieve a specific report by its ID
+      description: Allows an authenticated user or admin to fetch detailed information about a specific report using its unique ID.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          description: The unique ID of the report to retrieve.
+          schema:
+            type: string
+            example: "64f3e9b12f6c8b0012df7890"
+      responses:
+        200:
+          description: Report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Report retrieved successfully."
+                  report:
+                    type: object
+                    properties:
+                      reportId:
+                        type: string
+                        example: "64f3e9b12f6c8b0012df7890"
+                      productId:
+                        type: string
+                        example: "64c2d45e9a3b8d0014abc789"
+                      reportedBy:
+                        type: string
+                        example: "user12345"
+                      reason:
+                        type: string
+                        example: "Misleading product description."
+                      comments:
+                        type: string
+                        example: "The product description does not match the actual product."
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2024-12-02T10:30:00Z"
+        401:
+          description: Unauthorized (user not authenticated or not authorized)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Authentication required."
+        404:
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Report not found with the given ID."
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An error occurred while retrieving the report."
+    delete:
+      summary: Delete a specific report
+      description: >
+        Allows a vendor or the user who submitted the report to delete a report related to a product.
+        Only the original reporter or the vendor associated with the product can perform this action.
+        Access is restricted to authenticated users.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []  # Assumes JWT Bearer token authentication
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          description: The unique identifier of the report to be deleted.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Report deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Report deleted successfully.
+        401:
+          description: Unauthorized. Authentication token is missing or invalid.
+        403:
+          description: Forbidden. User is not authorized to delete this report.
+        404:
+          description: Report not found.
+        500:
+          description: Internal server error.
+    put:
+      summary: Update details of a specific report
+      description: >
+        user can Updates the comments or reason of their own report. The report can only be updated if its status is neither "rejected" nor "resolved".
+        This endpoint is accessible to authenticated users.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []  # Assumes JWT Bearer token authentication
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          description: The unique identifier of the report to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comments:
+                  type: string
+                  description: Updated comments for the report.
+                reason:
+                  type: string
+                  description: Updated reason for the report.
+              required:
+                - comments
+                - reason
+      responses:
+        200:
+          description: Report details updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Report updated successfully.
+                  report:
+                    type: object
+                    properties:
+                      reportId:
+                        type: string
+                      comments:
+                        type: string
+                      reason:
+                        type: string
+                      status:
+                        type: string
+                        example: pending
+                      updatedAt:
+                        type: string
+                        format: date-time
+        400:
+          description: Invalid request or report status is "rejected" or "resolved".
+        401:
+          description: Unauthorized. Authentication token is missing or invalid.
+        403:
+          description: Forbidden. User not authorized to update this report.
+        404:
+          description: Report not found.
+        500:
+          description: Internal server error.
+  /reports/user/{userEmail}:
+    get:
+      summary: Retrieve all reports by a specific user
+      description: Retrieves all reports submitted by the user with the specified `userId`. Access is restricted to authorized users only.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []  
+      parameters:
+        - name: userEmail
+          in: path
+          required: true
+          description: The unique identifier of the user.
+          schema:
+            type: string
+        - $ref : '#/components/parameters/pageParam'
+        - $ref : '#/components/parameters/limitParam'
+        - $ref : '#/components/parameters/sortTypeParam'
+      responses:
+        200:
+          description: A list of reports submitted by the user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    reportId:
+                      type: string
+                      description: Unique identifier for the report.
+                      example: 5fc67871349bb7bf6a000002
+                    productId:
+                      type: string
+                      description: Unique identifier for the report.
+                      example: 4fc67871349bb7bf6a000002
+                    reason:
+                      type: string
+                      description: Title of the report.
+                    comments:
+                      type: string
+                      description: Content or summary of the report.
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: Timestamp when the report was created.
+                    status:
+                      type: string
+                      description: Status of the report (e.g., pending, approved).
+        401:
+          description: Unauthorized access. Authentication token is missing or invalid.
+        404:
+          description: User not found or no reports available.
+        500:
+          description: Internal server error.
+  /reports/product/{productId}/count:
+    get:
+      summary: Retrieve the count of reports for a specific product
+      description: >
+        Returns the total number of reports submitted for a specific product. 
+        This endpoint is restricted to authenticated users.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []  
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The unique identifier of the product whose report count is being retrieved.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully retrieved the report count.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 5
+                    description: The total number of reports for the specified product.
+        401:
+          description: Unauthorized. Authentication token is missing or invalid.
+        404:
+          description: Product not found or no reports available.
+        500:
+          description: Internal server error.
+  /reports/{reportId}/status:
+    patch:
+      summary: Update the status of a specific report(vendor)
+      description: >
+        Allows a vendor to update the status of a report as "solved" or "unsolved".
+        Only authenticated vendors can access this endpoint.
+      tags:
+        - Report
+      security:
+        - BearerAuth: []  # Assumes JWT Bearer token authentication
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          description: The unique identifier of the report to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [pending,resolve,reject]
+                  description: The new status of the report.
+              required:
+                - status
+      responses:
+        200:
+          description: Report status updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Report status updated successfully.
+                  report:
+                    type: object
+                    properties:
+                      reportId:
+                        type: string
+                      status:
+                        type: string
+                      updatedAt:
+                        type: string
+                        format: date-time
+        400:
+          description: Invalid request payload or status value.
+        401:
+          description: Unauthorized. Authentication token is missing or invalid.
+        403:
+          description: Forbidden. Only vendors can access this endpoint.
+        404:
+          description: Report not found.
+        500:
+          description: Internal server error.
+  
+  /cart:
+    get:
+      summary: Retrieve the user's current cart
+      description: Fetches the current cart for the authenticated user, including all items, total quantity, and total price.
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User's cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userEmail:
+                    type: string
+                    description: The email of the authenticated user.
+                    example: "user@example.com"
+                  items:
+                    type: array
+                    description: List of products in the cart.
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: string
+                          description: Unique identifier for the product.
+                          example: "64c2d45e9a3b8d0014abc789"
+                        quantity:
+                          type: integer
+                          description: Quantity of the product in the cart.
+                          example: 2
+                        price:
+                          type: number
+                          description: Price of the product when added.
+                          example: 29.99
+                        total:
+                          type: number
+                          description: Total cost for this product (price * quantity).
+                          example: 59.98
+                  totalQuantity:
+                    type: integer
+                    description: Total quantity of items in the cart.
+                    example: 3
+                  totalPrice:
+                    type: number
+                    description: Total price of all items in the cart.
+                    example: 89.97
+                  timestamps:
+                    type: string
+                    format: date-time
+                    description: Last updated time of the cart.
+                    example: "2024-12-05T10:30:00Z"
+        401:
+          description: Unauthorized (user not authenticated)
+
+        404:
+          description: Cart not found
+
+        500:
+          description: Server error
+    post:
+      summary: Add an item to the cart
+      description: Allows an authenticated user to add a product to their cart. Updates total quantity and total price.
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  description: The unique ID of the product to add to the cart.
+                  example: "64c2d45e9a3b8d0014abc789"
+                quantity:
+                  type: integer
+                  description: The quantity of the product to add.
+                  example: 2
+                price:
+                  type: number
+                  format: float
+                  description: The price of the product at the time of addition.
+                  example: 29.99
+      responses:
+        201:
+          description: Item successfully added to the cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product added to the cart successfully."
+                  cart:
+                    type: object
+                    properties:
+                      userEmail:
+                        type: string
+                        example: "user@example.com"
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            productId:
+                              type: string
+                              example: "64c2d45e9a3b8d0014abc789"
+                            quantity:
+                              type: integer
+                              example: 2
+                            price:
+                              type: number
+                              example: 29.99
+                            total:
+                              type: number
+                              example: 59.98
+                      totalQuantity:
+                        type: integer
+                        example: 3
+                      totalPrice:
+                        type: number
+                        example: 89.97
+                      timestamps:
+                        type: string
+                        format: date-time
+                        example: "2024-12-05T10:30:00Z"
+        400:
+          description: Bad request (e.g., invalid product ID or quantity)
+ 
+        401:
+          description: Unauthorized (user not authenticated)
+ 
+        404:
+          description: Product not found
+ 
+        500:
+          description: Server error
+    delete:
+      summary: Clear the user's entire cart
+      description: Removes all items from the authenticated user's cart.
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Cart cleared successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cart cleared successfully."
+                  cart:
+                    type: object
+                    properties:
+                      userEmail:
+                        type: string
+                        example: "user@example.com"
+                      items:
+                        type: array
+                        items:
+                          type: object
+                      totalQuantity:
+                        type: integer
+                        example: 0
+                      totalPrice:
+                        type: number
+                        example: 0.00
+        401:
+          description: Unauthorized (user not authenticated)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Authentication required."
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An error occurred while clearing the cart."
+  /cart/item/{productId}:
+    put:
+      summary: Update product quantity in the cart
+      description: Updates the quantity of a specific product in the authenticated user's cart. If the quantity is set to zero, the item can be removed from the cart.
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The ID of the product to update in the cart.
+          schema:
+            type: string
+            example: "64c2d45e9a3b8d0014abc789"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  description: New quantity for the product in the cart.
+                  example: 3
+      responses:
+        200:
+          description: Product quantity updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product quantity updated successfully."
+                  cart:
+                    type: object
+                    properties:
+                      userEmail:
+                        type: string
+                        example: "user@example.com"
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            productId:
+                              type: string
+                              example: "64c2d45e9a3b8d0014abc789"
+                            quantity:
+                              type: integer
+                              example: 3
+                            price:
+                              type: number
+                              example: 29.99
+                            total:
+                              type: number
+                              example: 89.97
+                      totalQuantity:
+                        type: integer
+                        example: 5
+                      totalPrice:
+                        type: number
+                        example: 149.95
+        400:
+          description: Invalid input or request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid quantity provided."
+        404:
+          description: Product not found in the cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product not found in the cart."
+        401:
+          description: Unauthorized (user not authenticated)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Authentication required."
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An error occurred while updating the cart."
+    delete:
+      summary: Remove a product from the cart
+      description: Removes a specific product from the authenticated user's cart.
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The ID of the product to remove from the cart.
+          schema:
+            type: string
+            example: "64c2d45e9a3b8d0014abc789"
+      responses:
+        200:
+          description: Product removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product removed from the cart successfully."
+                  cart:
+                    type: object
+                    properties:
+                      userEmail:
+                        type: string
+                        example: "user@example.com"
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            productId:
+                              type: string
+                              example: "64c2d45e9a3b8d0014abc789"
+                            quantity:
+                              type: integer
+                              example: 2
+                            price:
+                              type: number
+                              example: 29.99
+                            total:
+                              type: number
+                              example: 59.98
+                      totalQuantity:
+                        type: integer
+                        example: 2
+                      totalPrice:
+                        type: number
+                        example: 59.98
+        404:
+          description: Product not found in the cart
+  
+        401:
+          description: Unauthorized (user not authenticated)
+
+        500:
+          description: Server error
+          
+  /orders:
+    post:
+      summary: Place a new order
+      description: Allows an authenticated user to place a new order based on the items in their cart.
+      tags:
+        - Order
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  description: List of products in the order
+                  items:
+                    type: object
+                    properties:
+                      ProductID:
+                        type: string
+                        example: "60f7f2e0d1234a001c56789a"
+                      quantity:
+                        type: integer
+                        example: 2
+                      price:
+                        type: number
+                        example: 49.99
+                      total:
+                        type: number
+                        example: 99.98
+                totalQuantity:
+                  type: integer
+                  example: 2
+                totalPrice:
+                  type: number
+                  example: 99.98
+                shippingAddress:
+                  type: object
+                  properties:
+                    fullName:
+                      type: string
+                      example: "John Doe"
+                    address:
+                      type: string
+                      example: "123 Main Street"
+                    city:
+                      type: string
+                      example: "New York"
+                    postalCode:
+                      type: string
+                      example: "10001"
+                    countryCode:
+                      type: string
+                      example: "US"
+      responses:
+        201:
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order placed successfully."
+                  orderId:
+                    type: string
+                    example: "64a6f2e0d1234b001c123456"
+        400:
+          description: Bad Request (e.g., missing fields or invalid data)
+        
+        401:
+          description: Unauthorized (user not authenticated)
+          
+        500:
+          description: Server error
+  /orders/user/{userEmail}:
+    get:
+      summary: Retrieve all orders placed by a specific user
+      description: Fetches all orders placed by the user identified by their email address.
+      tags:
+        - Order
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: userEmail
+          required: true
+          description: Email address of the user whose orders are being retrieved.
+          schema:
+            type: string
+            example: "user@example.com"
+      responses:
+        200:
+          description: List of orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    orderId:
+                      type: string
+                      example: "64a6f2e0d1234b001c123456"
+                    totalQuantity:
+                      type: integer
+                      example: 3
+                    totalPrice:
+                      type: number
+                      example: 150.50
+                    status:
+                      type: string
+                      enum:
+                        - confirmed
+                        - processing
+                        - shipped
+                        - delivered
+                        - cancelled
+                      example: "processing"
+                    shippingAddress:
+                      type: object
+                      properties:
+                        fullName:
+                          type: string
+                          example: "John Doe"
+                        address:
+                          type: string
+                          example: "123 Main Street"
+                        city:
+                          type: string
+                          example: "New York"
+                        postalCode:
+                          type: string
+                          example: "10001"
+                        countryCode:
+                          type: string
+                          example: "US"
+                    timestamps:
+                      type: string
+                      format: date-time
+                      example: "2024-12-05T10:45:30Z"
+        400:
+          description: Bad Request (invalid email format)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid email format."
+        401:
+          description: Unauthorized (user not authenticated)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Authentication required."
+        404:
+          description: No orders found for the specified user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "No orders found for this user."
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An error occurred while retrieving the orders."
+  /orders/{orderId}:
+   patch:
+      summary: Update the status of an order(vendor)
+      description: Allows a vendor to update the status of a specific order by its ID.
+      tags:
+        - Order
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          description: The ID of the order to be updated.
+          schema:
+            type: string
+            example: "64a6f2e0d1234b001c123456"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - confirmed
+                    - processing
+                    - shipped
+                    - delivered
+                    - cancelled
+                  description: The new status of the order.
+                  example: "shipped"
+      responses:
+        200:
+          description: Order status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order status updated successfully."
+                  updatedOrder:
+                    type: object
+                    properties:
+                      orderId:
+                        type: string
+                        example: "64a6f2e0d1234b001c123456"
+                      status:
+                        type: string
+                        example: "shipped"
+                      timestamps:
+                        type: string
+                        format: date-time
+                        example: "2024-12-05T12:34:56Z"
+        400:
+          description: Bad Request (invalid status value or missing data)
+
+        401:
+          description: Unauthorized (vendor not authenticated)
+
+        403:
+          description: Forbidden (vendor not authorized to update the order)
+ 
+        404:
+          description: Order not found
+ 
+        500:
+          description: Server error
+  /orders/{orderId}/cancel:
+    delete:
+      summary: Cancel an order
+      description: Allows a user to cancel their order if it has not yet been shipped.
+      tags:
+        - Order
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          description: The ID of the order to be canceled.
+          schema:
+            type: string
+            example: "64a6f2e0d1234b001c123456"
+      responses:
+        200:
+          description: Order canceled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order canceled successfully."
+                  canceledOrder:
+                    type: object
+                    properties:
+                      orderId:
+                        type: string
+                        example: "64a6f2e0d1234b001c123456"
+                      status:
+                        type: string
+                        example: "cancelled"
+                      timestamps:
+                        type: string
+                        format: date-time
+                        example: "2024-12-05T12:34:56Z"
+        400:
+          description: Bad Request (order cannot be canceled)
+ 
+        401:
+          description: Unauthorized (user not authenticated)
+
+        403:
+          description: Forbidden (user not authorized to cancel this order)
+ 
+        404:
+          description: Order not found
+ 
+        500:
+          description: Server error
+  /orders/vendor/:
+    get:
+      summary: Retrieve all orders for a vendor's products(vendor)
+      description: Allows a vendor to view all orders placed for products they own.
+      tags:
+        - Order
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortTypeParam'
+       
+      responses:
+        200:
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Orders retrieved successfully."
+                  orders:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        orderId:
+                          type: string
+                          example: "64a6f2e0d1234b001c123456"
+                        userEmail:
+                          type: string
+                          example: "customer@example.com"
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              productId:
+                                type: string
+                                example: "64a6e1c0d1234b001b123789"
+                              quantity:
+                                type: number
+                                example: 2
+                              price:
+                                type: number
+                                example: 29.99
+                              total:
+                                type: number
+                                example: 59.98
+                        totalQuantity:
+                          type: number
+                          example: 2
+                        totalPrice:
+                          type: number
+                          example: 59.98
+                        status:
+                          type: string
+                          enum: [confirmed, processing, shipped, delivered, cancelled]
+                          example: "processing"
+                        shippingAddress:
+                          type: object
+                          properties:
+                            fullName:
+                              type: string
+                              example: "John Doe"
+                            address:
+                              type: string
+                              example: "123 Main St"
+                            city:
+                              type: string
+                              example: "New York"
+                            postalCode:
+                              type: string
+                              example: "10001"
+                            countryCode:
+                              type: string
+                              example: "US"
+                        timestamps:
+                          type: string
+                          format: date-time
+                          example: "2024-12-05T12:34:56Z"
+                        pagination:
+                          type: object
+                          properties:
+                            totalItems:
+                              type: integer
+                              example: 100
+                            totalPages:
+                              type: integer
+                              example: 10
+                            currentPage:
+                              type: integer
+                              example: 1
+                            pageSize:
+                              type: integer
+                              example: 10
+        401:
+          description: Unauthorized (vendor not authenticated)
+   
+        403:
+          description: Forbidden (not authorized to access these orders)
+ 
+        500:
+          description: Server error
+ 
+ 
+                   
+          
+    
+          
+ 
+  
+  
+          
+          
+          
