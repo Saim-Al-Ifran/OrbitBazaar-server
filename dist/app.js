@@ -23,12 +23,15 @@ app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDoc));
 if (secret_1.nodeEnv !== 'production') {
-    app.use((0, morgan_1.default)('dev')); // Use morgan in non-production environments
+    app.use((0, morgan_1.default)('dev'));
 }
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
 app.use((0, cors_1.default)());
 app.use(index_1.default);
+app.get('/', (_req, res) => {
+    res.status(200).json({ message: 'welcome, server is running' });
+});
 // Error handling middleware
 app.use(defaultError_1.default);
 exports.default = app;

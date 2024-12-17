@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Multi-Vendor E-Commerce(OrbitBazaar) API DocumentationI
+  title: Multi-Vendor E-Commerce(OrbitBazaar) API Documentation
   description: >
     This API enables vendors to manage products, orders, and inventory, while buyers can browse and purchase items.
     The platform supports features like product management, order processing, user management, and more.
