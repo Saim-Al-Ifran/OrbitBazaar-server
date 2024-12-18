@@ -79,8 +79,13 @@ const UserSchema = new mongoose_1.Schema({
     },
     status: {
         type: String,
-        enum: ['block', 'pending', 'approved', 'decline', 'active'],
-        default: 'pending',
+        enum: ['block', 'active'],
+        default: 'active',
+    },
+    vendorRequestStatus: {
+        type: String,
+        enum: ['none', 'requested', 'approved', 'declined'],
+        default: 'none',
     },
     refreshTokens: [
         {
