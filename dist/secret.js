@@ -16,15 +16,15 @@ if (!NODE_ENV) {
 if (!JWT_SECRET_KEY) {
     throw new Error('Missing JWT_SECRET_KEY environment variable');
 }
-// if (!CLOUDINARY_CLOUD_NAME) {
-//   throw new Error('Missing CLOUDINARY_CLOUD_NAME environment variable');
-// }
-// if (!CLOUDINARY_API_KEY) {
-//   throw new Error('Missing CLOUDINARY_API_KEY environment variable');
-// }
-// if (!CLOUDINARY_API_SECRET_KEY) {
-//   throw new Error('Missing CLOUDINARY_API_SECRET_KEY environment variable');
-// }
+if (!CLOUDINARY_CLOUD_NAME) {
+    throw new Error('Missing CLOUDINARY_CLOUD_NAME environment variable');
+}
+if (!CLOUDINARY_API_KEY) {
+    throw new Error('Missing CLOUDINARY_API_KEY environment variable');
+}
+if (!CLOUDINARY_API_SECRET_KEY) {
+    throw new Error('Missing CLOUDINARY_API_SECRET_KEY environment variable');
+}
 if (!JWT_REFRESH_TOKEN_KEY) {
     throw new Error('Missing CLOUDINARY_API_SECRET_KEY environment variable');
 }
