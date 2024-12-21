@@ -11,7 +11,8 @@ export interface IUser extends Document {
   password: string;
   phoneNumber: string;
   role: 'user' | 'vendor' | 'admin' | 'super-admin';
-  status: 'block' | 'pending' | 'approved' | 'decline' | 'active';
+  vendorRequestStatus: 'none'| 'requested' | 'approved'|  'declined';
+  status: 'block' | 'active';
   refreshTokens: IRefreshToken[];
   createdAt?: Date;
   updatedAt?: Date;
