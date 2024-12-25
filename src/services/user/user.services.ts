@@ -1,7 +1,9 @@
 import User from "../../models/User";
 import { IUser } from "../../types/models/User";
+import { PaginationResult } from "../../types/types";
 import CustomError from "../../utils/errors/customError";
 import { uploadFileToCloudinary } from "../../utils/fileUpload";
+import paginate from "../../utils/paginate";
 
 // Service to find a user by a specific property
 export const findUserByProperty = async (key: keyof IUser, value: string): Promise<IUser | null> => {
@@ -18,8 +20,19 @@ export const createNewUser = async (userData: Partial<IUser>): Promise<IUser> =>
 };
 
 // Service to get all users
-export const getAllUsers = async (): Promise<IUser[]> => {
-  return await User.find().select('-password');
+export const getAllUsers = async (
+  role: "super-admin" | "admin",
+  page: number,
+  limit: number,
+  sort: any,
+  searchQuery: object,
+) => {
+  const query = {
+    ...searchQuery,
+    role: role === "super-admin" ? { $ne: "super-admin" } : "user",
+  };
+
+  return await paginate(User, query, page, limit, sort,"-password -refreshTokens");
 };
 
 // Service to toggle user status (block/active)

@@ -16,6 +16,7 @@ exports.updateUserProfile = exports.changePassword = exports.updateUserProfileIm
 const User_1 = __importDefault(require("../../models/User"));
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const fileUpload_1 = require("../../utils/fileUpload");
+const paginate_1 = __importDefault(require("../../utils/paginate"));
 // Service to find a user by a specific property
 const findUserByProperty = (key, value) => __awaiter(void 0, void 0, void 0, function* () {
     if (key === '_id') {
@@ -31,8 +32,9 @@ const createNewUser = (userData) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.createNewUser = createNewUser;
 // Service to get all users
-const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.default.find().select('-password');
+const getAllUsers = (role, page, limit, sort, searchQuery) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = Object.assign(Object.assign({}, searchQuery), { role: role === "super-admin" ? { $ne: "super-admin" } : "user" });
+    return yield (0, paginate_1.default)(User_1.default, query, page, limit, sort, "-password -refreshTokens");
 });
 exports.getAllUsers = getAllUsers;
 // Service to toggle user status (block/active)
