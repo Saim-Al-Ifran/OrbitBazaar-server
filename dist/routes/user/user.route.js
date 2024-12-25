@@ -9,4 +9,5 @@ const authorizeAdmin_1 = __importDefault(require("../../middlewares/auth/authori
 const user_controller_1 = require("../../controllers/user/user.controller");
 const router = express_1.default.Router();
 router.get('/admin/users', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.findAllUsers);
+router.post('/admin/users', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.createUser);
 exports.default = router;

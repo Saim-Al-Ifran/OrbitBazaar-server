@@ -1,6 +1,6 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { getAllUsers } from "../../services/user/user.services";
+import { createNewUser, getAllUsers } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllUsers = TryCatch(
@@ -16,7 +16,7 @@ export const findAllUsers = TryCatch(
       const sort = req.query.sort || { createdAt: -1 };
       const search = req.query.search as string | undefined;
   
-      // Prepare search query
+   
       const searchQuery = search
         ? {
             $or: [
@@ -44,3 +44,35 @@ export const findAllUsers = TryCatch(
       });
     }
   );
+
+export const createUser = TryCatch(
+    async(req:Request,res:Response,_next:NextFunction)=>{
+
+        let { name, email, password, role, phoneNumber } = req.body;
+        const requesterRole = req.user?.role;
+        role = requesterRole === 'admin' ? 'user' : role; 
+
+        const userData = {
+            name,
+            email,
+            password,
+            role,
+            phoneNumber,
+          };
+        const newUser = await createNewUser(userData);
+
+        res.status(201).json({
+            success: true,
+            message: 'User created successfully.',
+            data: {
+              id: newUser.id,
+              name: newUser.name,
+              email: newUser.email,
+              role: newUser.role,
+              phoneNumber: newUser.phoneNumber,
+              createdAt: newUser.createdAt,
+              updatedAt: newUser.updatedAt,
+            },
+          });
+    }
+)

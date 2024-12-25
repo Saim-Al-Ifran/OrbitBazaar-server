@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findAllUsers = void 0;
+exports.createUser = exports.findAllUsers = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const user_services_1 = require("../../services/user/user.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -26,7 +26,6 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
     const limit = parseInt(req.query.limit) || 10;
     const sort = req.query.sort || { createdAt: -1 };
     const search = req.query.search;
-    // Prepare search query
     const searchQuery = search
         ? {
             $or: [
@@ -48,5 +47,32 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             nextPage,
             page
         }
+    });
+}));
+exports.createUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    let { name, email, password, role, phoneNumber } = req.body;
+    const requesterRole = (_a = req.user) === null || _a === void 0 ? void 0 : _a.role;
+    role = requesterRole === 'admin' ? 'user' : role;
+    const userData = {
+        name,
+        email,
+        password,
+        role,
+        phoneNumber,
+    };
+    const newUser = yield (0, user_services_1.createNewUser)(userData);
+    res.status(201).json({
+        success: true,
+        message: 'User created successfully.',
+        data: {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            role: newUser.role,
+            phoneNumber: newUser.phoneNumber,
+            createdAt: newUser.createdAt,
+            updatedAt: newUser.updatedAt,
+        },
     });
 }));
