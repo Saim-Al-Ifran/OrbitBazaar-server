@@ -1,6 +1,6 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { approveVendor, createNewUser, getAllUsers, toggleUserStatus } from "../../services/user/user.services";
+import { approveVendor, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllUsers = TryCatch(
@@ -119,6 +119,20 @@ export const updateVendorRequestStatus = TryCatch(
             vendorRequestStatus: updatedUser.vendorRequestStatus,
             updatedAt: updatedUser.updatedAt,
           },
+        });
+  }
+)
+export const getUserProfile = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction): Promise<void> =>{
+         const email=req.user?.email;
+         if (!email) {
+          throw new CustomError('User ID is missing', 400);
+        }
+         const user = await findUserByProperty('email',email);
+         res.status(200).json({
+          success: true,
+          message: 'User profile retrieved successfully.',
+          data: user,
         });
   }
 )

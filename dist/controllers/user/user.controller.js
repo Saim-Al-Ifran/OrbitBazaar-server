@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateVendorRequestStatus = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
+exports.getUserProfile = exports.updateVendorRequestStatus = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const user_services_1 = require("../../services/user/user.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -112,5 +112,18 @@ exports.updateVendorRequestStatus = (0, TryCatch_1.TryCatch)((req, res, _next) =
             vendorRequestStatus: updatedUser.vendorRequestStatus,
             updatedAt: updatedUser.updatedAt,
         },
+    });
+}));
+exports.getUserProfile = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const email = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!email) {
+        throw new customError_1.default('User ID is missing', 400);
+    }
+    const user = yield (0, user_services_1.findUserByProperty)('email', email);
+    res.status(200).json({
+        success: true,
+        message: 'User profile retrieved successfully.',
+        data: user,
     });
 }));
