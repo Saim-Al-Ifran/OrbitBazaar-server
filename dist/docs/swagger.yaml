@@ -1056,7 +1056,7 @@ paths:
         description: Forbidden - Super-admin role required
       '409':
         description: Conflict - Email already exists or other conflict
-  /profile:
+  /user/profile:
     get:
       tags:
         - User
