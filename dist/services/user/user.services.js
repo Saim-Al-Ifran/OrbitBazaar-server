@@ -38,10 +38,13 @@ const getAllUsers = (role, page, limit, sort, searchQuery) => __awaiter(void 0, 
 });
 exports.getAllUsers = getAllUsers;
 // Service to toggle user status (block/active)
-const toggleUserStatus = (userId, value) => __awaiter(void 0, void 0, void 0, function* () {
+const toggleUserStatus = (userId, value, requesterRole) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield User_1.default.findById(userId);
     if (!user) {
         throw new customError_1.default('User not found', 404);
+    }
+    if (requesterRole === 'admin' && user.role === 'admin') {
+        throw new customError_1.default('Admins cannot modify the status of other admins.', 403);
     }
     user.status = value;
     return yield user.save();

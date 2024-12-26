@@ -1,6 +1,5 @@
 import User from "../../models/User";
 import { IUser } from "../../types/models/User";
-import { PaginationResult } from "../../types/types";
 import CustomError from "../../utils/errors/customError";
 import { uploadFileToCloudinary } from "../../utils/fileUpload";
 import paginate from "../../utils/paginate";
@@ -36,11 +35,15 @@ export const getAllUsers = async (
 };
 
 // Service to toggle user status (block/active)
-export const toggleUserStatus = async (userId: string, value: 'block' | 'active'): Promise<IUser> => {
+export const toggleUserStatus = async (userId: string, value: 'block' | 'active', requesterRole:'admin' | 'super-admin'): Promise<IUser> => {
   const user = await User.findById(userId);
   if (!user) {
     throw new CustomError('User not found', 404);
   }
+  if (requesterRole === 'admin' && user.role === 'admin') {
+    throw new CustomError('Admins cannot modify the status of other admins.', 403);
+  }
+
   user.status = value;
   return await user.save();
 };
