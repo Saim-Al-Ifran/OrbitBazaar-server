@@ -22,7 +22,7 @@ const findUserByProperty = (key, value) => __awaiter(void 0, void 0, void 0, fun
     if (key === '_id') {
         return yield User_1.default.findById(value).select('-password');
     }
-    return yield User_1.default.findOne({ [key]: value });
+    return yield User_1.default.findOne({ [key]: value }).select('-password');
 });
 exports.findUserByProperty = findUserByProperty;
 // Service to create a new user
@@ -39,7 +39,7 @@ const getAllUsers = (role, page, limit, sort, searchQuery) => __awaiter(void 0, 
 exports.getAllUsers = getAllUsers;
 // Service to toggle user status (block/active)
 const toggleUserStatus = (userId, value, requesterRole) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield User_1.default.findById(userId);
+    const user = yield (0, exports.findUserByProperty)('_id', userId);
     if (!user) {
         throw new customError_1.default('User not found', 404);
     }
@@ -52,7 +52,7 @@ const toggleUserStatus = (userId, value, requesterRole) => __awaiter(void 0, voi
 exports.toggleUserStatus = toggleUserStatus;
 // Service to approve or decline vendor requests
 const approveVendor = (userId, value) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield User_1.default.findById(userId);
+    const user = yield (0, exports.findUserByProperty)('_id', userId);
     if (!user) {
         throw new customError_1.default('Vendor not found', 404);
     }

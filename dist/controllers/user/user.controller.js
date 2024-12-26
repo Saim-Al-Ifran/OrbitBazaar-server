@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
+exports.updateVendorRequestStatus = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const user_services_1 = require("../../services/user/user.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -94,6 +94,22 @@ exports.updateUserStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
             email: updatedUser.email,
             role: updatedUser.role,
             status: updatedUser.status,
+            updatedAt: updatedUser.updatedAt,
+        },
+    });
+}));
+exports.updateVendorRequestStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const { status } = req.body;
+    const updatedUser = yield (0, user_services_1.approveVendor)(userId, status);
+    res.status(200).json({
+        success: true,
+        message: `Vendor status updated successfully to '${status}'.`,
+        data: {
+            id: updatedUser.id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            vendorRequestStatus: updatedUser.vendorRequestStatus,
             updatedAt: updatedUser.updatedAt,
         },
     });

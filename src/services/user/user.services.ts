@@ -9,7 +9,7 @@ export const findUserByProperty = async (key: keyof IUser, value: string): Promi
   if (key === '_id') {
     return await User.findById(value).select('-password');
   }
-  return await User.findOne({ [key]: value });
+  return await User.findOne({ [key]: value }).select('-password');
 };
 
 // Service to create a new user
@@ -36,7 +36,7 @@ export const getAllUsers = async (
 
 // Service to toggle user status (block/active)
 export const toggleUserStatus = async (userId: string, value: 'block' | 'active', requesterRole:'admin' | 'super-admin'): Promise<IUser> => {
-  const user = await User.findById(userId);
+  const user = await findUserByProperty('_id',userId);
   if (!user) {
     throw new CustomError('User not found', 404);
   }
@@ -50,7 +50,7 @@ export const toggleUserStatus = async (userId: string, value: 'block' | 'active'
 
 // Service to approve or decline vendor requests
 export const approveVendor = async (userId: string, value: 'none' | 'requested' | 'approved' | 'declined'): Promise<IUser> => {
-  const user = await User.findById(userId);
+  const user = await findUserByProperty('_id',userId);
   if (!user) {
     throw new CustomError('Vendor not found', 404);
   }

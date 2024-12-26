@@ -1,6 +1,6 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { createNewUser, getAllUsers, toggleUserStatus } from "../../services/user/user.services";
+import { approveVendor, createNewUser, getAllUsers, toggleUserStatus } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllUsers = TryCatch(
@@ -102,4 +102,23 @@ export const updateUserStatus = TryCatch(
             },
         });
     }
+)
+
+export const updateVendorRequestStatus = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+        const { userId } = req.params;
+        const { status } = req.body;
+        const updatedUser = await approveVendor(userId, status);
+        res.status(200).json({
+          success: true,
+          message: `Vendor status updated successfully to '${status}'.`,
+          data: {
+            id: updatedUser.id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            vendorRequestStatus: updatedUser.vendorRequestStatus,
+            updatedAt: updatedUser.updatedAt,
+          },
+        });
+  }
 )
