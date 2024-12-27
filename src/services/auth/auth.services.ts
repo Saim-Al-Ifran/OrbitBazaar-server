@@ -47,6 +47,9 @@ import { refreshSecretKey } from '../../secret';
     if (!user) {
       throw new CustomError('Invalid email or password', 401);
     }
+    if(user.role === 'admin' || user.role=== 'super-admin'){
+      throw new CustomError('Only users are allowed to login.', 403);
+    }
   
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {

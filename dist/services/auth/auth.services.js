@@ -53,6 +53,9 @@ const loginUserService = (loginData) => __awaiter(void 0, void 0, void 0, functi
     if (!user) {
         throw new customError_1.default('Invalid email or password', 401);
     }
+    if (user.role === 'admin' || user.role === 'super-admin') {
+        throw new customError_1.default('Only users are allowed to login.', 403);
+    }
     const isMatch = yield user.comparePassword(password);
     if (!isMatch) {
         throw new customError_1.default('Invalid email or password', 401);
