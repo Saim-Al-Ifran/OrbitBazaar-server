@@ -87,14 +87,14 @@ const uploadUserProfileImage = (email, file) => __awaiter(void 0, void 0, void 0
 });
 exports.uploadUserProfileImage = uploadUserProfileImage;
 // Service to change user password
-const changePassword = (userId, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield User_1.default.findById(userId);
+const changePassword = (email, currentPassword, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield (0, exports.findUserForAuth)(email);
     if (!user) {
         throw new customError_1.default('User not found', 404);
     }
-    const isMatched = yield user.comparePassword(newPassword);
-    if (isMatched) {
-        throw new customError_1.default('New password cannot be the same as the old password', 400);
+    const isMatched = yield user.comparePassword(currentPassword);
+    if (!isMatched) {
+        throw new customError_1.default("Current password doesn't match", 400);
     }
     user.password = newPassword;
     return yield user.save();

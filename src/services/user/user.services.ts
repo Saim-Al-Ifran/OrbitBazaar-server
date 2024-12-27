@@ -85,14 +85,15 @@ export const uploadUserProfileImage = async (email: string, file: Express.Multer
 };
 
 // Service to change user password
-export const changePassword = async (userId: string, newPassword: string): Promise<IUser> => {
-  const user = await User.findById(userId);
+export const changePassword = async (email: string,currentPassword: string ,newPassword: string): Promise<IUser> => {
+  const user = await findUserForAuth(email);
   if (!user) {
     throw new CustomError('User not found', 404);
   }
-  const isMatched = await user.comparePassword(newPassword);
-  if (isMatched) {
-    throw new CustomError('New password cannot be the same as the old password', 400);
+  const isMatched = await user.comparePassword(currentPassword);
+  
+  if (!isMatched) {
+    throw new CustomError("Current password doesn't match", 400);
   }
   user.password = newPassword;
   return await user.save();

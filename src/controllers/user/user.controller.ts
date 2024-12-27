@@ -1,6 +1,6 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { approveVendor, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus, updateUserProfile, uploadUserProfileImage } from "../../services/user/user.services";
+import { approveVendor, changePassword, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus, updateUserProfile, uploadUserProfileImage } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllUsers = TryCatch(
@@ -180,6 +180,31 @@ export const updateUserProfileHandler = TryCatch(
         email: updatedUser.email,
         image:updatedUser.image,
         role:updatedUser.role,
+      },
+    });
+  }
+)
+
+export const changePasswordHandler = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction)=>{
+    const email = req.user?.email;  
+    const { currentPassword ,newPassword } = req.body;
+
+    if (!newPassword) {
+      throw new CustomError('New password is required', 400);
+    }
+    if (!email) {
+      throw new CustomError('Email is required', 400);
+    }
+
+    const updatedUser = await changePassword(email, currentPassword ,newPassword);
+
+    res.status(200).json({
+      message: 'Password updated successfully',
+      user: {
+        id: updatedUser._id,
+        email: updatedUser.email,
+        name: updatedUser.name,
       },
     });
   }
