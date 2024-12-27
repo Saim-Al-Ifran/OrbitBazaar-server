@@ -5,9 +5,11 @@ import {
     createUser,
     findAllUsers,
     getUserProfile,
+    updateUserProfileImage,
     updateUserStatus,
     updateVendorRequestStatus
 } from '../../controllers/user/user.controller';
+import upload from '../../middlewares/uploadFile/uploadFile';
 const router = express.Router();
 
  
@@ -16,5 +18,6 @@ router.post('/admin/users',authenticate,authorizeAdmin,createUser);
 router.patch('/admin/users/:id/status',authenticate,authorizeAdmin,updateUserStatus);
 router.patch('/admin/vendors/:userId/status', authenticate,authorizeAdmin,updateVendorRequestStatus);
 router.get('/user/profile', authenticate,getUserProfile);
+router.put('/user/profile-image', authenticate,upload.single('image'),updateUserProfileImage);
 
 export default router;

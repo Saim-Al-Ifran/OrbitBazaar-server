@@ -25,7 +25,7 @@ const uploadFileToCloudinary = (file) => __awaiter(void 0, void 0, void 0, funct
     const b64 = buffer_1.Buffer.from(file.buffer).toString('base64');
     const dataURI = `data:${file.mimetype};base64,${b64}`;
     return yield cloudinary_1.default.uploader.upload(dataURI, {
-        folder: 'horek-rokom/uploads',
+        folder: 'obritBazaar/uploads',
         public_id: publicIdWithoutExtension,
     });
 });

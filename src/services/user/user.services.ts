@@ -74,7 +74,7 @@ export const updateUserRole = async (userId: string, value: 'user' | 'vendor' | 
 };
 
 // Service to update user profile image
-export const updateUserProfileImage = async (email: string, file: Express.Multer.File): Promise<IUser> => {
+export const uploadUserProfileImage = async (email: string, file: Express.Multer.File): Promise<IUser> => {
   const result = await uploadFileToCloudinary(file);
   const user = await User.findOne({ email });
   if (!user) {

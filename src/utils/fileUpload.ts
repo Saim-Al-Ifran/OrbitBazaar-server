@@ -21,7 +21,7 @@ export const uploadFileToCloudinary = async (file: UploadedFile): Promise<Upload
   const dataURI = `data:${file.mimetype};base64,${b64}`;
 
   return await cloudinary.uploader.upload(dataURI, {
-    folder: 'horek-rokom/uploads',
+    folder: 'obritBazaar/uploads',
     public_id: publicIdWithoutExtension,
   });
 };

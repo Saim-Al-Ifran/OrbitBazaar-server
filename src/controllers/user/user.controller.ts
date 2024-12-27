@@ -1,6 +1,6 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { approveVendor, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus } from "../../services/user/user.services";
+import { approveVendor, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus, uploadUserProfileImage } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllUsers = TryCatch(
@@ -135,4 +135,28 @@ export const getUserProfile = TryCatch(
           data: user,
         });
   }
+)
+
+export const updateUserProfileImage = TryCatch(
+   async(req:Request,res:Response,_next:NextFunction)=>{
+
+        const email = req.user?.email;
+        if (!email) {
+          throw new CustomError('Unauthorized request.', 401);
+        }
+    
+        if (!req.file) {
+          throw new CustomError('Profile image is required.', 400);
+        }
+        const updatedUser = await uploadUserProfileImage(email, req.file);
+
+        res.status(200).json({
+          success: true,
+          message: 'Profile image uploaded successfully.',
+          data: {
+            image: updatedUser.image
+          },
+        });
+        
+   }
 )

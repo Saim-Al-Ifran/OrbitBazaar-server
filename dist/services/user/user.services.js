@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserProfile = exports.changePassword = exports.updateUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = exports.findUserForAuth = void 0;
+exports.updateUserProfile = exports.changePassword = exports.uploadUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = exports.findUserForAuth = void 0;
 const User_1 = __importDefault(require("../../models/User"));
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const fileUpload_1 = require("../../utils/fileUpload");
@@ -76,7 +76,7 @@ const updateUserRole = (userId, value) => __awaiter(void 0, void 0, void 0, func
 });
 exports.updateUserRole = updateUserRole;
 // Service to update user profile image
-const updateUserProfileImage = (email, file) => __awaiter(void 0, void 0, void 0, function* () {
+const uploadUserProfileImage = (email, file) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, fileUpload_1.uploadFileToCloudinary)(file);
     const user = yield User_1.default.findOne({ email });
     if (!user) {
@@ -85,7 +85,7 @@ const updateUserProfileImage = (email, file) => __awaiter(void 0, void 0, void 0
     user.image = result.secure_url;
     return yield user.save();
 });
-exports.updateUserProfileImage = updateUserProfileImage;
+exports.uploadUserProfileImage = uploadUserProfileImage;
 // Service to change user password
 const changePassword = (userId, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield User_1.default.findById(userId);
