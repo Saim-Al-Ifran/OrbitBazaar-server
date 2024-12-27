@@ -15,4 +15,5 @@ router.patch('/admin/users/:id/status', authenticate_1.default, authorizeAdmin_1
 router.patch('/admin/vendors/:userId/status', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.updateVendorRequestStatus);
 router.get('/user/profile', authenticate_1.default, user_controller_1.getUserProfile);
 router.put('/user/profile-image', authenticate_1.default, uploadFile_1.default.single('image'), user_controller_1.updateUserProfileImage);
+router.put('/users/profile', authenticate_1.default, user_controller_1.updateUserProfileHandler);
 exports.default = router;

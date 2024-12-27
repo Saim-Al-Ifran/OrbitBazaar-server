@@ -1,6 +1,6 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { approveVendor, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus, uploadUserProfileImage } from "../../services/user/user.services";
+import { approveVendor, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus, updateUserProfile, uploadUserProfileImage } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllUsers = TryCatch(
@@ -159,4 +159,28 @@ export const updateUserProfileImage = TryCatch(
         });
         
    }
+)
+
+export const updateUserProfileHandler = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction)=>{
+    const email = req.user?.email;
+    if (!email) {
+      throw new CustomError('Email is required', 400);
+    }
+    const updates = req.body;
+    console.log(updates);
+    
+    const updatedUser = await updateUserProfile(email, updates);
+    
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      data: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        image:updatedUser.image,
+        role:updatedUser.role,
+      },
+    });
+  }
 )

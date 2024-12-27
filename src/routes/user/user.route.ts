@@ -5,6 +5,7 @@ import {
     createUser,
     findAllUsers,
     getUserProfile,
+    updateUserProfileHandler,
     updateUserProfileImage,
     updateUserStatus,
     updateVendorRequestStatus
@@ -19,5 +20,6 @@ router.patch('/admin/users/:id/status',authenticate,authorizeAdmin,updateUserSta
 router.patch('/admin/vendors/:userId/status', authenticate,authorizeAdmin,updateVendorRequestStatus);
 router.get('/user/profile', authenticate,getUserProfile);
 router.put('/user/profile-image', authenticate,upload.single('image'),updateUserProfileImage);
+router.put('/users/profile',authenticate,updateUserProfileHandler)
 
 export default router;

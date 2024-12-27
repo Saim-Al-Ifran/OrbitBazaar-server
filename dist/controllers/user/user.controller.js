@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserProfileImage = exports.getUserProfile = exports.updateVendorRequestStatus = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
+exports.updateUserProfileHandler = exports.updateUserProfileImage = exports.getUserProfile = exports.updateVendorRequestStatus = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const user_services_1 = require("../../services/user/user.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -142,6 +142,26 @@ exports.updateUserProfileImage = (0, TryCatch_1.TryCatch)((req, res, _next) => _
         message: 'Profile image uploaded successfully.',
         data: {
             image: updatedUser.image
+        },
+    });
+}));
+exports.updateUserProfileHandler = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const email = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!email) {
+        throw new customError_1.default('Email is required', 400);
+    }
+    const updates = req.body;
+    console.log(updates);
+    const updatedUser = yield (0, user_services_1.updateUserProfile)(email, updates);
+    res.status(200).json({
+        message: 'Profile updated successfully',
+        data: {
+            id: updatedUser.id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            image: updatedUser.image,
+            role: updatedUser.role,
         },
     });
 }));
