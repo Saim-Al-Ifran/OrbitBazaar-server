@@ -23,7 +23,7 @@ const registerUserService = (userData) => __awaiter(void 0, void 0, void 0, func
     if (!email) {
         throw new customError_1.default('Email is required', 400);
     }
-    const existingUser = yield (0, user_services_1.findUserByProperty)('email', email);
+    const existingUser = yield (0, user_services_1.findUserForAuth)(email);
     if (existingUser) {
         throw new customError_1.default('User already exists with this email', 400);
     }
@@ -49,7 +49,7 @@ const loginUserService = (loginData) => __awaiter(void 0, void 0, void 0, functi
     if (!password) {
         throw new customError_1.default('Password is required', 400);
     }
-    const user = yield (0, user_services_1.findUserByProperty)('email', email);
+    const user = yield (0, user_services_1.findUserForAuth)(email);
     if (!user) {
         throw new customError_1.default('Invalid email or password', 401);
     }
@@ -73,10 +73,12 @@ const loginUserService = (loginData) => __awaiter(void 0, void 0, void 0, functi
 exports.loginUserService = loginUserService;
 const loginAdminService = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = loginData;
-    const user = yield (0, user_services_1.findUserByProperty)('email', email);
+    const user = yield (0, user_services_1.findUserForAuth)(email);
     if (!user || user.role == 'user') {
         throw new customError_1.default('Only admins are allowed to login', 401);
     }
+    console.log('Candidate Password:', password);
+    console.log('Stored Hash:', user.password);
     const isMatch = user.comparePassword(password);
     if (!isMatch) {
         throw new customError_1.default('Invalid email or password', 401);

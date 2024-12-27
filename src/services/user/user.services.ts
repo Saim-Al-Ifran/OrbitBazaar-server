@@ -4,6 +4,11 @@ import CustomError from "../../utils/errors/customError";
 import { uploadFileToCloudinary } from "../../utils/fileUpload";
 import paginate from "../../utils/paginate";
 
+//Find a user by email for authentication purposes
+export const findUserForAuth = async (email: string): Promise<IUser | null> => {
+  return await User.findOne({ email });
+};
+
 // Service to find a user by a specific property
 export const findUserByProperty = async (key: keyof IUser, value: string): Promise<IUser | null> => {
   if (key === '_id') {

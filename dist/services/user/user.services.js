@@ -12,11 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserProfile = exports.changePassword = exports.updateUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = void 0;
+exports.updateUserProfile = exports.changePassword = exports.updateUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = exports.findUserForAuth = void 0;
 const User_1 = __importDefault(require("../../models/User"));
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const fileUpload_1 = require("../../utils/fileUpload");
 const paginate_1 = __importDefault(require("../../utils/paginate"));
+//Find a user by email for authentication purposes
+const findUserForAuth = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield User_1.default.findOne({ email });
+});
+exports.findUserForAuth = findUserForAuth;
 // Service to find a user by a specific property
 const findUserByProperty = (key, value) => __awaiter(void 0, void 0, void 0, function* () {
     if (key === '_id') {

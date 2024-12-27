@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { IUser } from "../../types/models/User";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/token";
 import CustomError from "../../utils/errors/customError";
-import { createNewUser, findUserByProperty } from "../user/user.services";
+import { createNewUser, findUserByProperty, findUserForAuth } from "../user/user.services";
 import { refreshSecretKey } from '../../secret';
 
  
@@ -12,7 +12,7 @@ import { refreshSecretKey } from '../../secret';
       throw new CustomError('Email is required', 400);
     }
   
-    const existingUser = await findUserByProperty('email', email);
+    const existingUser = await findUserForAuth(email);
     if (existingUser) {
       throw new CustomError('User already exists with this email', 400);
     }
@@ -43,7 +43,7 @@ import { refreshSecretKey } from '../../secret';
       throw new CustomError('Password is required', 400);
     }
   
-    const user = await findUserByProperty('email', email);
+    const user = await findUserForAuth(email);
     if (!user) {
       throw new CustomError('Invalid email or password', 401);
     }
@@ -71,12 +71,14 @@ import { refreshSecretKey } from '../../secret';
 
  export const loginAdminService = async (loginData: { email: string; password: string }): Promise<{payload: object; accessToken: string; refreshToken: string }> => {
     const { email, password } = loginData;
-    const user = await findUserByProperty('email', email);
+    const user = await findUserForAuth(email);
   
     if (!user || user.role == 'user') {
       throw new CustomError('Only admins are allowed to login', 401);
     }
-  
+    console.log('Candidate Password:', password);
+    console.log('Stored Hash:', user.password);
+    
     const isMatch =  user.comparePassword(password);
     if (!isMatch) {
       throw new CustomError('Invalid email or password', 401);
