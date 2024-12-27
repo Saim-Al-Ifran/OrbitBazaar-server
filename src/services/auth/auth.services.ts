@@ -36,12 +36,6 @@ import { refreshSecretKey } from '../../secret';
 
  export const loginUserService = async (loginData: { email: string; password: string }): Promise<{payload:object; accessToken: string; refreshToken: string }> => {
     const { email, password } = loginData;
-    if (!email) {
-      throw new CustomError('Email is required', 400);
-    }
-    if (!password) {
-      throw new CustomError('Password is required', 400);
-    }
   
     const user = await findUserForAuth(email);
     if (!user) {
@@ -65,7 +59,9 @@ import { refreshSecretKey } from '../../secret';
   
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
-  
+    user.refreshTokens.push({ token: refreshToken });
+    await user.save();
+    
     return {payload,accessToken, refreshToken };
   };
 
@@ -76,8 +72,6 @@ import { refreshSecretKey } from '../../secret';
     if (!user || user.role == 'user') {
       throw new CustomError('Only admins are allowed to login', 401);
     }
-    console.log('Candidate Password:', password);
-    console.log('Stored Hash:', user.password);
     
     const isMatch =  user.comparePassword(password);
     if (!isMatch) {
@@ -98,7 +92,7 @@ import { refreshSecretKey } from '../../secret';
     return {payload,accessToken, refreshToken };
   };
 
-  export const refreshTokenService = async (refreshToken: string): Promise<{accessToken: string; refreshToken: string}> => {
+  export const refreshTokenService = async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
     if (!refreshToken) {
       throw new CustomError('Refresh token not provided', 400);
     }
@@ -106,13 +100,12 @@ import { refreshSecretKey } from '../../secret';
     let payload: any;
     try {
       payload = jwt.verify(refreshToken, refreshSecretKey);
-      
     } catch (error) {
+      console.error('JWT verification failed:', error);
       throw new CustomError('Invalid refresh token', 403);
     }
-    console.log(payload.id)
-    const user = await findUserByProperty('_id', payload.id);
   
+    const user = await findUserByProperty('_id', payload.id);
     if (!user || !user.refreshTokens.some((rt) => rt.token === refreshToken)) {
       throw new CustomError('Invalid refresh token', 403);
     }
@@ -121,7 +114,7 @@ import { refreshSecretKey } from '../../secret';
       id: user._id,
       username: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
     });
     const newRefreshToken = generateRefreshToken({ id: user._id });
   

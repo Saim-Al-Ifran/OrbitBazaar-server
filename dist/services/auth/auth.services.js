@@ -43,12 +43,6 @@ const registerUserService = (userData) => __awaiter(void 0, void 0, void 0, func
 exports.registerUserService = registerUserService;
 const loginUserService = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = loginData;
-    if (!email) {
-        throw new customError_1.default('Email is required', 400);
-    }
-    if (!password) {
-        throw new customError_1.default('Password is required', 400);
-    }
     const user = yield (0, user_services_1.findUserForAuth)(email);
     if (!user) {
         throw new customError_1.default('Invalid email or password', 401);
@@ -68,6 +62,8 @@ const loginUserService = (loginData) => __awaiter(void 0, void 0, void 0, functi
     };
     const accessToken = (0, token_1.generateAccessToken)(payload);
     const refreshToken = (0, token_1.generateRefreshToken)(payload);
+    user.refreshTokens.push({ token: refreshToken });
+    yield user.save();
     return { payload, accessToken, refreshToken };
 });
 exports.loginUserService = loginUserService;
@@ -77,8 +73,6 @@ const loginAdminService = (loginData) => __awaiter(void 0, void 0, void 0, funct
     if (!user || user.role == 'user') {
         throw new customError_1.default('Only admins are allowed to login', 401);
     }
-    console.log('Candidate Password:', password);
-    console.log('Stored Hash:', user.password);
     const isMatch = user.comparePassword(password);
     if (!isMatch) {
         throw new customError_1.default('Invalid email or password', 401);
@@ -105,9 +99,9 @@ const refreshTokenService = (refreshToken) => __awaiter(void 0, void 0, void 0, 
         payload = jsonwebtoken_1.default.verify(refreshToken, secret_1.refreshSecretKey);
     }
     catch (error) {
+        console.error('JWT verification failed:', error);
         throw new customError_1.default('Invalid refresh token', 403);
     }
-    console.log(payload.id);
     const user = yield (0, user_services_1.findUserByProperty)('_id', payload.id);
     if (!user || !user.refreshTokens.some((rt) => rt.token === refreshToken)) {
         throw new customError_1.default('Invalid refresh token', 403);
@@ -116,7 +110,7 @@ const refreshTokenService = (refreshToken) => __awaiter(void 0, void 0, void 0, 
         id: user._id,
         username: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
     });
     const newRefreshToken = (0, token_1.generateRefreshToken)({ id: user._id });
     user.refreshTokens = user.refreshTokens.filter((rt) => rt.token !== refreshToken);
