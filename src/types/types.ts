@@ -16,3 +16,7 @@ export interface PaginationResult<T> {
   nextPage: number | null;
   page: number;
 }
+
+export interface CloudinaryDeleteResponse {
+  result: string;
+}
