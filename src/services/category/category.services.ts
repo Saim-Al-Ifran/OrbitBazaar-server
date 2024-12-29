@@ -25,7 +25,8 @@ export const getAllCategoriesForAdmin = async (
     limit: number,
     query: object = {} 
   ): Promise<PaginationResult<ICategory>> => {
-
+     console.log(query);
+     
      return await paginate(Category, query, page, limit);
 
   };

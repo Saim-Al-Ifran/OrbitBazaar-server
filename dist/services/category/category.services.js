@@ -29,6 +29,7 @@ const getAllCategories = () => __awaiter(void 0, void 0, void 0, function* () {
 exports.getAllCategories = getAllCategories;
 // Fetch all categories for admin (admin access)
 const getAllCategoriesForAdmin = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_1, limit_1, ...args_1], void 0, function* (page, limit, query = {}) {
+    console.log(query);
     return yield (0, paginate_1.default)(Category_1.default, query, page, limit);
 });
 exports.getAllCategoriesForAdmin = getAllCategoriesForAdmin;
