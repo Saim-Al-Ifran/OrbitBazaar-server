@@ -45,7 +45,7 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             totalPages,
             prevPage,
             nextPage,
-            page
+            currentPage: page
         }
     });
 }));

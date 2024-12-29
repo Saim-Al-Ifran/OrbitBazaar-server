@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findAllCategoriesForAdmin = exports.findAllCategories = void 0;
+exports.addCategory = exports.findAllCategoriesForAdmin = exports.findAllCategories = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -45,5 +45,17 @@ exports.findAllCategoriesForAdmin = (0, TryCatch_1.TryCatch)((req, res, _next) =
             nextPage,
             currentPage: page
         }
+    });
+}));
+exports.addCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { body, file } = req;
+    if (!file) {
+        throw new customError_1.default('Image file is required.', 404);
+    }
+    const category = yield (0, category_services_1.createCategory)(body, file);
+    res.status(201).json({
+        success: true,
+        message: "Category created successfully.",
+        data: category,
     });
 }));

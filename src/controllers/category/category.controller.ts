@@ -1,6 +1,6 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { getAllCategories, getAllCategoriesForAdmin } from "../../services/category/category.services";
+import { createCategory, getAllCategories, getAllCategoriesForAdmin } from "../../services/category/category.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllCategories = TryCatch(
@@ -41,5 +41,21 @@ export const findAllCategoriesForAdmin = TryCatch(
         }
 
       });
+  }
+)
+export const addCategory = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction)=>{
+    const { body, file } = req;
+
+    if (!file) {
+      throw new CustomError('Image file is required.',404);
+    }
+    const category = await createCategory(body, file);
+
+    res.status(201).json({
+      success: true,
+      message: "Category created successfully.",
+      data: category,
+    });
   }
 )

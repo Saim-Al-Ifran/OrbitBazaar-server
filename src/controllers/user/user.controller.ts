@@ -1,6 +1,15 @@
 import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { approveVendor, changePassword, createNewUser, findUserByProperty, getAllUsers, toggleUserStatus, updateUserProfile, uploadUserProfileImage } from "../../services/user/user.services";
+import { 
+  approveVendor,
+  changePassword,
+  createNewUser,
+  findUserByProperty,
+  getAllUsers,
+  toggleUserStatus,
+  updateUserProfile,
+  uploadUserProfileImage
+} from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 
 export const findAllUsers = TryCatch(
@@ -38,7 +47,7 @@ export const findAllUsers = TryCatch(
             totalPages,
             prevPage,
             nextPage,
-            page
+            currentPage:page
         }
 
       });
