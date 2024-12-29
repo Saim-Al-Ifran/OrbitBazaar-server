@@ -27,47 +27,35 @@ const getAllCategories = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield Category_1.default.find({});
 });
 exports.getAllCategories = getAllCategories;
-/**
- * Fetch all categories for admin (admin access)
- */
+// Fetch all categories for admin (admin access)
 const getAllCategoriesForAdmin = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_1, limit_1, ...args_1], void 0, function* (page, limit, query = {}) {
     return yield (0, paginate_1.default)(Category_1.default, query, page, limit);
 });
 exports.getAllCategoriesForAdmin = getAllCategoriesForAdmin;
-/**
- * Create a new category (admin access)
- */
+// Create a new category (admin access)
 const createCategory = (categoryData, file) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, fileUpload_1.uploadFileToCloudinary)(file);
     const category = new Category_1.default(Object.assign(Object.assign({}, categoryData), { image: result.secure_url }));
     return yield category.save();
 });
 exports.createCategory = createCategory;
-/**
- * Update a category in the database with the provided updates
- */
+// Update a category in the database with the provided updates
 const updateCategoryInDb = (categoryId, updates) => __awaiter(void 0, void 0, void 0, function* () {
     return yield Category_1.default.findByIdAndUpdate(categoryId, updates, { new: true });
 });
 exports.updateCategoryInDb = updateCategoryInDb;
-/**
- * Upload the category image to Cloudinary and return the URL
- */
+// Upload the category image to Cloudinary and return the URL
 const uploadCategoryImage = (image) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, fileUpload_1.uploadFileToCloudinary)(image);
     return result.secure_url;
 });
 exports.uploadCategoryImage = uploadCategoryImage;
-/**
- * Delete the category image from Cloudinary
- */
+// Delete the category image from Cloudinary
 const deleteCategoryImage = (imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, delFileFromCloudinary_1.deleteFileFromCloudinary)(imageUrl);
 });
 exports.deleteCategoryImage = deleteCategoryImage;
-/**
- * Delete a category from the database
- */
+// Delete a category from the database
 const deleteCategoryFromDb = (categoryId) => __awaiter(void 0, void 0, void 0, function* () {
     yield Category_1.default.deleteOne({ _id: categoryId });
 });
