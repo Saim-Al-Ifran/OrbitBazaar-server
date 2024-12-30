@@ -16,22 +16,28 @@ exports.deleteFileFromCloudinary = void 0;
 const cloudinary_1 = __importDefault(require("../config/cloudinary"));
 const deleteFileFromCloudinary = (cloudinaryURL) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Verify if the URL is from Cloudinary
+        if (!isCloudinaryUrl(cloudinaryURL)) {
+            console.warn(`Skipping deletion. Not a Cloudinary URL: ${cloudinaryURL}`);
+            return null; // Return null for non-Cloudinary URLs
+        }
+        // Extract the public ID from the Cloudinary URL
         const regex = /\/v\d+\/([^\/]+\/[^\.]+)\./;
         const match = cloudinaryURL.match(regex);
         if (match && match[1]) {
             const publicId = match[1];
+            // Delete the resource from Cloudinary
             const result = yield cloudinary_1.default.uploader.destroy(publicId);
             return result;
         }
         else {
-            console.log('Unable to extract the desired part');
-            throw new Error('Invalid Cloudinary URL format');
+            throw new Error("Invalid Cloudinary URL format");
         }
     }
     catch (error) {
-        console.error('Cloudinary deletion error:', error);
-        if (error.message.includes('Unexpected token < in JSON')) {
-            throw new Error('Failed to delete resource from Cloudinary. Non-JSON response received.');
+        console.error("Cloudinary deletion error:", error);
+        if (error.message.includes("Unexpected token < in JSON")) {
+            throw new Error("Failed to delete resource from Cloudinary. Non-JSON response received.");
         }
         else {
             throw new Error(`Failed to delete resource from Cloudinary: ${error.message}`);
@@ -39,3 +45,7 @@ const deleteFileFromCloudinary = (cloudinaryURL) => __awaiter(void 0, void 0, vo
     }
 });
 exports.deleteFileFromCloudinary = deleteFileFromCloudinary;
+// Helper function to check if a URL belongs to Cloudinary
+const isCloudinaryUrl = (url) => {
+    return url.includes("res.cloudinary.com");
+};
