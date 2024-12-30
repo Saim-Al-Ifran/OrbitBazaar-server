@@ -2,6 +2,7 @@ import {Response,Request,NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
 import {
   createCategory,
+  deleteCategoryFromDb,
   deleteCategoryImage,
   findCategoryById,
   getAllCategories,
@@ -67,7 +68,7 @@ export const addCategory = TryCatch(
     });
   }
 )
-export const updateCategoryController = TryCatch(
+export const updateCategory  = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
     const updates = req.body;
@@ -93,6 +94,31 @@ export const updateCategoryController = TryCatch(
       success: true,
       message: "Category updated successfully.",
       data: updatedCategory,
+    });
+  }
+);
+
+export const deleteCategory = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+
+    // Check if category exists
+    const category = await findCategoryById(id);
+    if (!category) {
+      throw new CustomError("Category not found.", 404);
+    }
+
+    // Delete the category image from Cloudinary (if exists)
+    if (category.image) {
+      await deleteCategoryImage(category.image);
+    }
+
+    // Delete the category from the database
+    await deleteCategoryFromDb(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Category deleted successfully.",
     });
   }
 );

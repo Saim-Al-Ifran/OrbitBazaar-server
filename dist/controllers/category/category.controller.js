@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCategoryController = exports.addCategory = exports.findAllCategoriesForAdmin = exports.findAllCategories = void 0;
+exports.deleteCategory = exports.updateCategory = exports.addCategory = exports.findAllCategoriesForAdmin = exports.findAllCategories = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -59,7 +59,7 @@ exports.addCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(vo
         data: category,
     });
 }));
-exports.updateCategoryController = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.updateCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const updates = req.body;
     const file = req.file;
@@ -79,5 +79,23 @@ exports.updateCategoryController = (0, TryCatch_1.TryCatch)((req, res, _next) =>
         success: true,
         message: "Category updated successfully.",
         data: updatedCategory,
+    });
+}));
+exports.deleteCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    // Check if category exists
+    const category = yield (0, category_services_1.findCategoryById)(id);
+    if (!category) {
+        throw new customError_1.default("Category not found.", 404);
+    }
+    // Delete the category image from Cloudinary (if exists)
+    if (category.image) {
+        yield (0, category_services_1.deleteCategoryImage)(category.image);
+    }
+    // Delete the category from the database
+    yield (0, category_services_1.deleteCategoryFromDb)(id);
+    res.status(200).json({
+        success: true,
+        message: "Category deleted successfully.",
     });
 }));
