@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserProfile = exports.changePassword = exports.uploadUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = exports.findUserForAuth = void 0;
+exports.updateUserProfile = exports.changePassword = exports.uploadUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserRole = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = exports.findUserForAuth = void 0;
 const User_1 = __importDefault(require("../../models/User"));
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const fileUpload_1 = require("../../utils/fileUpload");
@@ -55,6 +55,16 @@ const toggleUserStatus = (userId, value, requesterRole) => __awaiter(void 0, voi
     return yield user.save();
 });
 exports.toggleUserStatus = toggleUserStatus;
+// Service to update user role (block/active)
+const toggleUserRole = (userId, value) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield (0, exports.findUserByProperty)('_id', userId);
+    if (!user) {
+        throw new customError_1.default('User not found', 404);
+    }
+    user.role = value;
+    return yield user.save();
+});
+exports.toggleUserRole = toggleUserRole;
 // Service to approve or decline vendor requests
 const approveVendor = (userId, value) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield (0, exports.findUserByProperty)('_id', userId);

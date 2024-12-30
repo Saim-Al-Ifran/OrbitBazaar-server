@@ -1,7 +1,13 @@
 import express from 'express';
 import authenticate from '../../middlewares/auth/authenticate';
 import authorizeAdmin from '../../middlewares/auth/authorizeAdmin';
-import { addCategory, deleteCategory, findAllCategories, findAllCategoriesForAdmin, updateCategory } from '../../controllers/category/category.controller';
+import {
+    addCategory,
+    deleteCategory,
+    findAllCategories,
+    findAllCategoriesForAdmin,
+    updateCategory
+} from '../../controllers/category/category.controller';
 import upload from '../../middlewares/uploadFile/uploadFile';
  
 const router = express.Router();

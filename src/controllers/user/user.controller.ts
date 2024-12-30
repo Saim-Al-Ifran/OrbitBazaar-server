@@ -6,6 +6,7 @@ import {
   createNewUser,
   findUserByProperty,
   getAllUsers,
+  toggleUserRole,
   toggleUserStatus,
   updateUserProfile,
   uploadUserProfileImage
@@ -101,6 +102,27 @@ export const updateUserStatus = TryCatch(
         res.status(200).json({
             success: true,
             message: `User status updated to ${status} successfully.`,
+            data: {
+              id: updatedUser.id,
+              name: updatedUser.name,
+              email: updatedUser.email,
+              role: updatedUser.role,
+              status: updatedUser.status,
+              updatedAt: updatedUser.updatedAt,
+            },
+        });
+    }
+)
+export const updateUserRole = TryCatch(
+    async(req:Request,res: Response,_next: NextFunction)=>{
+
+        const { id } = req.params;
+        const { role } = req.body;
+        const updatedUser = await toggleUserRole(id, role);
+
+        res.status(200).json({
+            success: true,
+            message: `User status updated to ${role} successfully.`,
             data: {
               id: updatedUser.id,
               name: updatedUser.name,

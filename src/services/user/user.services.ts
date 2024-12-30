@@ -52,6 +52,16 @@ export const toggleUserStatus = async (userId: string, value: 'block' | 'active'
   user.status = value;
   return await user.save();
 };
+// Service to update user role (block/active)
+export const toggleUserRole = async (userId: string, value: 'user'|'admin'|'vendor'): Promise<IUser> => {
+  const user = await findUserByProperty('_id',userId);
+  if (!user) {
+    throw new CustomError('User not found', 404);
+  }
+ 
+  user.role = value;
+  return await user.save();
+};
 
 // Service to approve or decline vendor requests
 export const approveVendor = async (userId: string, value: 'none' | 'requested' | 'approved' | 'declined'): Promise<IUser> => {
