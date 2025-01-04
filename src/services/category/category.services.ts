@@ -7,8 +7,16 @@ import paginate from "../../utils/paginate";
 
 
 // Find a category by its ID
- export const findCategoryById = async (categoryId: string): Promise<ICategory | null> => {
+ export const findCategoryById = async (
+  categoryId: string
+): Promise<ICategory | null> => {
     return await Category.findById(categoryId);
+  };
+// Find a category by its  name
+ export const findCategoryByName = async (
+  category: string
+): Promise<ICategory | null> => {
+    return await Category.findOne({ name: {$regex:category,$options:'i'}});
   };
   
 // Fetch all categories (public access)

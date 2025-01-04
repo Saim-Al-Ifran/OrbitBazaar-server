@@ -7,16 +7,15 @@ import { deleteFileFromCloudinary } from "../../utils/delFileFromCloudinary";
 
  
 // Retrieve all products for public view
-export const getAllProducts = async (
+export const findAllProducts = async (
     page:number,
     limit:number,
+    query:any={},
     sort: string,
 ) : Promise<PaginationResult<IProduct>> => {
-    const query = {
-        isArchived: false
-    }
-    const sortObject = sort ? { [sort]: 1 } : {};
-    return paginate(Product,query,page,limit,sortObject,'-analytics')
+ 
+   
+    return paginate(Product,query,page,limit,sort,'-analytics -totalRevenue')
       
   };
 

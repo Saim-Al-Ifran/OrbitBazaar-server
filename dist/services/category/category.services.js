@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCategoryFromDb = exports.deleteCategoryImage = exports.uploadCategoryImage = exports.updateCategoryInDb = exports.createCategory = exports.getAllCategoriesForAdmin = exports.getAllCategories = exports.findCategoryById = void 0;
+exports.deleteCategoryFromDb = exports.deleteCategoryImage = exports.uploadCategoryImage = exports.updateCategoryInDb = exports.createCategory = exports.getAllCategoriesForAdmin = exports.getAllCategories = exports.findCategoryByName = exports.findCategoryById = void 0;
 const Category_1 = __importDefault(require("../../models/Category"));
 const delFileFromCloudinary_1 = require("../../utils/delFileFromCloudinary");
 const fileUpload_1 = require("../../utils/fileUpload");
@@ -22,6 +22,11 @@ const findCategoryById = (categoryId) => __awaiter(void 0, void 0, void 0, funct
     return yield Category_1.default.findById(categoryId);
 });
 exports.findCategoryById = findCategoryById;
+// Find a category by its  name
+const findCategoryByName = (category) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Category_1.default.findOne({ name: { $regex: category, $options: 'i' } });
+});
+exports.findCategoryByName = findCategoryByName;
 // Fetch all categories (public access)
 const getAllCategories = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield Category_1.default.find({});

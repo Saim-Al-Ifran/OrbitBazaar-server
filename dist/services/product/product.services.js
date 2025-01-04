@@ -12,20 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleFeatureProduct = exports.trackProductView = exports.searchProducts = exports.getProductById = exports.getArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProduct = exports.deleteProductImage = exports.updateProduct = exports.uploadProductImage = exports.addProduct = exports.getAllProducts = void 0;
+exports.toggleFeatureProduct = exports.trackProductView = exports.searchProducts = exports.getProductById = exports.getArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProduct = exports.deleteProductImage = exports.updateProduct = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
 const Product_1 = __importDefault(require("../../models/Product"));
 const fileUpload_1 = require("../../utils/fileUpload");
 const paginate_1 = __importDefault(require("../../utils/paginate"));
 const delFileFromCloudinary_1 = require("../../utils/delFileFromCloudinary");
 // Retrieve all products for public view
-const getAllProducts = (page, limit, sort) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = {
-        isArchived: false
-    };
-    const sortObject = sort ? { [sort]: 1 } : {};
-    return (0, paginate_1.default)(Product_1.default, query, page, limit, sortObject, '-analytics');
+const findAllProducts = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_1, limit_1, ...args_1], void 0, function* (page, limit, query = {}, sort) {
+    return (0, paginate_1.default)(Product_1.default, query, page, limit, sort, '-analytics -totalRevenue');
 });
-exports.getAllProducts = getAllProducts;
+exports.findAllProducts = findAllProducts;
 // Add a new product (vendors)
 const addProduct = (productData, file) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, fileUpload_1.uploadFileToCloudinary)(file);
