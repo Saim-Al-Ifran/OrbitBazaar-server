@@ -1,13 +1,13 @@
 import { Document } from 'mongoose';
 
-export interface Product extends Document {
+export interface IProduct extends Document {
     name: string;
     description: string;
     category: mongoose.Types.ObjectId;
     vendorEmail: string;
     price: number;
     stock: number;
-    images: string[];
+    images: string;
     ratings: {
       average: number;
       count: number;
