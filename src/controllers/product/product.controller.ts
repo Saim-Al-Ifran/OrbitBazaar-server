@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
 import { findCategoryByName } from "../../services/category/category.services";
 import CustomError from "../../utils/errors/customError";
-import { findAllProducts } from "../../services/product/product.services";
-import Product from "../../models/Product";
+import { addProduct, findAllProducts } from "../../services/product/product.services";
+ 
 
 export const getAllProducts = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -11,9 +11,7 @@ export const getAllProducts = TryCatch(
     const limit = parseInt(req.query.limit as string) || 10;
 
     // Extract and prepare filtering options
-    const { minPrice, maxPrice, category } = req.query;
-
-    
+    const { minPrice, maxPrice, category } = req.query;   
     const query: Record<string, any> = { isArchived: false };
 
     if (minPrice || maxPrice) {
@@ -30,7 +28,7 @@ export const getAllProducts = TryCatch(
       }
       query.category = categoryData._id;
     }
-    console.log(query);
+
     // Sorting logic
     const sortOption = req.query.sort as string;
     const sortMapping: Record<string, string> = {
@@ -67,3 +65,24 @@ export const getAllProducts = TryCatch(
     });
   }
 );
+
+export const createProduct = TryCatch(
+  async(req: Request,res: Response,_next: NextFunction)=>{
+    const vendorEmail = req.user?.email;
+    const productData  = req.body;
+    const file = req.file; 
+
+    if (!file) {
+      throw new CustomError("Product image is required",400)
+    }
+    if (!vendorEmail) {
+      throw new CustomError("Vendor email is required",400)
+    }
+    const newProduct = await addProduct(productData, file,vendorEmail);
+ 
+    res.status(201).json({
+      message: "Product created successfully",
+      product: newProduct,
+    });
+  }
+)

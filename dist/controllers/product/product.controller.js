@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllProducts = void 0;
+exports.createProduct = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -37,7 +37,6 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         }
         query.category = categoryData._id;
     }
-    console.log(query);
     // Sorting logic
     const sortOption = req.query.sort;
     const sortMapping = {
@@ -62,5 +61,22 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
             nextPage,
             currentPage: page,
         },
+    });
+}));
+exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const productData = req.body;
+    const file = req.file;
+    if (!file) {
+        throw new customError_1.default("Product image is required", 400);
+    }
+    if (!vendorEmail) {
+        throw new customError_1.default("Vendor email is required", 400);
+    }
+    const newProduct = yield (0, product_services_1.addProduct)(productData, file, vendorEmail);
+    res.status(201).json({
+        message: "Product created successfully",
+        product: newProduct,
     });
 }));

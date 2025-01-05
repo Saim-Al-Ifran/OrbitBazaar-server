@@ -20,19 +20,23 @@ export const findAllProducts = async (
   };
 
 // Add a new product (vendors)
-  export const addProduct = async (
-    productData: Partial<IProduct>,
-    file: Express.Multer.File
-  ): Promise<IProduct> => {
- 
-      const result = await uploadFileToCloudinary(file); 
-      const product = new Product({
-        ...productData,
-        image: result.secure_url,  
-      });
-      return await product.save();  
- 
-  };
+export const addProduct = async (
+  productData: Partial<IProduct>,
+  file: Express.Multer.File,
+  email:string
+): Promise<IProduct> => {
+
+  const imageUrl = await uploadProductImage(file);
+  const product = new Product({
+    ...productData,
+    vendorEmail:email,
+    image: imageUrl,
+  });
+
+  // Save the product to the database
+  return await product.save();
+};
+
 
 // Upload the product image to Cloudinary and return the URL
   export const uploadProductImage = async (
