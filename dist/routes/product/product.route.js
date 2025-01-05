@@ -10,5 +10,6 @@ const uploadFile_1 = __importDefault(require("../../middlewares/uploadFile/uploa
 const authenticate_1 = __importDefault(require("../../middlewares/auth/authenticate"));
 const router = express_1.default.Router();
 router.get('/products', product_controller_1.getAllProducts);
+router.get('/products/:id', product_controller_1.getSingleProduct);
 router.post('/products', authenticate_1.default, authorizeVendor_1.default, uploadFile_1.default.single('image'), product_controller_1.createProduct);
 exports.default = router;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createProduct = exports.getAllProducts = void 0;
+exports.getSingleProduct = exports.createProduct = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -76,7 +76,20 @@ exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     }
     const newProduct = yield (0, product_services_1.addProduct)(productData, file, vendorEmail);
     res.status(201).json({
+        success: true,
         message: "Product created successfully",
         product: newProduct,
+    });
+}));
+exports.getSingleProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const product = yield (0, product_services_1.getProductById)(id);
+    if (!product) {
+        throw new customError_1.default('Product not found!', 404);
+    }
+    res.status(200).json({
+        success: true,
+        message: "Product fetched successfully",
+        product,
     });
 }));

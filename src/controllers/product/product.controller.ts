@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
 import { findCategoryByName } from "../../services/category/category.services";
 import CustomError from "../../utils/errors/customError";
-import { addProduct, findAllProducts } from "../../services/product/product.services";
+import { addProduct, findAllProducts, getProductById } from "../../services/product/product.services";
  
 
 export const getAllProducts = TryCatch(
@@ -81,8 +81,24 @@ export const createProduct = TryCatch(
     const newProduct = await addProduct(productData, file,vendorEmail);
  
     res.status(201).json({
+      success: true,
       message: "Product created successfully",
       product: newProduct,
     });
+  }
+)
+
+export const getSingleProduct = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction)=>{
+    const id = req.params.id;
+    const product = await getProductById(id);
+    if(!product){
+      throw new CustomError('Product not found!',404);
+    }
+    res.status(200).json({
+      success: true,
+      message: "Product fetched successfully",
+      product,
+   })
   }
 )
