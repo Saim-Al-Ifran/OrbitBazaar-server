@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
+exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -159,7 +159,7 @@ exports.deleteProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
         throw new customError_1.default("Vendor can only delete their own product", 401);
     }
     if (!vendorEmail) {
-        throw new customError_1.default("Needs to login to access this route", 401);
+        throw new customError_1.default("Vendor email is required", 400);
     }
     if (!product) {
         throw new customError_1.default('Product not found!', 404);
@@ -181,7 +181,7 @@ exports.updatedProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     const product = yield (0, product_services_1.findProductById)(id);
     if (!vendorEmail) {
-        throw new customError_1.default("Vendor can only delete their own product", 401);
+        throw new customError_1.default("Vendor email is required", 400);
     }
     if (!product) {
         throw new customError_1.default('Product not found!', 404);
@@ -194,9 +194,33 @@ exports.updatedProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         updates.imageUrl = newImageUrl;
     }
     const updatedProduct = yield (0, product_services_1.updateProductInDb)(id, updates, vendorEmail);
+    if (!updatedProduct) {
+        throw new customError_1.default("Vendor can only update their own product", 401);
+    }
     res.status(200).json({
         success: true,
         message: "Product updated successfully.",
+        data: updatedProduct,
+    });
+}));
+exports.toggleProductFeaturedStatus = (0, TryCatch_1.TryCatch)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const productId = req.params.id;
+    const isFeatured = req.body.isFeatured;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!vendorEmail) {
+        throw new customError_1.default("Vendor email is required", 400);
+    }
+    if (typeof isFeatured !== "boolean") {
+        throw new customError_1.default("Invalid value for 'isFeatured'. It must be a boolean.", 400);
+    }
+    const updatedProduct = yield (0, product_services_1.toggleFeatureProduct)(productId, isFeatured, vendorEmail);
+    if (!updatedProduct) {
+        throw new customError_1.default("Product not found or you do not have permission to update it.", 404);
+    }
+    res.status(200).json({
+        success: true,
+        message: `Product '${updatedProduct.name}' ${isFeatured ? "featured" : "unfeatured"} successfully.`,
         data: updatedProduct,
     });
 }));

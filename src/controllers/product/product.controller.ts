@@ -10,6 +10,7 @@ import {
   findProductById,
   getFeaturedProducts,
   getVendorProducts,
+  toggleFeatureProduct,
   updateProductInDb,
   uploadProductImage,
  
@@ -199,7 +200,7 @@ export const deleteProduct = TryCatch(
         throw new CustomError("Vendor can only delete their own product",401);
       }
       if(!vendorEmail){
-        throw new CustomError("Needs to login to access this route",401);
+        throw new CustomError("Vendor email is required",400)
       }
       if (!product) {
         throw new CustomError('Product not found!', 404);
@@ -224,7 +225,7 @@ export const updatedProduct = TryCatch(
       const product = await findProductById(id);
 
       if(!vendorEmail){
-        throw new CustomError("Vendor can only delete their own product",401);
+        throw new CustomError("Vendor email is required",400)
       }
       if(!product){
         throw new CustomError('Product not found!', 404);
@@ -239,6 +240,9 @@ export const updatedProduct = TryCatch(
       }
 
       const updatedProduct = await updateProductInDb(id,updates,vendorEmail);
+      if(!updatedProduct){
+         throw new CustomError("Vendor can only update their own product",401);
+      }
       res.status(200).json({
         success: true,
         message: "Product updated successfully.",
@@ -246,3 +250,32 @@ export const updatedProduct = TryCatch(
       });
   }
 )
+
+
+export const toggleProductFeaturedStatus = TryCatch(
+  async (req: Request, res: Response) => {
+    const productId = req.params.id;
+    const isFeatured = req.body.isFeatured;
+    const vendorEmail = req.user?.email;
+ 
+    if (!vendorEmail) {
+      throw new CustomError("Vendor email is required",400);
+    }
+ 
+    if (typeof isFeatured !== "boolean") {
+      throw new CustomError("Invalid value for 'isFeatured'. It must be a boolean.", 400);
+    }
+ 
+    const updatedProduct = await toggleFeatureProduct(productId, isFeatured, vendorEmail);
+ 
+    if (!updatedProduct) {
+      throw new CustomError("Product not found or you do not have permission to update it.", 404);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Product '${updatedProduct.name}' ${isFeatured ? "featured" : "unfeatured"} successfully.`,
+      data: updatedProduct,
+    });
+  }
+);

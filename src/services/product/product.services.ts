@@ -50,10 +50,10 @@ export const addProduct = async (
   export const updateProductInDb = async (
     productId: string,
     updatedData: Partial<IProduct>,
-    vendorEmail: string
+    email: string
   ): Promise<IProduct | null> => {
     return Product.findOneAndUpdate(
-      { _id: productId, vendorEmail } ,
+      { _id: productId, vendorEmail:email } ,
       { $set: updatedData } ,
       { new: true }
     );
@@ -143,10 +143,10 @@ export const trackProductView = async (
 export const toggleFeatureProduct = async (
     productId: string,
     isFeatured: boolean,
-    vendorEmail: string
+    email: string
   ): Promise<IProduct | null> => {
     return Product.findOneAndUpdate(
-      { _id: productId, vendorEmail },
+      { _id: productId, vendorEmail:email },
       { $set: { isFeatured }} ,
       { new: true }
     );

@@ -37,8 +37,8 @@ const uploadProductImage = (image) => __awaiter(void 0, void 0, void 0, function
 });
 exports.uploadProductImage = uploadProductImage;
 // Update product details by product ID (vendors)
-const updateProductInDb = (productId, updatedData, vendorEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail }, { $set: updatedData }, { new: true });
+const updateProductInDb = (productId, updatedData, email) => __awaiter(void 0, void 0, void 0, function* () {
+    return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail: email }, { $set: updatedData }, { new: true });
 });
 exports.updateProductInDb = updateProductInDb;
 // Delete the product image from Cloudinary
@@ -93,7 +93,7 @@ const trackProductView = (productId) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.trackProductView = trackProductView;
 // Mark a product as featured or remove it from the featured list
-const toggleFeatureProduct = (productId, isFeatured, vendorEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail }, { $set: { isFeatured } }, { new: true });
+const toggleFeatureProduct = (productId, isFeatured, email) => __awaiter(void 0, void 0, void 0, function* () {
+    return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail: email }, { $set: { isFeatured } }, { new: true });
 });
 exports.toggleFeatureProduct = toggleFeatureProduct;

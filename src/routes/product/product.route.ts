@@ -6,6 +6,7 @@ import {
     getAllProducts,
     getAllProductsForVendor,
     getSingleProduct,
+    toggleProductFeaturedStatus,
     updatedProduct,
  
 } from '../../controllers/product/product.controller';
@@ -20,6 +21,7 @@ router.get('/products/:id',getSingleProduct);
 router.get('/vendor/products',authenticate,authorizeVendor,getAllProductsForVendor);
 router.post('/products',authenticate,authorizeVendor,upload.single('image'),createProduct);
 router.put('/products/:id',authenticate,authorizeVendor,upload.single('image'),updatedProduct);
+router.patch("/products/:id/feature", authenticate, authorizeVendor, toggleProductFeaturedStatus);
 router.delete('/products/:id',authenticate,authorizeVendor,deleteProduct);
 
 
