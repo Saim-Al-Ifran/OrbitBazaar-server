@@ -47,7 +47,7 @@ export const addProduct = async (
   };
 
 // Update product details by product ID (vendors)
-  export const updateProduct = async (
+  export const updateProductInDb = async (
     productId: string,
     updatedData: Partial<IProduct>,
     vendorEmail: string

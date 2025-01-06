@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
+exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -103,6 +103,7 @@ exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     const productData = req.body;
     const file = req.file;
+    console.log(req.body);
     if (!file) {
         throw new customError_1.default("Product image is required", 400);
     }
@@ -154,8 +155,11 @@ exports.deleteProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     const { id } = req.params;
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     const product = yield (0, product_services_1.findProductById)(id);
-    if (!vendorEmail) {
+    if ((product === null || product === void 0 ? void 0 : product.vendorEmail) !== vendorEmail) {
         throw new customError_1.default("Vendor can only delete their own product", 401);
+    }
+    if (!vendorEmail) {
+        throw new customError_1.default("Needs to login to access this route", 401);
     }
     if (!product) {
         throw new customError_1.default('Product not found!', 404);
@@ -167,5 +171,32 @@ exports.deleteProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     res.status(200).json({
         success: true,
         message: "Product deleted successfully.",
+    });
+}));
+exports.updatedProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { id } = req.params;
+    const updates = req.body;
+    const file = req.file;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const product = yield (0, product_services_1.findProductById)(id);
+    if (!vendorEmail) {
+        throw new customError_1.default("Vendor can only delete their own product", 401);
+    }
+    if (!product) {
+        throw new customError_1.default('Product not found!', 404);
+    }
+    if (file) {
+        if (product.image) {
+            yield (0, product_services_1.deleteProductImage)(product.image);
+        }
+        const newImageUrl = yield (0, product_services_1.uploadProductImage)(file);
+        updates.imageUrl = newImageUrl;
+    }
+    const updatedProduct = yield (0, product_services_1.updateProductInDb)(id, updates, vendorEmail);
+    res.status(200).json({
+        success: true,
+        message: "Product updated successfully.",
+        data: updatedProduct,
     });
 }));

@@ -10,8 +10,11 @@ import {
   findProductById,
   getFeaturedProducts,
   getVendorProducts,
+  updateProductInDb,
+  uploadProductImage,
  
 } from "../../services/product/product.services";
+import { updateUserProfileImage } from "../user/user.controller";
  
 
 export const getAllProducts = TryCatch(
@@ -124,7 +127,8 @@ export const createProduct = TryCatch(
     const vendorEmail = req.user?.email;
     const productData  = req.body;
     const file = req.file; 
-
+    console.log(req.body);
+    
     if (!file) {
       throw new CustomError("Product image is required",400)
     }
@@ -191,8 +195,11 @@ export const deleteProduct = TryCatch(
       const { id } = req.params;
       const vendorEmail = req.user?.email;
       const product = await findProductById(id);
-      if(!vendorEmail){
+      if(product?.vendorEmail !== vendorEmail){
         throw new CustomError("Vendor can only delete their own product",401);
+      }
+      if(!vendorEmail){
+        throw new CustomError("Needs to login to access this route",401);
       }
       if (!product) {
         throw new CustomError('Product not found!', 404);
@@ -204,6 +211,38 @@ export const deleteProduct = TryCatch(
       res.status(200).json({
         success: true,
         message: "Product deleted successfully.",
+      });
+  }
+)
+
+export const updatedProduct = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction)=>{
+      const { id } = req.params;
+      const updates = req.body;
+      const file = req.file;
+      const vendorEmail = req.user?.email;
+      const product = await findProductById(id);
+
+      if(!vendorEmail){
+        throw new CustomError("Vendor can only delete their own product",401);
+      }
+      if(!product){
+        throw new CustomError('Product not found!', 404);
+      }
+
+      if (file) {
+        if(product.image){
+          await deleteProductImage(product.image);
+        }
+        const newImageUrl= await uploadProductImage(file);
+        updates.imageUrl = newImageUrl;
+      }
+
+      const updatedProduct = await updateProductInDb(id,updates,vendorEmail);
+      res.status(200).json({
+        success: true,
+        message: "Product updated successfully.",
+        data: updatedProduct,
       });
   }
 )

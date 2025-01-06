@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleFeatureProduct = exports.trackProductView = exports.searchProducts = exports.findProductById = exports.getArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProduct = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
+exports.toggleFeatureProduct = exports.trackProductView = exports.searchProducts = exports.findProductById = exports.getArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProductInDb = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
 const Product_1 = __importDefault(require("../../models/Product"));
 const fileUpload_1 = require("../../utils/fileUpload");
 const paginate_1 = __importDefault(require("../../utils/paginate"));
@@ -37,10 +37,10 @@ const uploadProductImage = (image) => __awaiter(void 0, void 0, void 0, function
 });
 exports.uploadProductImage = uploadProductImage;
 // Update product details by product ID (vendors)
-const updateProduct = (productId, updatedData, vendorEmail) => __awaiter(void 0, void 0, void 0, function* () {
+const updateProductInDb = (productId, updatedData, vendorEmail) => __awaiter(void 0, void 0, void 0, function* () {
     return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail }, { $set: updatedData }, { new: true });
 });
-exports.updateProduct = updateProduct;
+exports.updateProductInDb = updateProductInDb;
 // Delete the product image from Cloudinary
 const deleteProductImage = (imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, delFileFromCloudinary_1.deleteFileFromCloudinary)(imageUrl);
