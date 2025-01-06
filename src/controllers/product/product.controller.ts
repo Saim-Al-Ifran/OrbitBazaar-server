@@ -2,7 +2,16 @@ import { Request, Response, NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
 import { findCategoryByName } from "../../services/category/category.services";
 import CustomError from "../../utils/errors/customError";
-import { addProduct, findAllProducts, getProductById, getVendorProducts } from "../../services/product/product.services";
+import {
+  addProduct,
+  deleteProductImage,
+  deleteProductInDb,
+  findAllProducts,
+  findProductById,
+  getFeaturedProducts,
+  getVendorProducts,
+ 
+} from "../../services/product/product.services";
  
 
 export const getAllProducts = TryCatch(
@@ -85,7 +94,7 @@ export const getAllProductsForVendor = TryCatch(
       asc: "price",
       dsc: "-price",
     };
-    const sortField = sortMapping[sort as string] || "-createdAt"; // Default sort
+    const sortField = sortMapping[sort as string] || "-createdAt"; 
  
     const { data, totalRecords, totalPages, prevPage, nextPage } =
       await getVendorProducts(page, limit, query, sortField);
@@ -109,7 +118,6 @@ export const getAllProductsForVendor = TryCatch(
     });
   }
 );
-
 
 export const createProduct = TryCatch(
   async(req: Request,res: Response,_next: NextFunction)=>{
@@ -136,7 +144,7 @@ export const createProduct = TryCatch(
 export const getSingleProduct = TryCatch(
   async(req:Request,res:Response,_next:NextFunction)=>{
     const id = req.params.id;
-    const product = await getProductById(id);
+    const product = await findProductById(id);
     if(!product){
       throw new CustomError('Product not found!',404);
     }
@@ -145,5 +153,57 @@ export const getSingleProduct = TryCatch(
       message: "Product fetched successfully",
       product,
    })
+  }
+)
+
+export const getAllFeaturedProducts = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+  
+    const { data, totalRecords, totalPages, prevPage, nextPage } =
+      await getFeaturedProducts(page, limit);
+
+ 
+    if (data.length === 0) {
+      throw new CustomError("No featured products found!", 404);
+    }
+
+    // Return response
+    res.status(200).json({
+      success: true,
+      message: "Featured products fetched successfully.",
+      data,
+      pagination: {
+        totalRecords,
+        totalPages,
+        prevPage,
+        nextPage,
+        currentPage: page,
+      },
+    });
+  }
+);
+
+export const deleteProduct = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction)=>{
+      const { id } = req.params;
+      const vendorEmail = req.user?.email;
+      const product = await findProductById(id);
+      if(!vendorEmail){
+        throw new CustomError("Vendor can only delete their own product",401);
+      }
+      if (!product) {
+        throw new CustomError('Product not found!', 404);
+      }
+      if(product.image){
+        await deleteProductImage(product.image);
+      }
+      await  deleteProductInDb(id,vendorEmail);
+      res.status(200).json({
+        success: true,
+        message: "Product deleted successfully.",
+      });
   }
 )

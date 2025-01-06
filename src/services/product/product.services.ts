@@ -66,14 +66,14 @@ export const addProduct = async (
     };
     
 // Delete a product permanently(Only vendors are allowed to delete their own products)
-  export const deleteProduct = async (
+  export const deleteProductInDb= async (
       productId: string,
-      vendorEmail: string
+      email: string
     ): Promise<IProduct | null> => {
  
       return Product.findOneAndDelete({
         _id: productId,
-        vendorEmail,
+        vendorEmail:email,
       });
     };
     
@@ -111,7 +111,7 @@ export const getArchivedProducts = async (
   };
   
 // Fetch detailed information about a product by its ID
-export const getProductById = async (
+export const findProductById = async (
     productId: string
 ): Promise<IProduct | null> => {
     return Product.findById(productId);
