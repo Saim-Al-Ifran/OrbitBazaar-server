@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
 import { findCategoryByName } from "../../services/category/category.services";
 import CustomError from "../../utils/errors/customError";
-import { addProduct, findAllProducts, getProductById } from "../../services/product/product.services";
+import { addProduct, findAllProducts, getProductById, getVendorProducts } from "../../services/product/product.services";
  
 
 export const getAllProducts = TryCatch(
@@ -37,9 +37,7 @@ export const getAllProducts = TryCatch(
       rating: "-ratings.average",
     };
     const sortField = sortMapping[sortOption] || "createdAt";
-     
-    console.log(sortField);
-    
+
     const { data, totalRecords, totalPages, prevPage, nextPage } = await findAllProducts(
       page,
       limit,
@@ -65,6 +63,53 @@ export const getAllProducts = TryCatch(
     });
   }
 );
+
+export const getAllProductsForVendor = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const vendorEmail = req.user?.email;
+
+    const { search, sort } = req.query;
+
+    // Build query
+    const query: Record<string, any> = { isArchived: false };
+    if (vendorEmail) {
+      query.vendorEmail = vendorEmail; 
+    }
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    const sortMapping: Record<string, string> = {
+      asc: "price",
+      dsc: "-price",
+    };
+    const sortField = sortMapping[sort as string] || "-createdAt"; // Default sort
+ 
+    const { data, totalRecords, totalPages, prevPage, nextPage } =
+      await getVendorProducts(page, limit, query, sortField);
+
+ 
+    if (data.length === 0) {
+      throw new CustomError('No product data found!',404);
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: "All products fetched successfully.",
+      data,
+      pagination: {
+        totalRecords,
+        totalPages,
+        prevPage,
+        nextPage,
+        currentPage: page,
+      },
+    });
+  }
+);
+
 
 export const createProduct = TryCatch(
   async(req: Request,res: Response,_next: NextFunction)=>{

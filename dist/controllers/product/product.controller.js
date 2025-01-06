@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSingleProduct = exports.createProduct = exports.getAllProducts = void 0;
+exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -45,8 +45,43 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         rating: "-ratings.average",
     };
     const sortField = sortMapping[sortOption] || "createdAt";
-    console.log(sortField);
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.findAllProducts)(page, limit, query, sortField);
+    if (data.length === 0) {
+        throw new customError_1.default('No product data found!', 404);
+    }
+    res.status(200).json({
+        success: true,
+        message: "All products fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    });
+}));
+exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const { search, sort } = req.query;
+    // Build query
+    const query = { isArchived: false };
+    if (vendorEmail) {
+        query.vendorEmail = vendorEmail;
+    }
+    if (search) {
+        query.name = { $regex: search, $options: "i" };
+    }
+    const sortMapping = {
+        asc: "price",
+        dsc: "-price",
+    };
+    const sortField = sortMapping[sort] || "-createdAt"; // Default sort
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getVendorProducts)(page, limit, query, sortField);
     if (data.length === 0) {
         throw new customError_1.default('No product data found!', 404);
     }
