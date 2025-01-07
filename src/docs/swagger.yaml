@@ -1930,7 +1930,7 @@ paths:
         '500':
           description: Internal Server Error.
   /products/{productId}/view:
-    post:
+    patch:
       tags:
         - Product
       summary: Track product page view
@@ -1964,7 +1964,7 @@ paths:
         '500':
           description: Internal Server Error - Error occurred while tracking product view.
   /products/{productId}/click:
-    post:
+    patch:
       tags:
         - Product
       summary: Track product click
