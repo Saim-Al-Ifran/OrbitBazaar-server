@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleFeatureProduct = exports.trackProductView = exports.searchProducts = exports.findProductById = exports.getArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProductInDb = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
+exports.toggleFeatureProduct = exports.trackProductClick = exports.trackProductView = exports.searchProducts = exports.findProductById = exports.getArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProductInDb = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
 const Product_1 = __importDefault(require("../../models/Product"));
 const fileUpload_1 = require("../../utils/fileUpload");
 const paginate_1 = __importDefault(require("../../utils/paginate"));
@@ -92,6 +92,11 @@ const trackProductView = (productId) => __awaiter(void 0, void 0, void 0, functi
     return Product_1.default.findByIdAndUpdate(productId, { $inc: { 'analytics.views': 1 } }, { new: true });
 });
 exports.trackProductView = trackProductView;
+// Track when a product page is clicked
+const trackProductClick = (productId) => __awaiter(void 0, void 0, void 0, function* () {
+    return Product_1.default.findByIdAndUpdate(productId, { $inc: { 'analytics.clicks': 1 } }, { new: true });
+});
+exports.trackProductClick = trackProductClick;
 // Mark a product as featured or remove it from the featured list
 const toggleFeatureProduct = (productId, isFeatured, email) => __awaiter(void 0, void 0, void 0, function* () {
     return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail: email }, { $set: { isFeatured } }, { new: true });

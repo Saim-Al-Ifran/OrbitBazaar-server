@@ -138,6 +138,16 @@ export const trackProductView = async (
       { new: true }
     );
   };
+// Track when a product page is clicked
+export const trackProductClick = async (
+    productId: string
+): Promise<IProduct | null> => {
+    return Product.findByIdAndUpdate(
+      productId,
+      { $inc: { 'analytics.clicks': 1 } },
+      { new: true }
+    );
+  };
 
 // Mark a product as featured or remove it from the featured list
 export const toggleFeatureProduct = async (

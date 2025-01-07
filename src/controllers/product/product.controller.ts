@@ -11,6 +11,7 @@ import {
   getFeaturedProducts,
   getVendorProducts,
   toggleFeatureProduct,
+  trackProductClick,
   trackProductView,
   updateProductInDb,
   uploadProductImage,
@@ -297,6 +298,26 @@ export const trackProductViewController = TryCatch(
     res.status(200).json({
       success: true,
       message: "Product view tracked successfully.",
+      data: updatedProduct,
+    });
+    
+  }
+);
+export const trackProductClickController = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+
+    const { id } = req.params;
+    if (!id) {
+      throw new CustomError("Product ID is required", 400);
+    }
+    const updatedProduct = await trackProductClick(id);
+    if (!updatedProduct) {
+      throw new CustomError("Product not found", 404);
+    }
+ 
+    res.status(200).json({
+      success: true,
+      message: "Product click tracked successfully.",
       data: updatedProduct,
     });
     

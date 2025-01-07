@@ -7,6 +7,7 @@ import {
     getAllProductsForVendor,
     getSingleProduct,
     toggleProductFeaturedStatus,
+    trackProductClickController,
     trackProductViewController,
     updatedProduct,
  
@@ -24,6 +25,7 @@ router.post('/products',authenticate,authorizeVendor,upload.single('image'),crea
 router.put('/products/:id',authenticate,authorizeVendor,upload.single('image'),updatedProduct);
 router.patch("/products/:id/feature", authenticate, authorizeVendor, toggleProductFeaturedStatus);
 router.patch("/products/:id/view", trackProductViewController);
+router.patch("/products/:id/click", trackProductClickController);
 router.delete('/products/:id',authenticate,authorizeVendor,deleteProduct);
 
 
