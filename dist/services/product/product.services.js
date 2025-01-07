@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleFeatureProduct = exports.trackProductClick = exports.trackProductView = exports.searchProducts = exports.findProductById = exports.getArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProductInDb = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
+exports.toggleFeatureProduct = exports.trackProductClick = exports.trackProductView = exports.searchProducts = exports.findProductById = exports.findArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProductInDb = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
 const Product_1 = __importDefault(require("../../models/Product"));
 const fileUpload_1 = require("../../utils/fileUpload");
 const paginate_1 = __importDefault(require("../../utils/paginate"));
@@ -69,10 +69,10 @@ const getVendorProducts = (page_1, limit_1, ...args_1) => __awaiter(void 0, [pag
 });
 exports.getVendorProducts = getVendorProducts;
 // Retrieve archived products for a vendor
-const getArchivedProducts = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_1, limit_1, ...args_1], void 0, function* (page, limit, query = {}) {
-    return (0, paginate_1.default)(Product_1.default, query, page, limit);
+const findArchivedProducts = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_1, limit_1, ...args_1], void 0, function* (page, limit, query = {}, sort) {
+    return (0, paginate_1.default)(Product_1.default, query, page, limit, sort);
 });
-exports.getArchivedProducts = getArchivedProducts;
+exports.findArchivedProducts = findArchivedProducts;
 // Fetch detailed information about a product by its ID
 const findProductById = (productId) => __awaiter(void 0, void 0, void 0, function* () {
     return Product_1.default.findById(productId);

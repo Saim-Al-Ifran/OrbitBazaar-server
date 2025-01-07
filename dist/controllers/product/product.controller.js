@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
+exports.getArchivedProducts = exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -103,7 +103,6 @@ exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     const productData = req.body;
     const file = req.file;
-    console.log(req.body);
     if (!file) {
         throw new customError_1.default("Product image is required", 400);
     }
@@ -252,5 +251,40 @@ exports.trackProductClickController = (0, TryCatch_1.TryCatch)((req, res, _next)
         success: true,
         message: "Product click tracked successfully.",
         data: updatedProduct,
+    });
+}));
+exports.getArchivedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    // Parse query parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const sort = req.query.sort;
+    const email = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const query = {
+        isArchived: true,
+        vendorEmail: email
+    };
+    const sortMapping = {
+        createdAsc: "createdAt",
+        createdDsc: "-createdAt",
+    };
+    const sortField = sortMapping[sort] || "-createdAt";
+    const { data, totalRecords, totalPages, prevPage, nextPage, } = yield (0, product_services_1.findArchivedProducts)(page, limit, query, sortField);
+    // Check if data exists
+    if (data.length === 0) {
+        throw new customError_1.default("No archived products found!", 404);
+    }
+    // Send response
+    res.status(200).json({
+        success: true,
+        message: "Archived products fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
     });
 }));

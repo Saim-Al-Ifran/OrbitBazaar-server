@@ -102,12 +102,13 @@ export const getVendorProducts = async (
   };
 
 // Retrieve archived products for a vendor
-export const getArchivedProducts = async (
+export const findArchivedProducts = async (
     page:number,
     limit:number,
-    query: object = {} 
+    query: object = {},
+    sort:string 
 ): Promise<PaginationResult<IProduct> > => {
-      return paginate(Product,query,page,limit);
+      return paginate(Product,query,page,limit,sort);
   };
   
 // Fetch detailed information about a product by its ID

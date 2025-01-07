@@ -5,6 +5,7 @@ import {
     getAllFeaturedProducts,
     getAllProducts,
     getAllProductsForVendor,
+    getArchivedProducts,
     getSingleProduct,
     toggleProductFeaturedStatus,
     trackProductClickController,
@@ -19,6 +20,7 @@ const router  = express.Router();
 
 router.get('/products',getAllProducts);
 router.get("/products/featured", getAllFeaturedProducts);
+router.get('/products/archived',authenticate,authorizeVendor,getArchivedProducts);
 router.get('/products/:id',getSingleProduct);
 router.get('/vendor/products',authenticate,authorizeVendor,getAllProductsForVendor);
 router.post('/products',authenticate,authorizeVendor,upload.single('image'),createProduct);

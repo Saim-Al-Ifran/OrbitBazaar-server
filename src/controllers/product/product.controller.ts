@@ -7,6 +7,7 @@ import {
   deleteProductImage,
   deleteProductInDb,
   findAllProducts,
+  findArchivedProducts,
   findProductById,
   getFeaturedProducts,
   getVendorProducts,
@@ -130,7 +131,7 @@ export const createProduct = TryCatch(
     const vendorEmail = req.user?.email;
     const productData  = req.body;
     const file = req.file; 
-    console.log(req.body);
+  
     
     if (!file) {
       throw new CustomError("Product image is required",400)
@@ -321,5 +322,54 @@ export const trackProductClickController = TryCatch(
       data: updatedProduct,
     });
     
+  }
+);
+
+export const getArchivedProducts = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    // Parse query parameters
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const sort = req.query.sort as string;
+    const email = req.user?.email;
+     
+    const query: Record<string, any> = {
+      isArchived: true,
+      vendorEmail:email
+    };
+
+  
+    const sortMapping: Record<string, string> = {
+      createdAsc: "createdAt", 
+      createdDsc: "-createdAt", 
+    };
+
+    const sortField = sortMapping[sort] || "-createdAt";  
+    const {
+      data,
+      totalRecords,
+      totalPages,
+      prevPage,
+      nextPage,
+    } = await findArchivedProducts(page, limit, query, sortField);
+
+    // Check if data exists
+    if (data.length === 0) {
+      throw new CustomError("No archived products found!", 404);
+    }
+
+    // Send response
+    res.status(200).json({
+      success: true,
+      message: "Archived products fetched successfully.",
+      data,
+      pagination: {
+        totalRecords,
+        totalPages,
+        prevPage,
+        nextPage,
+        currentPage: page,
+      },
+    });
   }
 );
