@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
+exports.trackProductViewController = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -221,6 +221,21 @@ exports.toggleProductFeaturedStatus = (0, TryCatch_1.TryCatch)((req, res) => __a
     res.status(200).json({
         success: true,
         message: `Product '${updatedProduct.name}' ${isFeatured ? "featured" : "unfeatured"} successfully.`,
+        data: updatedProduct,
+    });
+}));
+exports.trackProductViewController = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    if (!id) {
+        throw new customError_1.default("Product ID is required", 400);
+    }
+    const updatedProduct = yield (0, product_services_1.trackProductView)(id);
+    if (!updatedProduct) {
+        throw new customError_1.default("Product not found", 404);
+    }
+    res.status(200).json({
+        success: true,
+        message: "Product view tracked successfully.",
         data: updatedProduct,
     });
 }));

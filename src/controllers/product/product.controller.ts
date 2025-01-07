@@ -11,6 +11,7 @@ import {
   getFeaturedProducts,
   getVendorProducts,
   toggleFeatureProduct,
+  trackProductView,
   updateProductInDb,
   uploadProductImage,
  
@@ -277,5 +278,27 @@ export const toggleProductFeaturedStatus = TryCatch(
       message: `Product '${updatedProduct.name}' ${isFeatured ? "featured" : "unfeatured"} successfully.`,
       data: updatedProduct,
     });
+  }
+);
+
+
+export const trackProductViewController = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+
+    const { id } = req.params;
+    if (!id) {
+      throw new CustomError("Product ID is required", 400);
+    }
+    const updatedProduct = await trackProductView(id);
+    if (!updatedProduct) {
+      throw new CustomError("Product not found", 404);
+    }
+ 
+    res.status(200).json({
+      success: true,
+      message: "Product view tracked successfully.",
+      data: updatedProduct,
+    });
+    
   }
 );
