@@ -1859,7 +1859,10 @@ paths:
       summary: Retrieve products matching the search keyword
       description: Fetches products that match the given search keyword in their name or description.
       parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/searchParam'
+        - $ref: '#/components/parameters/sortByParam'
       responses:
         '200':
           description: List of products matching the search keyword.
@@ -2740,7 +2743,7 @@ paths:
       tags:
         - Report
       security:
-        - BearerAuth: []   
+        - BearerAuth: []  # Assumes JWT Bearer token authentication
       parameters:
         - name: reportId
           in: path
@@ -2775,7 +2778,7 @@ paths:
       tags:
         - Report
       security:
-        - BearerAuth: []  
+        - BearerAuth: []  # Assumes JWT Bearer token authentication
       parameters:
         - name: reportId
           in: path
@@ -2934,7 +2937,7 @@ paths:
       tags:
         - Report
       security:
-        - BearerAuth: []   
+        - BearerAuth: []  # Assumes JWT Bearer token authentication
       parameters:
         - name: reportId
           in: path
