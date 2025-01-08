@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getArchivedProducts = exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
+exports.searchProducts = exports.getArchivedProducts = exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -278,6 +278,42 @@ exports.getArchivedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __aw
     res.status(200).json({
         success: true,
         message: "Archived products fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    });
+}));
+exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.keyword;
+    const sort = req.query.sort;
+    const query = { isArchived: false };
+    if (search) {
+        query.$or = [
+            { name: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+        ];
+    }
+    const sortMapping = {
+        asc: "price",
+        dsc: "-price",
+        createdAsc: "createdAt",
+        createdDsc: "-createdAt",
+    };
+    const sortField = sortMapping[sort] || "-createdAt";
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.searchProductsService)(page, limit, query, sortField);
+    if (data.length === 0) {
+        throw new customError_1.default('No product data found!', 404);
+    }
+    res.status(200).json({
+        success: true,
+        message: "All products fetched successfully.",
         data,
         pagination: {
             totalRecords,

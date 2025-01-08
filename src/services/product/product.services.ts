@@ -119,14 +119,13 @@ export const findProductById = async (
   };
 
 // Search products by name or description
-export const searchProducts = async (
-    keyword: string
-): Promise<IProduct[]> => {
-    const regex = new RegExp(keyword, 'i'); 
-    return Product.find({
-      $or: [{ name: regex }, { description: regex }],
-      isArchived: false,
-    });
+export const searchProductsService = async (
+    page:number,
+    limit:number,
+    query: object = {},
+    sort:string
+):Promise<PaginationResult<IProduct> > => {
+    return paginate(Product,query,page,limit,sort);
   };
 
 // Track when a product page is viewed

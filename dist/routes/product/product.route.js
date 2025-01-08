@@ -11,6 +11,7 @@ const authenticate_1 = __importDefault(require("../../middlewares/auth/authentic
 const router = express_1.default.Router();
 router.get('/products', product_controller_1.getAllProducts);
 router.get("/products/featured", product_controller_1.getAllFeaturedProducts);
+router.get('/products/search', product_controller_1.searchProducts);
 router.get('/products/archived', authenticate_1.default, authorizeVendor_1.default, product_controller_1.getArchivedProducts);
 router.get('/products/:id', product_controller_1.getSingleProduct);
 router.get('/vendor/products', authenticate_1.default, authorizeVendor_1.default, product_controller_1.getAllProductsForVendor);

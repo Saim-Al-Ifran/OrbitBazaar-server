@@ -11,6 +11,7 @@ import {
   findProductById,
   getFeaturedProducts,
   getVendorProducts,
+  searchProductsService,
   toggleFeatureProduct,
   trackProductClick,
   trackProductView,
@@ -18,8 +19,6 @@ import {
   uploadProductImage,
  
 } from "../../services/product/product.services";
-import { updateUserProfileImage } from "../user/user.controller";
- 
 
 export const getAllProducts = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -52,8 +51,7 @@ export const getAllProducts = TryCatch(
       "high-price": "-price",
       rating: "-ratings.average",
     };
-    const sortField = sortMapping[sortOption] || "createdAt";
-
+    const sortField = sortMapping[sortOption] || "createdAt"; 
     const { data, totalRecords, totalPages, prevPage, nextPage } = await findAllProducts(
       page,
       limit,
@@ -63,7 +61,7 @@ export const getAllProducts = TryCatch(
 
     if(data.length === 0){
         throw new CustomError('No product data found!',404);
-   }
+    }
     
     res.status(200).json({
       success: true,
@@ -373,3 +371,51 @@ export const getArchivedProducts = TryCatch(
     });
   }
 );
+
+export const searchProducts = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.keyword as string;
+    const sort = req.query.sort as string;
+
+    const query: Record<string, any> = { isArchived: false };
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },  
+        { description: { $regex: search, $options: "i" } },   
+      ];
+    }
+    const sortMapping: Record<string, string> = {
+      asc: "price",     
+      dsc: "-price",       
+      createdAsc: "createdAt", 
+      createdDsc: "-createdAt",  
+    };
+    const sortField = sortMapping[sort] || "-createdAt"; 
+    const { data, totalRecords, totalPages, prevPage, nextPage } = await searchProductsService(
+      page,
+      limit,
+      query,
+      sortField
+    );
+
+    if(data.length === 0){
+      throw new CustomError('No product data found!',404);
+    }
+  
+  res.status(200).json({
+    success: true,
+    message: "All products fetched successfully.",
+    data,
+    pagination: {
+      totalRecords,
+      totalPages,
+      prevPage,
+      nextPage,
+      currentPage: page,
+    },
+  });
+    
+  }
+) 

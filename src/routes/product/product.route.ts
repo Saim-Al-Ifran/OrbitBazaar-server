@@ -7,6 +7,7 @@ import {
     getAllProductsForVendor,
     getArchivedProducts,
     getSingleProduct,
+    searchProducts,
     toggleProductFeaturedStatus,
     trackProductClickController,
     trackProductViewController,
@@ -20,6 +21,7 @@ const router  = express.Router();
 
 router.get('/products',getAllProducts);
 router.get("/products/featured", getAllFeaturedProducts);
+router.get('/products/search',searchProducts);
 router.get('/products/archived',authenticate,authorizeVendor,getArchivedProducts);
 router.get('/products/:id',getSingleProduct);
 router.get('/vendor/products',authenticate,authorizeVendor,getAllProductsForVendor);
