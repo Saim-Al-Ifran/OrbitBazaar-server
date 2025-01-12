@@ -2043,7 +2043,49 @@ paths:
           description: Not Found - Product not found for the provided ID.
         '500':
           description: Internal Server Error - Error occurred while updating product featured status.
-  
+  /products/{productId}/archive:
+    patch:
+      tags:
+        - Product
+      summary: Mark a product as archived or remove it from the archived  list(vendor)
+      description: Allows a vendor to mark a product as featured or remove it from the featured list. Featured products may receive special prominence on the platform.
+      security:
+          - BearerAuth: []   
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product to be marked as featured or removed from featured.
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9a10f3a8c5f8a1c5"
+        - name: isArchived
+          in: query
+          description: Boolean flag indicating whether to mark the product as featured (`true`) or remove it from the featured list (`false`).
+          required: true
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: Product archived status successfully updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product featured status successfully updated."
+        '400':
+          description: Bad Request - Invalid product ID or malformed request.
+        '404':
+          description: Not Found - Product not found for the provided ID.
+        '500':
+          description: Internal Server Error - Error occurred while updating product featured status.
   /reviews:
     post:
       tags:
@@ -3777,15 +3819,4 @@ paths:
  
         500:
           description: Server error
- 
- 
-                   
-          
     
-          
- 
-  
-  
-          
-          
-          
