@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleFeatureProduct = exports.trackProductClick = exports.trackProductView = exports.searchProductsService = exports.findProductById = exports.findArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProductInDb = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
+exports.toggleArchivedProduct = exports.toggleFeatureProduct = exports.trackProductClick = exports.trackProductView = exports.searchProductsService = exports.findProductById = exports.findArchivedProducts = exports.getVendorProducts = exports.getFeaturedProducts = exports.deleteProductInDb = exports.deleteProductImage = exports.updateProductInDb = exports.uploadProductImage = exports.addProduct = exports.findAllProducts = void 0;
 const Product_1 = __importDefault(require("../../models/Product"));
 const fileUpload_1 = require("../../utils/fileUpload");
 const paginate_1 = __importDefault(require("../../utils/paginate"));
@@ -98,3 +98,8 @@ const toggleFeatureProduct = (productId, isFeatured, email) => __awaiter(void 0,
     return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail: email }, { $set: { isFeatured } }, { new: true });
 });
 exports.toggleFeatureProduct = toggleFeatureProduct;
+// Mark a product as archived or remove it from the archived list
+const toggleArchivedProduct = (productId, isArchived, email) => __awaiter(void 0, void 0, void 0, function* () {
+    return Product_1.default.findOneAndUpdate({ _id: productId, vendorEmail: email }, { $set: { isArchived } }, { new: true });
+});
+exports.toggleArchivedProduct = toggleArchivedProduct;

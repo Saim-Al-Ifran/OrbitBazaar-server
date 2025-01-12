@@ -12,6 +12,7 @@ import {
   getFeaturedProducts,
   getVendorProducts,
   searchProductsService,
+  toggleArchivedProduct,
   toggleFeatureProduct,
   trackProductClick,
   trackProductView,
@@ -280,6 +281,33 @@ export const toggleProductFeaturedStatus = TryCatch(
     });
   }
 );
+export const toggleProductArchivedStatus = TryCatch(
+  async (req: Request, res: Response) => {
+    const productId = req.params.id;
+    const isArchived= req.body.isArchived;
+    const vendorEmail = req.user?.email;
+ 
+    if (!vendorEmail) {
+      throw new CustomError("Vendor email is required",400);
+    }
+ 
+    if (typeof isArchived!== "boolean") {
+      throw new CustomError("Invalid value for 'isFeatured'. It must be a boolean.", 400);
+    }
+ 
+    const updatedProduct = await toggleArchivedProduct(productId, isArchived, vendorEmail);
+ 
+    if (!updatedProduct) {
+      throw new CustomError("Product not found or you do not have permission to update it.", 404);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Product '${updatedProduct.name}' ${isArchived ? "Archived" : "unArchived"} successfully.`,
+      data: updatedProduct,
+    });
+  }
+);
 
 
 export const trackProductViewController = TryCatch(
@@ -419,3 +447,4 @@ export const searchProducts = TryCatch(
     
   }
 ) 
+ 

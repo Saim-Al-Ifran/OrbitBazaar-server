@@ -161,3 +161,18 @@ export const toggleFeatureProduct = async (
       { new: true }
     );
   };
+  
+// Mark a product as archived or remove it from the archived list
+export const toggleArchivedProduct = async (
+    productId: string,
+    isArchived: boolean,
+    email: string
+  ): Promise<IProduct | null> => {
+    return Product.findOneAndUpdate(
+      { _id: productId, vendorEmail:email },
+      { $set: { isArchived }} ,
+      { new: true }
+    );
+  };
+
+ 

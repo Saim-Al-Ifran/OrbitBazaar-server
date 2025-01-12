@@ -1,42 +1,29 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseCSV = void 0;
-const fs_1 = __importDefault(require("fs"));
 const csv_parser_1 = __importDefault(require("csv-parser"));
-const parseCSV = (filePath) => {
+const stream_1 = require("stream");
+const parseCSV = (buffer) => __awaiter(void 0, void 0, void 0, function* () {
+    const results = [];
+    const stream = stream_1.Readable.from(buffer);
     return new Promise((resolve, reject) => {
-        const products = [];
-        fs_1.default.createReadStream(filePath)
+        stream
             .pipe((0, csv_parser_1.default)())
-            .on('data', (row) => {
-            // Add each row to the products array
-            products.push({
-                name: row.name,
-                description: row.description,
-                category: row.category,
-                vendorEmail: row.vendorEmail,
-                price: parseFloat(row.price),
-                stock: parseInt(row.stock),
-                images: row.images,
-                ratings: {
-                    average: parseFloat(row['ratings.average']),
-                    count: parseInt(row['ratings.count']),
-                },
-                isFeatured: row.isFeatured === 'true',
-                isArchived: row.isArchived === 'true',
-                salesCount: parseInt(row.salesCount),
-                totalRevenue: parseFloat(row.totalRevenue),
-                analytics: {
-                    views: parseInt(row['analytics.views']),
-                    clicks: parseInt(row['analytics.clicks']),
-                },
-            });
-        })
-            .on('end', () => resolve(products))
-            .on('error', (err) => reject(err));
+            .on('data', (data) => results.push(data))
+            .on('end', () => resolve(results))
+            .on('error', (error) => reject(error));
     });
-};
+});
 exports.parseCSV = parseCSV;

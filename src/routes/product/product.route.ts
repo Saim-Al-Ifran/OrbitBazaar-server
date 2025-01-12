@@ -1,5 +1,6 @@
 import express from 'express';
 import { 
+ 
     createProduct,
     deleteProduct,
     getAllFeaturedProducts,
@@ -8,6 +9,7 @@ import {
     getArchivedProducts,
     getSingleProduct,
     searchProducts,
+    toggleProductArchivedStatus,
     toggleProductFeaturedStatus,
     trackProductClickController,
     trackProductViewController,
@@ -24,10 +26,13 @@ router.get("/products/featured", getAllFeaturedProducts);
 router.get('/products/search',searchProducts);
 router.get('/products/archived',authenticate,authorizeVendor,getArchivedProducts);
 router.get('/products/:id',getSingleProduct);
+
 router.get('/vendor/products',authenticate,authorizeVendor,getAllProductsForVendor);
 router.post('/products',authenticate,authorizeVendor,upload.single('image'),createProduct);
 router.put('/products/:id',authenticate,authorizeVendor,upload.single('image'),updatedProduct);
 router.patch("/products/:id/feature", authenticate, authorizeVendor, toggleProductFeaturedStatus);
+router.patch("/products/:id/archive", authenticate, authorizeVendor, toggleProductArchivedStatus);
+
 router.patch("/products/:id/view", trackProductViewController);
 router.patch("/products/:id/click", trackProductClickController);
 router.delete('/products/:id',authenticate,authorizeVendor,deleteProduct);

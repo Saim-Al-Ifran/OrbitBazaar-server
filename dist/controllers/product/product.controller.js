@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchProducts = exports.getArchivedProducts = exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
+exports.searchProducts = exports.getArchivedProducts = exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductArchivedStatus = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -220,6 +220,27 @@ exports.toggleProductFeaturedStatus = (0, TryCatch_1.TryCatch)((req, res) => __a
     res.status(200).json({
         success: true,
         message: `Product '${updatedProduct.name}' ${isFeatured ? "featured" : "unfeatured"} successfully.`,
+        data: updatedProduct,
+    });
+}));
+exports.toggleProductArchivedStatus = (0, TryCatch_1.TryCatch)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const productId = req.params.id;
+    const isArchived = req.body.isArchived;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!vendorEmail) {
+        throw new customError_1.default("Vendor email is required", 400);
+    }
+    if (typeof isArchived !== "boolean") {
+        throw new customError_1.default("Invalid value for 'isFeatured'. It must be a boolean.", 400);
+    }
+    const updatedProduct = yield (0, product_services_1.toggleArchivedProduct)(productId, isArchived, vendorEmail);
+    if (!updatedProduct) {
+        throw new customError_1.default("Product not found or you do not have permission to update it.", 404);
+    }
+    res.status(200).json({
+        success: true,
+        message: `Product '${updatedProduct.name}' ${isArchived ? "Archived" : "unArchived"} successfully.`,
         data: updatedProduct,
     });
 }));
