@@ -14,7 +14,7 @@ export const recalculateProductRating = async (productID: string) => {
 };
 
 // added review 
-export const addReview = async (userEmail: string, productID: string, rating: number, comment: string) => {
+export const createReview = async (userEmail: string, productID: string, rating: number, comment: string) => {
   const hasPurchased = await Order.findOne({
     userEmail,
     'items.productID': productID,
@@ -53,7 +53,7 @@ export const updateReview = async (reviewID: string, userEmail: string, updatedD
   };
 
 // Deletes a user's review by ID.
-  export const deleteReview = async (reviewID: string, userEmail: string) => {
+  export const deleteReviewInDb = async (reviewID: string, userEmail: string) => {
     const review = await Review.findOneAndDelete({ _id: reviewID, userEmail });
   
     if (!review) {
@@ -67,12 +67,12 @@ export const updateReview = async (reviewID: string, userEmail: string, updatedD
   };
 
 // Retrieves all reviews for a specific product.
-  export const getProductReviews = async (productID: string) => {
+  export const findProductReviews = async (productID: string) => {
     return await Review.find({ productID }).select('rating comment createdAt');
   };
 
 // Retrieves all reviews by a specific user.
-  export const getUserReviews = async (userEmail: string) => {
+  export const findUserReviews = async (userEmail: string) => {
     return await Review.find({ userEmail });
   };
   
