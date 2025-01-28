@@ -24,7 +24,7 @@ export const addReview = TryCatch(
 export const getProductReviews = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
         const {id} = req.params;
-
+        console.log("helooo");
         const reviews = await findProductReviews(id as string);
         if(reviews.length  === 0){
             throw new CustomError('No reviews found', 404);
@@ -34,7 +34,15 @@ export const getProductReviews = TryCatch(
 ) 
 export const editReview = TryCatch(
     async (req: Request, res: Response, next: NextFunction) => {
-
+        const { id } = req.params;
+        const { rating, comment } = req.body;
+        const userEmail = req.user?.email;
+        if(!userEmail){
+            throw new CustomError("user not found", 404);
+        }
+        const review = await  updateReview(id, userEmail, { rating, comment });
+    
+        res.status(200).json({ message: 'Review updated successfully', review });
     }
 ) 
 export const deleteReview = TryCatch(
@@ -51,6 +59,8 @@ export const deleteReview = TryCatch(
 export const getUserReviews = TryCatch(
     async (req: Request, res: Response, next: NextFunction) => {
         const userEmail = req.user?.email;
+        console.log("helooo");
+        
         if(!userEmail){
             throw new CustomError("user not found", 404);
         }

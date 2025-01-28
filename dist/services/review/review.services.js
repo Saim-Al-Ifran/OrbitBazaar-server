@@ -70,7 +70,7 @@ exports.updateReview = updateReview;
 const deleteReviewInDb = (reviewID, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     const review = yield Review_1.default.findOneAndDelete({ _id: reviewID, userEmail });
     if (!review) {
-        throw new customError_1.default('Review not found or unauthorized.', 403);
+        throw new customError_1.default('Review not found  ', 403);
     }
     // Recalculate product rating after deletion
     yield (0, exports.recalculateProductRating)(review.productID.toString());
@@ -82,7 +82,7 @@ const findProductReviews = (productID) => __awaiter(void 0, void 0, void 0, func
     return yield Review_1.default.find({ productID: productID }).select('rating comment createdAt');
 });
 exports.findProductReviews = findProductReviews;
-// Retrieves all reviews by a specific user.
+//Retrieves all reviews by a specific user.
 const findUserReviews = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     return yield Review_1.default.find({ userEmail });
 });

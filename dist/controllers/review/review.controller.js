@@ -28,6 +28,7 @@ exports.addReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void
 }));
 exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
+    console.log("helooo");
     const reviews = yield (0, review_services_1.findProductReviews)(id);
     if (reviews.length === 0) {
         throw new customError_1.default('No reviews found', 404);
@@ -35,6 +36,15 @@ exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awai
     res.status(200).json({ reviews });
 }));
 exports.editReview = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default("user not found", 404);
+    }
+    const review = yield (0, review_services_1.updateReview)(id, userEmail, { rating, comment });
+    res.status(200).json({ message: 'Review updated successfully', review });
 }));
 exports.deleteReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -49,6 +59,7 @@ exports.deleteReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
 exports.getUserReviews = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    console.log("helooo");
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }

@@ -68,7 +68,7 @@ export const updateReview = async (reviewID: string, userEmail: string, updatedD
     const review = await Review.findOneAndDelete({ _id: reviewID, userEmail });
   
     if (!review) {
-      throw new CustomError('Review not found or unauthorized.', 403);
+      throw new CustomError('Review not found  ', 403);
     }
   
     // Recalculate product rating after deletion
@@ -82,7 +82,7 @@ export const updateReview = async (reviewID: string, userEmail: string, updatedD
     return await Review.find({productID:productID}).select('rating comment createdAt');
   };
 
-// Retrieves all reviews by a specific user.
+//Retrieves all reviews by a specific user.
   export const findUserReviews = async (userEmail: string) => {
     return await Review.find({ userEmail });
   };

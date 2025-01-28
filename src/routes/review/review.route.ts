@@ -13,9 +13,10 @@ import {
 const router = express.Router();
 
 router.post('/reviews', authenticate, addReview);
+router.get('/reviews/user',  authenticate, getUserReviews );
 router.get('/reviews/:id', getProductReviews);
 router.put('/reviews/:id', authenticate, editReview);
 router.delete('/reviews/:id',  authenticate, deleteReview);
-router.get('/reviews/user',  authenticate, getUserReviews);
+
 
 export default router;
