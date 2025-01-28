@@ -22,7 +22,13 @@ const recalculateProductRating = (productID) => __awaiter(void 0, void 0, void 0
     const reviews = yield Review_1.default.find({ productID });
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
     const averageRating = reviews.length ? totalRating / reviews.length : 0;
-    yield Product_1.default.findByIdAndUpdate(productID, { rating: averageRating });
+    const ratingCount = reviews.length;
+    yield Product_1.default.findByIdAndUpdate(productID, {
+        ratings: {
+            average: averageRating,
+            count: ratingCount
+        }
+    });
 });
 exports.recalculateProductRating = recalculateProductRating;
 // added review 
@@ -31,11 +37,13 @@ const createReview = (userEmail, productID, rating, comment) => __awaiter(void 0
         userEmail,
         'items.productID': productID,
     });
-    console.log(productID);
+    const existingReview = yield Review_1.default.exists({ userEmail, productID });
+    if (existingReview) {
+        throw new customError_1.default('You have already reviewed this product', 400);
+    }
     if (!hasPurchased) {
         throw new customError_1.default('You can only review products you have purchased.', 403);
     }
-    // Create a new review
     const review = yield Review_1.default.create({
         productID,
         userEmail,
@@ -51,7 +59,7 @@ exports.createReview = createReview;
 const updateReview = (reviewID, userEmail, updatedData) => __awaiter(void 0, void 0, void 0, function* () {
     const review = yield Review_1.default.findOneAndUpdate({ _id: reviewID, userEmail }, updatedData, { new: true });
     if (!review) {
-        throw new customError_1.default('Review not found or unauthorized.', 403);
+        throw new customError_1.default('Review not found', 403);
     }
     // Recalculate product rating after the update
     yield (0, exports.recalculateProductRating)(review.productID.toString());
@@ -71,7 +79,7 @@ const deleteReviewInDb = (reviewID, userEmail) => __awaiter(void 0, void 0, void
 exports.deleteReviewInDb = deleteReviewInDb;
 // Retrieves all reviews for a specific product.
 const findProductReviews = (productID) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Review_1.default.find({ productID }).select('rating comment createdAt');
+    return yield Review_1.default.find({ productID: productID }).select('rating comment createdAt');
 });
 exports.findProductReviews = findProductReviews;
 // Retrieves all reviews by a specific user.

@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { TryCatch } from '../../middlewares/TryCatch';
-import { createReview, findUserReviews } from '../../services/review/review.services';
+import {
+    createReview,
+    deleteReviewInDb,
+    findProductReviews,
+    findUserReviews,
+    updateReview
+} from '../../services/review/review.services';
 import CustomError from '../../utils/errors/customError';
 
 export const addReview = TryCatch(
@@ -16,13 +22,31 @@ export const addReview = TryCatch(
     }
 ) 
 export const getProductReviews = TryCatch(
-    async (req: Request, res: Response, next: NextFunction) => {}
+    async (req: Request, res: Response, _next: NextFunction) => {
+        const {id} = req.params;
+
+        const reviews = await findProductReviews(id as string);
+        if(reviews.length  === 0){
+            throw new CustomError('No reviews found', 404);
+        }
+        res.status(200).json({ reviews });
+    }
 ) 
 export const editReview = TryCatch(
-    async (req: Request, res: Response, next: NextFunction) => {}
+    async (req: Request, res: Response, next: NextFunction) => {
+
+    }
 ) 
 export const deleteReview = TryCatch(
-    async (req: Request, res: Response, next: NextFunction) => {}
+    async (req: Request, res: Response, _next: NextFunction) => {
+        const {id} = req.params;
+        const userEmail = req.user?.email;
+        if(!userEmail){
+            throw new CustomError("user not found", 404);
+        }
+        await  deleteReviewInDb(id, userEmail);
+        res.status(200).json({ message: 'Review deleted successfully' });
+    }
 ) 
 export const getUserReviews = TryCatch(
     async (req: Request, res: Response, next: NextFunction) => {

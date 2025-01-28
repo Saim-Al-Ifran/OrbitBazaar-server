@@ -4,14 +4,21 @@ import Review from "../../models/Review";
 import CustomError from "../../utils/errors/customError";
 
 // utitly function to calculate rating
-export const recalculateProductRating = async (productID: string) => {
-    const reviews = await Review.find({ productID });
-  
-    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-    const averageRating = reviews.length ? totalRating / reviews.length : 0;
-  
-    await Product.findByIdAndUpdate(productID, { rating: averageRating });
+export const recalculateProductRating = async (productID: string) => { 
+  const reviews = await Review.find({ productID });
+
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  const averageRating = reviews.length ? totalRating / reviews.length : 0;
+  const ratingCount = reviews.length;  
+
+  await Product.findByIdAndUpdate(productID, { 
+      ratings: { 
+          average: averageRating, 
+          count: ratingCount 
+      }
+  });
 };
+
 
 // added review 
 export const createReview = async (userEmail: string, productID: string, rating: number, comment: string) => {
@@ -19,13 +26,16 @@ export const createReview = async (userEmail: string, productID: string, rating:
     userEmail,
     'items.productID': productID,
   });
-  console.log(productID);
+  const existingReview = await Review.exists({ userEmail, productID });
+  if(existingReview){
+    throw new CustomError('You have already reviewed this product', 400);
+  }
   
   if (!hasPurchased) {
     throw new CustomError('You can only review products you have purchased.', 403);
   }
 
-  // Create a new review
+
   const review = await Review.create({
     productID,
     userEmail,
@@ -44,7 +54,7 @@ export const updateReview = async (reviewID: string, userEmail: string, updatedD
     const review = await Review.findOneAndUpdate({ _id: reviewID, userEmail }, updatedData, { new: true });
   
     if (!review) {
-      throw new CustomError('Review not found or unauthorized.', 403);
+      throw new CustomError('Review not found', 403);
     }
   
     // Recalculate product rating after the update
@@ -69,7 +79,7 @@ export const updateReview = async (reviewID: string, userEmail: string, updatedD
 
 // Retrieves all reviews for a specific product.
   export const findProductReviews = async (productID: string) => {
-    return await Review.find({ productID }).select('rating comment createdAt');
+    return await Review.find({productID:productID}).select('rating comment createdAt');
   };
 
 // Retrieves all reviews by a specific user.
