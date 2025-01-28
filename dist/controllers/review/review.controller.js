@@ -8,11 +8,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserReviews = exports.deleteReview = exports.editReview = exports.getProductReviews = exports.addReview = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
-exports.addReview = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { }));
+const review_services_1 = require("../../services/review/review.services");
+const customError_1 = __importDefault(require("../../utils/errors/customError"));
+exports.addReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { productId, rating, comment } = req.body;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default("user not found", 404);
+    }
+    const review = yield (0, review_services_1.createReview)(userEmail, productId, rating, comment);
+    res.status(201).json({ message: 'Review added successfully', review });
+}));
 exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { }));
 exports.editReview = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { }));
 exports.deleteReview = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { }));
-exports.getUserReviews = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { }));
+exports.getUserReviews = (0, TryCatch_1.TryCatch)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default("user not found", 404);
+    }
+    const reviews = yield (0, review_services_1.findUserReviews)(userEmail);
+    if (reviews.length === 0) {
+        throw new customError_1.default("No reviews found", 404);
+    }
+    res.status(200).json({ reviews });
+}));

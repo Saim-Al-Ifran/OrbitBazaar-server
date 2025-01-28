@@ -31,6 +31,7 @@ const createReview = (userEmail, productID, rating, comment) => __awaiter(void 0
         userEmail,
         'items.productID': productID,
     });
+    console.log(productID);
     if (!hasPurchased) {
         throw new customError_1.default('You can only review products you have purchased.', 403);
     }

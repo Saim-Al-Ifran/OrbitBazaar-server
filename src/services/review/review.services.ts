@@ -19,7 +19,8 @@ export const createReview = async (userEmail: string, productID: string, rating:
     userEmail,
     'items.productID': productID,
   });
-
+  console.log(productID);
+  
   if (!hasPurchased) {
     throw new CustomError('You can only review products you have purchased.', 403);
   }
