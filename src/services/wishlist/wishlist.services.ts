@@ -1,7 +1,7 @@
 import Wishlist from "../../models/Wishlist";
 
 //  Add a product to the user's wishlist
-export const addToWishlist = async (userEmail: string, productID: string) => {
+export const createWishlist = async (userEmail: string, productID: string) => {
     let wishlist = await Wishlist.findOne({ userEmail });
   
     if (!wishlist) {
@@ -19,14 +19,23 @@ export const addToWishlist = async (userEmail: string, productID: string) => {
   };
 
 // Get all wishlist items for a user
-export const getWishlist = async (userEmail: string) => {
+export const findWishlist = async (userEmail: string) => {
     return await Wishlist.findOne({ userEmail }).populate("items.productID");
   };
 
 // Remove a specific product from the wishlist
-export const deleteWishlist = async (userEmail: string): Promise<void> => {
-    await Wishlist.deleteOne({ userEmail });
+export const deleteProductFromWishlist = async (userEmail: string, productId: string) => {
+  const wishlist = await Wishlist.findOne({ userEmail });
+
+  if (!wishlist) {
+      throw new Error("Wishlist not found");
+  }
+
+  wishlist.items = wishlist.items.filter((item) => item.productID.toString() !== productId);
+
+  return await wishlist.save();
 };
+
 
 // Clear the entire wishlist for a user
 export const deleteAllWishlist= async (userEmail: string) => {

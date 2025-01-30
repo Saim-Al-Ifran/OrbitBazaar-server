@@ -35,11 +35,22 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const WishlistSchema = new mongoose_1.Schema({
-    userEmail: { type: String, required: true, unique: true },
+    userEmail: {
+        type: String,
+        required: true,
+        unique: true
+    },
     items: [
         {
-            productID: { type: mongoose_1.Schema.Types.ObjectId, ref: "Product", required: true },
-            addedAt: { type: Date, default: Date.now },
+            productID: {
+                type: mongoose_1.Schema.Types.ObjectId,
+                ref: "Product",
+                required: true
+            },
+            addedAt: {
+                type: Date,
+                default: Date.now
+            },
         },
     ],
 }, { timestamps: true });

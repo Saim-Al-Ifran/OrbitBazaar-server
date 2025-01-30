@@ -4,11 +4,22 @@ import { IWishlist } from "../types/models/Wishlist";
  
 const WishlistSchema = new Schema<IWishlist>(
   {
-    userEmail: { type: String, required: true, unique: true },
+    userEmail: {
+      type: String,
+      required: true,
+      unique: true
+    },
     items: [
       {
-        productID: { type: Schema.Types.ObjectId, ref: "Product", required: true },
-        addedAt: { type: Date, default: Date.now },
+        productID: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now
+        },
       },
     ],
   },

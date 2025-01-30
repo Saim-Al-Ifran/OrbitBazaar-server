@@ -12,10 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAllWishlist = exports.deleteWishlist = exports.getWishlist = exports.addToWishlist = void 0;
+exports.deleteAllWishlist = exports.deleteProductFromWishlist = exports.findWishlist = exports.createWishlist = void 0;
 const Wishlist_1 = __importDefault(require("../../models/Wishlist"));
 //  Add a product to the user's wishlist
-const addToWishlist = (userEmail, productID) => __awaiter(void 0, void 0, void 0, function* () {
+const createWishlist = (userEmail, productID) => __awaiter(void 0, void 0, void 0, function* () {
     let wishlist = yield Wishlist_1.default.findOne({ userEmail });
     if (!wishlist) {
         wishlist = new Wishlist_1.default({ userEmail, items: [{ productID }] });
@@ -31,17 +31,22 @@ const addToWishlist = (userEmail, productID) => __awaiter(void 0, void 0, void 0
     }
     return yield wishlist.save();
 });
-exports.addToWishlist = addToWishlist;
+exports.createWishlist = createWishlist;
 // Get all wishlist items for a user
-const getWishlist = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
+const findWishlist = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     return yield Wishlist_1.default.findOne({ userEmail }).populate("items.productID");
 });
-exports.getWishlist = getWishlist;
+exports.findWishlist = findWishlist;
 // Remove a specific product from the wishlist
-const deleteWishlist = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    yield Wishlist_1.default.deleteOne({ userEmail });
+const deleteProductFromWishlist = (userEmail, productId) => __awaiter(void 0, void 0, void 0, function* () {
+    const wishlist = yield Wishlist_1.default.findOne({ userEmail });
+    if (!wishlist) {
+        throw new Error("Wishlist not found");
+    }
+    wishlist.items = wishlist.items.filter((item) => item.productID.toString() !== productId);
+    return yield wishlist.save();
 });
-exports.deleteWishlist = deleteWishlist;
+exports.deleteProductFromWishlist = deleteProductFromWishlist;
 // Clear the entire wishlist for a user
 const deleteAllWishlist = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     return yield Wishlist_1.default.findOneAndDelete({ userEmail });
