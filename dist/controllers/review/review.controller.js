@@ -28,7 +28,6 @@ exports.addReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void
 }));
 exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    console.log("helooo");
     const reviews = yield (0, review_services_1.findProductReviews)(id);
     if (reviews.length === 0) {
         throw new customError_1.default('No reviews found', 404);

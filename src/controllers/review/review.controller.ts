@@ -24,7 +24,6 @@ export const addReview = TryCatch(
 export const getProductReviews = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
         const {id} = req.params;
-        console.log("helooo");
         const reviews = await findProductReviews(id as string);
         if(reviews.length  === 0){
             throw new CustomError('No reviews found', 404);
