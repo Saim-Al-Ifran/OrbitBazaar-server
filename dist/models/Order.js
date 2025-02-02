@@ -70,7 +70,7 @@ const OrderSchema = new mongoose_1.Schema({
     },
     status: {
         type: String,
-        enum: ['confirmed', 'processing', 'Delivered', 'Cancelled'],
+        enum: ['confirmed', 'processing', 'delivered', 'cancelled'],
         default: 'confirmed',
     },
     shippingAddress: {
