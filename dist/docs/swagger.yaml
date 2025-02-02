@@ -3481,7 +3481,7 @@ paths:
           
         500:
           description: Server error
-  /orders/user/{userEmail}:
+  /orders/user/:
     get:
       summary: Retrieve all orders placed by a specific user
       description: Fetches all orders placed by the user identified by their email address.
@@ -3489,7 +3489,7 @@ paths:
         - Order
       security:
         - BearerAuth: []
-      parameters:
+
         - in: path
           name: userEmail
           required: true
@@ -3658,10 +3658,9 @@ paths:
  
         500:
           description: Server error
-  /orders/{orderId}/cancel:
-    delete:
-      summary: Cancel an order
-      description: Allows a user to cancel their order if it has not yet been shipped.
+   get:
+      summary: Retrive a specific order data 
+      description: Allows to get  a specific order by its ID.
       tags:
         - Order
       security:
@@ -3670,13 +3669,14 @@ paths:
         - in: path
           name: orderId
           required: true
-          description: The ID of the order to be canceled.
+          description: The ID of the order to be updated.
           schema:
             type: string
             example: "64a6f2e0d1234b001c123456"
+  
       responses:
         200:
-          description: Order canceled successfully
+          description: Order status updated successfully
           content:
             application/json:
               schema:
@@ -3684,8 +3684,8 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Order canceled successfully."
-                  canceledOrder:
+                    example: "Order status updated successfully."
+                  updatedOrder:
                     type: object
                     properties:
                       orderId:
@@ -3693,19 +3693,19 @@ paths:
                         example: "64a6f2e0d1234b001c123456"
                       status:
                         type: string
-                        example: "cancelled"
+                        example: "shipped"
                       timestamps:
                         type: string
                         format: date-time
                         example: "2024-12-05T12:34:56Z"
         400:
-          description: Bad Request (order cannot be canceled)
- 
+          description: Bad Request (invalid status value or missing data)
+
         401:
-          description: Unauthorized (user not authenticated)
+          description: Unauthorized (vendor not authenticated)
 
         403:
-          description: Forbidden (user not authorized to cancel this order)
+          description: Forbidden (vendor not authorized to update the order)
  
         404:
           description: Order not found
