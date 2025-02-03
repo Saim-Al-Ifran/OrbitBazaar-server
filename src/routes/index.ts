@@ -7,6 +7,8 @@ import reviewRoute from './review/review.route';
 import wishlistRoute from './wishlist/wishlist.route';
 import cartRoute from './cart/cart.route';
 import orderRoute from './order/order.route';
+import reportRoute from './report/report.route';
+
 const router = Router();
 
 router.use('/api/v1/auth', authRoutes);
@@ -17,5 +19,6 @@ router.use('/api/v1', reviewRoute);
 router.use('/api/v1', wishlistRoute);
 router.use('/api/v1', cartRoute);
 router.use('/api/v1', orderRoute);
+router.use('/api/v1', reportRoute);
 
 export default router;

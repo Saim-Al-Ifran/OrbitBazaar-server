@@ -13,10 +13,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateReportStatus = exports.findReportCountByProduct = exports.findReportsByUser = exports.updateReport = exports.deleteReport = exports.findReportById = exports.findReportsByProduct = exports.findReportsByVendor = exports.createReport = void 0;
+const Order_1 = __importDefault(require("../../models/Order"));
 const Report_1 = __importDefault(require("../../models/Report"));
+const customError_1 = __importDefault(require("../../utils/errors/customError"));
 // Create a new report
-const createReport = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Report_1.default.create(data);
+const createReport = (productID, userEmail, comment, reason) => __awaiter(void 0, void 0, void 0, function* () {
+    const hasPurchased = yield Order_1.default.findOne({
+        userEmail,
+        'items.productID': productID
+    });
+    if (!hasPurchased) {
+        throw new customError_1.default('You can only report products you have purchased.', 403);
+    }
+    console.log({ userEmail, productID, });
+    return yield Report_1.default.create({ userEmail, productID, comment, reason });
 });
 exports.createReport = createReport;
 // Get all reports for a vendor's products

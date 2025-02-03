@@ -1,10 +1,25 @@
+import Order from "../../models/Order";
 import Report from "../../models/Report";
 import { IReport } from "../../types/models/Report";
+import CustomError from "../../utils/errors/customError";
  
 
 // Create a new report
-export const createReport = async (data: Partial<IReport>) => {
-  return await Report.create(data);
+export const createReport = async (productID: string, userEmail: string, comment:string,reason:string) => {
+ 
+  
+  const hasPurchased = await Order.findOne({
+     userEmail,
+    'items.productID':productID
+   });
+ 
+   
+  if (!hasPurchased) {
+    throw new CustomError('You can only report products you have purchased.', 403);
+  }
+  console.log({userEmail,productID,});
+  
+  return await Report.create({userEmail,productID,comment,reason});
 };
 
 // Get all reports for a vendor's products
