@@ -2581,7 +2581,7 @@ paths:
  
         500:
           description: Server error
-  /reports/vendor/{vendorEmail}:
+  /reports/vendor:
     get:
       summary: Retrieve reports related to vendor's products
       description: Allows an authenticated vendor to fetch all reports submitted for their own products.
@@ -2589,7 +2589,7 @@ paths:
         - Report
       security:
         - BearerAuth: []
-      parameters:
+
         - name: vendorEmail
           in: path
           required: true
@@ -2640,9 +2640,9 @@ paths:
 
         500:
           description: Server error
-  /reports/product/{productId}:
+  /reports/vendor/{reportId}:
     get:
-      summary: Retrieve reports for a specific product
+      summary: Retrieve reports for a specific product for vendor
       description: Allows an authenticated vendor to fetch all reports submitted for a specific product they own.
       tags:
         - Report
@@ -2656,10 +2656,8 @@ paths:
           schema:
             type: string
             example: "64c2d45e9a3b8d0014abc789"
-        - $ref: '#/components/parameters/pageParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/sortByParam'
-        - $ref: '#/components/parameters/sortTypeParam'
+ 
+        
       responses:
         200:
           description: Reports retrieved successfully
@@ -2697,7 +2695,7 @@ paths:
  
         500:
           description: Server error
-  /reports/{reportId}:
+  /reports/user/{reportId}:
     get:
       summary: Retrieve a specific report by its ID
       description: Allows an authenticated user or admin to fetch detailed information about a specific report using its unique ID.
@@ -2880,15 +2878,14 @@ paths:
           description: Report not found.
         500:
           description: Internal server error.
-  /reports/user/{userEmail}:
+  /reports/user:
     get:
       summary: Retrieve all reports by a specific user
-      description: Retrieves all reports submitted by the user with the specified `userId`. Access is restricted to authorized users only.
+      description: Retrieves all reports submitted by the user with the specified `userEmail`. Access is restricted to authorized users only.
       tags:
         - Report
       security:
         - BearerAuth: []  
-      parameters:
         - name: userEmail
           in: path
           required: true
@@ -2935,7 +2932,7 @@ paths:
           description: User not found or no reports available.
         500:
           description: Internal server error.
-  /reports/product/{productId}/count:
+
     get:
       summary: Retrieve the count of reports for a specific product
       description: >
@@ -2970,7 +2967,7 @@ paths:
           description: Product not found or no reports available.
         500:
           description: Internal server error.
-  /reports/{reportId}/status:
+  /reports/vendor/{reportId}/status:
     patch:
       summary: Update the status of a specific report(vendor)
       description: >
