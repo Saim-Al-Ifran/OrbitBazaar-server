@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editReportStatus = exports.getReportCountByProduct = exports.getReportsByUser = exports.editReport = exports.removeReport = exports.getReportById = exports.getReportsByProduct = exports.getReportsByVendor = exports.addReport = void 0;
+exports.getReportByIdForVendor = exports.editReportStatus = exports.getReportCountByProduct = exports.getSingleReportByUser = exports.getReportsByUser = exports.editReportByUser = exports.removeReportByUser = exports.getReportById = exports.getReportsByProduct = exports.getReportsByVendor = exports.addReport = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const report_services_1 = require("../../services/report/report.services");
@@ -36,6 +36,9 @@ exports.getReportsByVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
         throw new customError_1.default("user not found", 404);
     }
     const reports = yield (0, report_services_1.findReportsByVendor)(vendorEmail);
+    if (reports.length === 0) {
+        throw new customError_1.default("no reports  found!", 404);
+    }
     res.status(200).json(reports);
 }));
 exports.getReportsByProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -50,22 +53,24 @@ exports.getReportById = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
         return res.status(404).json({ message: 'Report not found' });
     res.status(200).json(report);
 }));
-exports.removeReport = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.removeReportByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { reportId } = req.params;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default("User not authenticated", 401);
+    }
+    const result = yield (0, report_services_1.deleteReport)(reportId, userEmail);
+    res.status(200).json(result);
+}));
+exports.editReportByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const { reportId } = req.params;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
-    const deletedReport = yield (0, report_services_1.deleteReport)(reportId, userEmail);
-    if (!deletedReport) {
-        throw new customError_1.default('Not authorized to delete this report', 403);
-    }
-    res.status(200).json({ message: 'Report deleted successfully' });
-}));
-exports.editReport = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { reportId } = req.params;
-    const updatedReport = yield (0, report_services_1.updateReport)(reportId, req.body);
+    const updatedReport = yield (0, report_services_1.updateReport)(reportId, userEmail, req.body);
     if (!updatedReport)
         return res.status(400).json({ message: 'Cannot update resolved/rejected report' });
     res.status(200).json(updatedReport);
@@ -76,8 +81,18 @@ exports.getReportsByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
-    const reports = yield (0, report_services_1.findReportsByUser)(userEmail);
+    const reports = yield (0, report_services_1.findAllReportsByUser)(userEmail);
     res.status(200).json(reports);
+}));
+exports.getSingleReportByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { reportId } = req.params;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default("User not authenticated", 401);
+    }
+    const report = yield (0, report_services_1.findReportByUser)(reportId, userEmail);
+    res.status(200).json({ report });
 }));
 exports.getReportCountByProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { productId } = req.params;
@@ -85,11 +100,26 @@ exports.getReportCountByProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => 
     res.status(200).json({ productId, count });
 }));
 exports.editReportStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     const { reportId } = req.params;
     const { status } = req.body;
-    if (!['solved', 'unsolved'].includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value' });
+    if (!vendorEmail) {
+        throw new customError_1.default("User not authenticated", 401);
     }
-    const updatedReport = yield (0, report_services_1.updateReportStatus)(reportId, status);
-    res.status(200).json(updatedReport);
+    const updatedReport = yield (0, report_services_1.updateReportStatus)(vendorEmail, reportId, status);
+    res.status(200).json({
+        message: "Report status updated successfully",
+        report: updatedReport,
+    });
+}));
+exports.getReportByIdForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const { reportId } = req.params;
+    if (!vendorEmail) {
+        throw new customError_1.default("User not authenticated", 401);
+    }
+    const report = yield (0, report_services_1.findReportByIdForVendor)(vendorEmail, reportId);
+    res.status(200).json(report);
 }));
