@@ -2587,9 +2587,8 @@ paths:
       description: Allows an authenticated vendor to fetch all reports submitted for their own products.
       tags:
         - Report
-      security:
+      security:    
         - BearerAuth: []
-
         - name: vendorEmail
           in: path
           required: true
@@ -2600,6 +2599,10 @@ paths:
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/sortByParam'
         - $ref: '#/components/parameters/sortTypeParam'
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
       responses:
         200:
           description: Reports retrieved successfully
@@ -2895,6 +2898,9 @@ paths:
         - $ref : '#/components/parameters/pageParam'
         - $ref : '#/components/parameters/limitParam'
         - $ref : '#/components/parameters/sortTypeParam'
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         200:
           description: A list of reports submitted by the user.
