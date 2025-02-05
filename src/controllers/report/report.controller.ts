@@ -33,15 +33,33 @@ export const addReport = TryCatch(
 
 export const getReportsByVendor = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
-        const vendorEmail = req.user?.email;
-        if(!vendorEmail){
-            throw new CustomError("user not found", 404);
-        }
-        const reports = await  findReportsByVendor(vendorEmail);
-        if(reports.length === 0){
-            throw new CustomError("no reports  found!", 404);
-        }
-        res.status(200).json(reports);
+      const vendorEmail = req.user?.email;
+      if (!vendorEmail) {
+        throw new CustomError("User not authenticated", 401);
+      }
+  
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const status = req.query.status as string; // Optional status filter
+  
+     const { data, totalRecords, totalPages, prevPage, nextPage } = await findReportsByVendor(vendorEmail, page, limit, status);
+
+     if(data.length === 0){
+       throw new  CustomError(`No ${status} reports found!`,404);
+     }
+  
+     res.status(200).json({
+      success: true,
+      message: "Reports fetched successfully.",
+      data,
+      pagination: {
+        totalRecords,
+        totalPages,
+        prevPage,
+        nextPage,
+        currentPage: page,
+      },
+    });
     }
 ) 
 export const getReportsByProduct = TryCatch(
@@ -90,8 +108,23 @@ export const getReportsByUser  = TryCatch(
         if(!userEmail){
             throw new CustomError("user not found", 404);
         }
-        const reports = await findAllReportsByUser(userEmail);
-        res.status(200).json(reports);
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+    
+        const { data, totalRecords, totalPages, prevPage, nextPage } = await findAllReportsByUser(userEmail, page, limit);
+     
+        res.status(200).json({
+          success: true,
+          message: "Reports fetched successfully.",
+          data,
+          pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+          },
+        });
     }
 ) 
 

@@ -2,7 +2,9 @@ import Order from "../../models/Order";
 import Product from "../../models/Product";
 import Report from "../../models/Report";
 import { IReport } from "../../types/models/Report";
+import { PaginationResult } from "../../types/types";
 import CustomError from "../../utils/errors/customError";
+import paginate from "../../utils/paginate";
  
 
 // Create a new report
@@ -24,14 +26,32 @@ export const createReport = async (productID: string, userEmail: string, comment
 };
 
 // Get all reports for a vendor's products
-export const findReportsByVendor = async (vendorEmail: string) => {
-  // Find all products owned by the vendor
+export const findReportsByVendor = async (
+  vendorEmail: string,
+  page: number,
+  limit: number,
+  status?: string
+):Promise<PaginationResult<IReport>> => {
+ 
+  // Get all products owned by the vendor
   const products = await Product.find({ vendorEmail }).select("_id");
-  // Extract product IDs
-  const productIds = products.map((product) => product._id);
-  // Find reports for these products
-  return await Report.find({ productID: { $in: productIds } }).populate("productID");
+
+  if (!products.length) {
+    throw new CustomError("No products found for this vendor", 404);
+  }
+
+  const productIds = products.map((p) => p._id);
+
+  // Build filter query
+  const filter: any = { productID: { $in: productIds } };
+  if (status) {
+    filter.status = status;
+  }
+
+  return await paginate(Report, filter, page, limit, { createdAt: -1 }, "", "productID");
 };
+
+
 
 // Get all reports for a specific product
 export const findReportsByProduct = async (productId: string) => {
@@ -68,8 +88,12 @@ export const updateReport = async (reportId: string, userEmail: string, data: Pa
 };
 
 // Get all reports submitted by a specific user
-export const findAllReportsByUser = async (userEmail: string) => {
-  return await Report.find({ userEmail });
+export const findAllReportsByUser = async (
+  userEmail: string,
+  page: number,
+  limit: number
+):Promise<PaginationResult<IReport>> => {
+  return await paginate(Report, { userEmail }, page, limit, { createdAt: -1 }, "", "productID");
 };
 
 // Get a specific  reports submitted by a  user

@@ -17,6 +17,7 @@ const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
 const Report_1 = __importDefault(require("../../models/Report"));
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const paginate_1 = __importDefault(require("../../utils/paginate"));
 // Create a new report
 const createReport = (productID, userEmail, comment, reason) => __awaiter(void 0, void 0, void 0, function* () {
     const hasPurchased = yield Order_1.default.findOne({
@@ -31,13 +32,19 @@ const createReport = (productID, userEmail, comment, reason) => __awaiter(void 0
 });
 exports.createReport = createReport;
 // Get all reports for a vendor's products
-const findReportsByVendor = (vendorEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    // Find all products owned by the vendor
+const findReportsByVendor = (vendorEmail, page, limit, status) => __awaiter(void 0, void 0, void 0, function* () {
+    // Get all products owned by the vendor
     const products = yield Product_1.default.find({ vendorEmail }).select("_id");
-    // Extract product IDs
-    const productIds = products.map((product) => product._id);
-    // Find reports for these products
-    return yield Report_1.default.find({ productID: { $in: productIds } }).populate("productID");
+    if (!products.length) {
+        throw new customError_1.default("No products found for this vendor", 404);
+    }
+    const productIds = products.map((p) => p._id);
+    // Build filter query
+    const filter = { productID: { $in: productIds } };
+    if (status) {
+        filter.status = status;
+    }
+    return yield (0, paginate_1.default)(Report_1.default, filter, page, limit, { createdAt: -1 }, "", "productID");
 });
 exports.findReportsByVendor = findReportsByVendor;
 // Get all reports for a specific product
@@ -73,8 +80,8 @@ const updateReport = (reportId, userEmail, data) => __awaiter(void 0, void 0, vo
 });
 exports.updateReport = updateReport;
 // Get all reports submitted by a specific user
-const findAllReportsByUser = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Report_1.default.find({ userEmail });
+const findAllReportsByUser = (userEmail, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield (0, paginate_1.default)(Report_1.default, { userEmail }, page, limit, { createdAt: -1 }, "", "productID");
 });
 exports.findAllReportsByUser = findAllReportsByUser;
 // Get a specific  reports submitted by a  user

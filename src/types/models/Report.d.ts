@@ -1,4 +1,4 @@
-import   Document from 'mongoose';
+import  {Document} from 'mongoose';
 interface IReport extends Document {
     productID: mongoose.Types.ObjectId;
     userEmail: string;

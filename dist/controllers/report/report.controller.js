@@ -33,13 +33,27 @@ exports.getReportsByVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
     var _a;
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     if (!vendorEmail) {
-        throw new customError_1.default("user not found", 404);
+        throw new customError_1.default("User not authenticated", 401);
     }
-    const reports = yield (0, report_services_1.findReportsByVendor)(vendorEmail);
-    if (reports.length === 0) {
-        throw new customError_1.default("no reports  found!", 404);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const status = req.query.status; // Optional status filter
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, report_services_1.findReportsByVendor)(vendorEmail, page, limit, status);
+    if (data.length === 0) {
+        throw new customError_1.default(`No ${status} reports found!`, 404);
     }
-    res.status(200).json(reports);
+    res.status(200).json({
+        success: true,
+        message: "Reports fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    });
 }));
 exports.getReportsByProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { productId } = req.params;
@@ -81,8 +95,21 @@ exports.getReportsByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
-    const reports = yield (0, report_services_1.findAllReportsByUser)(userEmail);
-    res.status(200).json(reports);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, report_services_1.findAllReportsByUser)(userEmail, page, limit);
+    res.status(200).json({
+        success: true,
+        message: "Reports fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    });
 }));
 exports.getSingleReportByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

@@ -9,12 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const paginate = (model_1, filter_1, page_1, limit_1, ...args_1) => __awaiter(void 0, [model_1, filter_1, page_1, limit_1, ...args_1], void 0, function* (model, filter, page, limit, sort = {}, projection) {
+const paginate = (model_1, filter_1, page_1, limit_1, ...args_1) => __awaiter(void 0, [model_1, filter_1, page_1, limit_1, ...args_1], void 0, function* (model, filter, page, limit, sort = {}, projection, populate) {
     const skip = (page - 1) * limit;
-    const query = model.find(filter);
+    let query = model.find(filter);
     // Apply projection if provided
     if (projection) {
-        query.select(projection);
+        query = query.select(projection);
+    }
+    // Apply population if provided
+    if (populate) {
+        query = query.populate(populate);
     }
     const data = yield query.skip(skip).limit(limit).sort(sort).exec();
     const totalRecords = yield model.countDocuments(filter).exec();
