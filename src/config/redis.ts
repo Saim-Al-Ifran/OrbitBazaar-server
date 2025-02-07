@@ -1,18 +1,15 @@
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import dotenv from 'dotenv';
 
 dotenv.config();  
 
-const redisPort = process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : undefined;
+ 
+const redisClient = new Redis({
+  host: process.env.REDIS_HOST || "127.0.0.1",
+  port: Number(process.env.REDIS_PORT) || 6379,
+  password: process.env.REDIS_PASSWORD
+});
 
-// Create a Redis client
-const redisClient = createClient({
-    password: process.env.REDIS_PASSWORD,
-    socket: {
-      host: process.env.REDIS_HOST, 
-      port: redisPort, 
-    },
-  });
 
 // Event handlers for Redis connection
 redisClient.on('connect', () => {
@@ -23,16 +20,18 @@ redisClient.on('error', (err) => {
   console.error('❌ Redis error:', err);
 });
 
-// Async function to connect
-const connectToRedis = async () => {
+// Function to periodically check Redis health
+const pingRedis = async () => {
   try {
-    await redisClient.connect();
-    console.log('🎉 Redis client is ready');
+    const response = await redisClient.ping();
+    console.log('✅ Redis is alive:', response); // Should return "PONG"
   } catch (err) {
-    console.error('❌ Failed to connect to Redis:', err);
+    console.error('❌ Error pinging Redis:', err);
   }
 };
 
-connectToRedis();
+// Call pingRedis every 10 minutes (600000 ms)
+pingRedis();
+setInterval(pingRedis, 600000);
 
 export default redisClient;

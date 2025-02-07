@@ -16,6 +16,7 @@ exports.deleteCategory = exports.updateCategory = exports.addCategory = exports.
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const cache_1 = require("../../utils/cache");
 exports.findAllCategories = (0, TryCatch_1.TryCatch)((_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const categories = yield (0, category_services_1.getAllCategories)();
     res.status(200).json({
@@ -27,14 +28,21 @@ exports.findAllCategoriesForAdmin = (0, TryCatch_1.TryCatch)((req, res, _next) =
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search;
+    const cacheKey = `categories_page_${page}_limit_${limit}_search_${search || "all"}`;
+    const cachedCategories = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedCategories) {
+        return res.json(JSON.parse(cachedCategories));
+    }
     const query = search
-        ? { name: { $regex: search, $options: 'i' } }
+        ? { name: { $regex: search, $options: "i" } }
         : {};
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, category_services_1.getAllCategoriesForAdmin)(page, limit, query);
     if (data.length === 0) {
-        throw new customError_1.default('No categories data found!', 404);
+        throw new customError_1.default("No categories data found!", 404);
     }
-    res.status(200).json({
+    // ✅ Return the response after setting cache
+    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
+    return res.status(200).json({
         success: true,
         message: "Categories fetched successfully.",
         data,
@@ -43,17 +51,18 @@ exports.findAllCategoriesForAdmin = (0, TryCatch_1.TryCatch)((req, res, _next) =
             totalPages,
             prevPage,
             nextPage,
-            currentPage: page
-        }
+            currentPage: page,
+        },
     });
 }));
 exports.addCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { body, file } = req;
     if (!file) {
-        throw new customError_1.default('Image file is required.', 404);
+        throw new customError_1.default("Image file is required.", 404);
     }
     const category = yield (0, category_services_1.createCategory)(body, file);
-    res.status(201).json({
+    yield (0, cache_1.deleteCacheByPattern)("categories_page_*");
+    return res.status(201).json({
         success: true,
         message: "Category created successfully.",
         data: category,
@@ -75,6 +84,7 @@ exports.updateCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         updates.image = newImageUrl;
     }
     const updatedCategory = yield (0, category_services_1.updateCategoryInDb)(id, updates);
+    yield (0, cache_1.deleteCacheByPattern)("categories_page_*");
     res.status(200).json({
         success: true,
         message: "Category updated successfully.",
@@ -94,6 +104,7 @@ exports.deleteCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     }
     // Delete the category from the database
     yield (0, category_services_1.deleteCategoryFromDb)(id);
+    yield (0, cache_1.deleteCacheByPattern)("categories_page_*");
     res.status(200).json({
         success: true,
         message: "Category deleted successfully.",

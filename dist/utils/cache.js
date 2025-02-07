@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.delCache = exports.setCache = exports.getCache = void 0;
+exports.deleteCacheByPattern = exports.deleteCache = exports.setCache = exports.getCache = void 0;
 const redis_1 = __importDefault(require("../config/redis"));
 // Function to get a cached value
 const getCache = (key) => __awaiter(void 0, void 0, void 0, function* () {
@@ -28,7 +28,7 @@ exports.getCache = getCache;
 // Function to set a cached value with an expiration
 const setCache = (key, value, ttl) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield redis_1.default.setEx(key, ttl, JSON.stringify(value));
+        yield redis_1.default.setex(key, ttl, JSON.stringify(value));
     }
     catch (err) {
         console.error(`Error setting cache for key: ${key}`, err);
@@ -36,7 +36,7 @@ const setCache = (key, value, ttl) => __awaiter(void 0, void 0, void 0, function
 });
 exports.setCache = setCache;
 // Function to delete a cached key
-const delCache = (key) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteCache = (key) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield redis_1.default.del(key);
     }
@@ -44,4 +44,16 @@ const delCache = (key) => __awaiter(void 0, void 0, void 0, function* () {
         console.error(`Error deleting cache for key: ${key}`, err);
     }
 });
-exports.delCache = delCache;
+exports.deleteCache = deleteCache;
+const deleteCacheByPattern = (pattern) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const keys = yield redis_1.default.keys(pattern); // ✅ Find all matching keys
+        if (keys.length > 0) {
+            yield redis_1.default.del(...keys); // ✅ Delete all found keys
+        }
+    }
+    catch (err) {
+        console.error(`Error deleting cache for pattern: ${pattern}`, err);
+    }
+});
+exports.deleteCacheByPattern = deleteCacheByPattern;
