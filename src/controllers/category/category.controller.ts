@@ -65,7 +65,17 @@ export const findAllCategoriesForAdmin = TryCatch(
   }
 );
 
-
+export const getCategoryById = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+    const category = await findCategoryById(id);
+    res.status(200).json({
+      success: true,
+      message: "Category fetched successfully.",
+      data: category,
+    });
+  }
+);
 
 export const addCategory = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {

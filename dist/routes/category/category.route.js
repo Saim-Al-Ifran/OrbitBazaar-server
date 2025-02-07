@@ -11,6 +11,7 @@ const uploadFile_1 = __importDefault(require("../../middlewares/uploadFile/uploa
 const router = express_1.default.Router();
 router.get('/categories', category_controller_1.findAllCategories);
 router.get('/admin/categories', authenticate_1.default, authorizeAdmin_1.default, category_controller_1.findAllCategoriesForAdmin);
+router.get('/admin/categories/:id', authenticate_1.default, authorizeAdmin_1.default, category_controller_1.getCategoryById);
 router.post('/admin/categories', authenticate_1.default, authorizeAdmin_1.default, uploadFile_1.default.single('image'), category_controller_1.addCategory);
 router.put('/admin/categories/:id', authenticate_1.default, authorizeAdmin_1.default, uploadFile_1.default.single('image'), category_controller_1.updateCategory);
 router.delete('/admin/categories/:id', authenticate_1.default, authorizeAdmin_1.default, category_controller_1.deleteCategory);

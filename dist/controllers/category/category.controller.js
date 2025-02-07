@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCategory = exports.updateCategory = exports.addCategory = exports.findAllCategoriesForAdmin = exports.findAllCategories = void 0;
+exports.deleteCategory = exports.updateCategory = exports.addCategory = exports.getCategoryById = exports.findAllCategoriesForAdmin = exports.findAllCategories = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -53,6 +53,15 @@ exports.findAllCategoriesForAdmin = (0, TryCatch_1.TryCatch)((req, res, _next) =
             nextPage,
             currentPage: page,
         },
+    });
+}));
+exports.getCategoryById = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const category = yield (0, category_services_1.findCategoryById)(id);
+    res.status(200).json({
+        success: true,
+        message: "Category fetched successfully.",
+        data: category,
     });
 }));
 exports.addCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
