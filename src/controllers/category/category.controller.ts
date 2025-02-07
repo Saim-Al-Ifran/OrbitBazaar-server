@@ -11,7 +11,7 @@ import {
   uploadCategoryImage
 } from "../../services/category/category.services";
 import CustomError from "../../utils/errors/customError";
-import { deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
+import { deleteCache, deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
 
 export const findAllCategories = TryCatch(
     async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
@@ -68,7 +68,16 @@ export const findAllCategoriesForAdmin = TryCatch(
 export const getCategoryById = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
+    const cacheKey = `category_${id}`;
+
+    // Check cache first
+    const cachedCategory = await getCache(cacheKey);
+    if (cachedCategory) {
+      return res.status(200).json(JSON.parse(cachedCategory));
+    }
     const category = await findCategoryById(id);
+    await setCache(cacheKey, {data: category}, 60);
+    
     res.status(200).json({
       success: true,
       message: "Category fetched successfully.",
@@ -101,7 +110,7 @@ export const updateCategory  = TryCatch(
     const { id } = req.params;
     const updates = req.body;
     const file = req.file;
- 
+    const cacheKey = `category_${id}`;
     const category = await findCategoryById(id);
     if (!category) {
       throw new CustomError("Category not found.", 404);
@@ -118,6 +127,8 @@ export const updateCategory  = TryCatch(
 
     const updatedCategory = await updateCategoryInDb(id, updates);
     await deleteCacheByPattern("categories_page_*");
+    await deleteCache(cacheKey);
+
     res.status(200).json({
       success: true,
       message: "Category updated successfully.",
@@ -129,8 +140,8 @@ export const updateCategory  = TryCatch(
 export const deleteCategory = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
+    const cacheKey = `category_${id}`;
 
-    // Check if category exists
     const category = await findCategoryById(id);
     if (!category) {
       throw new CustomError("Category not found.", 404);
@@ -144,6 +155,7 @@ export const deleteCategory = TryCatch(
     // Delete the category from the database
     await deleteCategoryFromDb(id);
     await deleteCacheByPattern("categories_page_*");
+    await deleteCache(cacheKey);
     res.status(200).json({
       success: true,
       message: "Category deleted successfully.",

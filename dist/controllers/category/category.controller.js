@@ -57,7 +57,14 @@ exports.findAllCategoriesForAdmin = (0, TryCatch_1.TryCatch)((req, res, _next) =
 }));
 exports.getCategoryById = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
+    const cacheKey = `category_${id}`;
+    // Check cache first
+    const cachedCategory = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedCategory) {
+        return res.status(200).json(JSON.parse(cachedCategory));
+    }
     const category = yield (0, category_services_1.findCategoryById)(id);
+    yield (0, cache_1.setCache)(cacheKey, { data: category }, 60);
     res.status(200).json({
         success: true,
         message: "Category fetched successfully.",
@@ -81,6 +88,7 @@ exports.updateCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     const { id } = req.params;
     const updates = req.body;
     const file = req.file;
+    const cacheKey = `category_${id}`;
     const category = yield (0, category_services_1.findCategoryById)(id);
     if (!category) {
         throw new customError_1.default("Category not found.", 404);
@@ -94,6 +102,7 @@ exports.updateCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     }
     const updatedCategory = yield (0, category_services_1.updateCategoryInDb)(id, updates);
     yield (0, cache_1.deleteCacheByPattern)("categories_page_*");
+    yield (0, cache_1.deleteCache)(cacheKey);
     res.status(200).json({
         success: true,
         message: "Category updated successfully.",
@@ -102,7 +111,7 @@ exports.updateCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
 }));
 exports.deleteCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    // Check if category exists
+    const cacheKey = `category_${id}`;
     const category = yield (0, category_services_1.findCategoryById)(id);
     if (!category) {
         throw new customError_1.default("Category not found.", 404);
@@ -114,6 +123,7 @@ exports.deleteCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     // Delete the category from the database
     yield (0, category_services_1.deleteCategoryFromDb)(id);
     yield (0, cache_1.deleteCacheByPattern)("categories_page_*");
+    yield (0, cache_1.deleteCache)(cacheKey);
     res.status(200).json({
         success: true,
         message: "Category deleted successfully.",
