@@ -5,6 +5,7 @@ import {
     deleteReview,
     editReview,
     getProductReviews,
+    getUserReview,
     getUserReviews
 } from '../../controllers/review/review.controller';
  
@@ -15,8 +16,9 @@ const router = express.Router();
 router.post('/reviews', authenticate, addReview);
 router.get('/reviews/user',  authenticate, getUserReviews );
 router.get('/reviews/:id', getProductReviews);
-router.put('/reviews/:id', authenticate, editReview);
-router.delete('/reviews/:id',  authenticate, deleteReview);
+router.get('/reviews/user/:reviewId', authenticate, getUserReview);
+router.put('/reviews/user/:reviewId', authenticate, editReview);
+router.delete('/reviews/user/:reviewId',  authenticate, deleteReview);
 
 
 export default router;

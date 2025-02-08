@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findUserReviews = exports.findProductReviews = exports.deleteReviewInDb = exports.updateReview = exports.createReview = exports.recalculateProductRating = void 0;
+exports.findUserReview = exports.findUserReviews = exports.findProductReviews = exports.deleteReviewInDb = exports.updateReview = exports.createReview = exports.recalculateProductRating = void 0;
 const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
 const Review_1 = __importDefault(require("../../models/Review"));
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const paginate_1 = __importDefault(require("../../utils/paginate"));
 // utitly function to calculate rating
 const recalculateProductRating = (productID) => __awaiter(void 0, void 0, void 0, function* () {
     const reviews = yield Review_1.default.find({ productID });
@@ -78,12 +79,18 @@ const deleteReviewInDb = (reviewID, userEmail) => __awaiter(void 0, void 0, void
 });
 exports.deleteReviewInDb = deleteReviewInDb;
 // Retrieves all reviews for a specific product.
-const findProductReviews = (productID) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Review_1.default.find({ productID: productID }).select('rating comment createdAt');
+const findProductReviews = (productID_1, page_1, limit_1, ...args_1) => __awaiter(void 0, [productID_1, page_1, limit_1, ...args_1], void 0, function* (productID, page, limit, sortField = 'createdAt', sortOrder = 'dsc') {
+    const sort = { [sortField]: sortOrder === 'asc' ? 1 : -1 };
+    return yield (0, paginate_1.default)(Review_1.default, { productID }, page, limit, sort, 'rating comment createdAt');
 });
 exports.findProductReviews = findProductReviews;
-//Retrieves all reviews by a specific user.
-const findUserReviews = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Review_1.default.find({ userEmail });
+// Retrieves all reviews by a specific user.
+const findUserReviews = (userEmail_1, page_1, limit_1, ...args_1) => __awaiter(void 0, [userEmail_1, page_1, limit_1, ...args_1], void 0, function* (userEmail, page, limit, sortField = 'createdAt', sortOrder = 'dsc') {
+    const sort = { [sortField]: sortOrder === 'asc' ? 1 : -1 };
+    return yield (0, paginate_1.default)(Review_1.default, { userEmail }, page, limit, sort, 'rating comment createdAt');
 });
 exports.findUserReviews = findUserReviews;
+const findUserReview = (userEmail, reviewId) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Review_1.default.findOne({ userEmail, _id: reviewId });
+});
+exports.findUserReview = findUserReview;

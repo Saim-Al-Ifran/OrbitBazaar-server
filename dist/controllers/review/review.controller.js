@@ -12,10 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserReviews = exports.deleteReview = exports.editReview = exports.getProductReviews = exports.addReview = void 0;
+exports.getUserReview = exports.getUserReviews = exports.deleteReview = exports.editReview = exports.getProductReviews = exports.addReview = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const review_services_1 = require("../../services/review/review.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const cache_1 = require("../../utils/cache");
 exports.addReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const { productId, rating, comment } = req.body;
@@ -28,42 +29,116 @@ exports.addReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void
 }));
 exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const reviews = yield (0, review_services_1.findProductReviews)(id);
-    if (reviews.length === 0) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const sortField = req.query.sortField || 'createdAt';
+    const sortOrder = req.query.sortOrder || 'dsc';
+    // caching review data
+    const cacheKey = `reviews_page_${page}_limit_${limit}_${sortField}_${sortOrder}_id_${id}`;
+    const cachedReviews = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedReviews) {
+        return res.json(JSON.parse(cachedReviews));
+    }
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, review_services_1.findProductReviews)(id, page, limit, sortField, sortOrder);
+    if (data.length === 0) {
         throw new customError_1.default('No reviews found', 404);
     }
-    res.status(200).json({ reviews });
+    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
+    return res.status(200).json({
+        success: true,
+        message: "Reviews fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    });
 }));
 exports.editReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const { id } = req.params;
+    const { reviewId } = req.params;
     const { rating, comment } = req.body;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const cacheKey = `reviews_${reviewId}_${userEmail}`;
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
-    const review = yield (0, review_services_1.updateReview)(id, userEmail, { rating, comment });
-    res.status(200).json({ message: 'Review updated successfully', review });
+    const review = yield (0, review_services_1.updateReview)(reviewId, userEmail, { rating, comment });
+    // delete from cache
+    yield (0, cache_1.deleteCacheByPattern)("reviews_page_*");
+    yield (0, cache_1.deleteCache)(cacheKey);
+    res.status(200).json({ message: 'Revsiew updated successfully', review });
 }));
 exports.deleteReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const { id } = req.params;
+    const { reviewId } = req.params;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const cacheKey = `reviews_${reviewId}_${userEmail}`;
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
-    yield (0, review_services_1.deleteReviewInDb)(id, userEmail);
+    yield (0, review_services_1.deleteReviewInDb)(reviewId, userEmail);
+    // delete from cache
+    yield (0, cache_1.deleteCacheByPattern)("reviews_page_*");
+    yield (0, cache_1.deleteCache)(cacheKey);
     res.status(200).json({ message: 'Review deleted successfully' });
 }));
 exports.getUserReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     if (!userEmail) {
+        throw new customError_1.default("User not found", 404);
+    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const sortField = req.query.sortField || 'createdAt';
+    const sortOrder = req.query.sortOrder || 'dsc';
+    const cacheKey = `reviews_page_${page}_limit_${limit}_${sortField}_${sortOrder}_user_${userEmail}`;
+    const cachedReviews = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedReviews) {
+        return res.json(JSON.parse(cachedReviews));
+    }
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, review_services_1.findUserReviews)(userEmail, page, limit, sortField, sortOrder);
+    if (data.length === 0) {
+        throw new customError_1.default('No reviews found', 404);
+    }
+    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
+    return res.status(200).json({
+        success: true,
+        message: "Reviews fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    });
+}));
+exports.getUserReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { reviewId } = req.params;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const cacheKey = `reviews_${reviewId}_${userEmail}`;
+    const cachedReview = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedReview) {
+        return res.json(JSON.parse(cachedReview));
+    }
+    if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
-    const reviews = yield (0, review_services_1.findUserReviews)(userEmail);
-    if (reviews.length === 0) {
-        throw new customError_1.default("No reviews found", 404);
+    const review = yield (0, review_services_1.findUserReview)(userEmail, reviewId);
+    if (!review) {
+        throw new customError_1.default("Review not found", 404);
     }
-    res.status(200).json({ reviews });
+    yield (0, cache_1.setCache)(cacheKey, { review }, 60);
+    return res.json({
+        success: true,
+        message: "Review fetched successfully",
+        data: review
+    });
 }));
