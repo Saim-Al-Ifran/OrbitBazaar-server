@@ -32,7 +32,7 @@ export const getProductReviews = TryCatch(
     }
 ) 
 export const editReview = TryCatch(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, _next: NextFunction) => {
         const { id } = req.params;
         const { rating, comment } = req.body;
         const userEmail = req.user?.email;
@@ -56,9 +56,8 @@ export const deleteReview = TryCatch(
     }
 ) 
 export const getUserReviews = TryCatch(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, _next: NextFunction) => {
         const userEmail = req.user?.email;
-        console.log("helooo");
         
         if(!userEmail){
             throw new CustomError("user not found", 404);

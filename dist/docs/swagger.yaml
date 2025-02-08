@@ -2155,7 +2155,6 @@ paths:
           example: "60c72b2f9a10f3a8c5f8a1c5"
         - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/sortByParam'
         - $ref: '#/components/parameters/sortTypeParam'
       responses:
         '200':
