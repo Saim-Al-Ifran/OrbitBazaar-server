@@ -2208,68 +2208,7 @@ paths:
           description: Not Found - Product not found for the given ID.
         '500':
           description: Internal Server Error - Error occurred while fetching reviews.
-    put:
-      tags:
-        - Review
-      summary: Update a user's review
-      description:  Allows a user to update their own review by its ID. This endpoint also recalculates the product's overall rating based on the updated review.
-      security:
-        - BearerAuth: []   
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                reviewId:
-                  type: string
-                  description: The ID of the review to be updated.
-                  example: "60c72b2f9a10f3a8c5f8a1c9"
-                rating:
-                  type: number
-                  format: float
-                  description: The updated rating value (e.g., 1 to 5).
-                  example: 4.5
-                comment:
-                  type: string
-                  description: The updated comment for the review.
-                  example: "Updated review: Still a great product!"
-      responses:
-        '200':
-          description: Review updated successfully, and product ratings recalculated.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Review updated successfully."
-                  review:
-                    type: object
-                    properties:
-                      reviewId:
-                        type: string
-                        example: "60c72b2f9a10f3a8c5f8a1c9"
-                      rating:
-                        type: number
-                        example: 4.5
-                      comment:
-                        type: string
-                        example: "Updated review: Still a great product!"
-                      updatedAt:
-                        type: string
-                        format: date-time
-                        example: "2024-12-04T15:00:00Z"
-        '400':
-          description: Bad Request - Invalid input data or missing required fields.
-        '404':
-          description: Not Found - Review with the specified ID not found.
-        '403':
-          description: Forbidden - User not authorized to update this review.
-        '500':
-          description: Internal Server Error - Error occurred while updating the review or recalculating ratings.
+
   /reviews/user:
     get:
       tags:
@@ -2342,6 +2281,117 @@ paths:
         '500':
           description: Internal Server Error - Error occurred while fetching reviews.
   /reviews/user/{reviewId}:
+    put:
+      tags:
+        - Review
+      summary: Update a user's review
+      description:  Allows a user to update their own review by its ID. This endpoint also recalculates the product's overall rating based on the updated review.
+      security:
+        - BearerAuth: []   
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reviewId:
+                  type: string
+                  description: The ID of the review to be updated.
+                  example: "60c72b2f9a10f3a8c5f8a1c9"
+                rating:
+                  type: number
+                  format: float
+                  description: The updated rating value (e.g., 1 to 5).
+                  example: 4.5
+                comment:
+                  type: string
+                  description: The updated comment for the review.
+                  example: "Updated review: Still a great product!"
+      responses:
+        '200':
+          description: Review updated successfully, and product ratings recalculated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review updated successfully."
+                  review:
+                    type: object
+                    properties:
+                      reviewId:
+                        type: string
+                        example: "60c72b2f9a10f3a8c5f8a1c9"
+                      rating:
+                        type: number
+                        example: 4.5
+                      comment:
+                        type: string
+                        example: "Updated review: Still a great product!"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2024-12-04T15:00:00Z"
+        '400':
+          description: Bad Request - Invalid input data or missing required fields.
+        '404':
+          description: Not Found - Review with the specified ID not found.
+        '403':
+          description: Forbidden - User not authorized to update this review.
+        '500':
+          description: Internal Server Error - Error occurred while updating the review or recalculating ratings.
+    get:
+      tags:
+        - Review
+      summary: Get specific data of user reivew
+      description:  Allows a user retrieve their own review by its ID.
+      security:
+        - BearerAuth: []   
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          description: The ID of the review  
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Review  fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review retrieve successfully."
+                  review:
+                    type: object
+                    properties:
+                      reviewId:
+                        type: string
+                        example: "60c72b2f9a10f3a8c5f8a1c9"
+                      rating:
+                        type: number
+                        example: 4.5
+                      comment:
+                        type: string
+                        example: "Updated review: Still a great product!"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2024-12-04T15:00:00Z"
+        '400':
+          description: Bad Request - Invalid input data or missing required fields.
+        '404':
+          description: Not Found - Review with the specified ID not found.
+        '403':
+          description: Forbidden - User not authorized to update this review.
+        '500':
+          description: Internal Server Error - Error occurred while updating the review or recalculating ratings.
     delete:
       summary: Delete a user's review
       description: Allows a user to delete their own review by its ID. This action also recalculates the product's overall rating to reflect the removal of the review.
