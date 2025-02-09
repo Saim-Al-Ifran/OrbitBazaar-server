@@ -16,6 +16,7 @@ exports.removeAllProductFromWishlist = exports.removeProductFromWishlist = expor
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const wishlist_services_1 = require("../../services/wishlist/wishlist.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const cache_1 = require("../../utils/cache");
 exports.addToWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const { productId } = req.body;
@@ -24,6 +25,7 @@ exports.addToWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
         throw new customError_1.default("user not found!", 404);
     }
     const wishlist = yield (0, wishlist_services_1.createWishlist)(userEmail, productId);
+    yield (0, cache_1.deleteCache)(`wishlist_${userEmail}`);
     res.status(200).json({ message: "Product added to wishlist", wishlist });
 }));
 exports.getAllWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -32,7 +34,16 @@ exports.getAllWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     if (!userEmail) {
         throw new customError_1.default("user not found!", 404);
     }
+    const cachedKey = `wishlist_${userEmail}`;
+    const cachedWishlist = yield (0, cache_1.getCache)(cachedKey);
+    if (cachedWishlist) {
+        return res.json(JSON.parse(cachedWishlist));
+    }
     const wishlist = yield (0, wishlist_services_1.findWishlist)(userEmail);
+    if (!wishlist) {
+        throw new customError_1.default("No wishlist found!", 404);
+    }
+    yield (0, cache_1.setCache)(cachedKey, wishlist, 60);
     res.status(200).json({ wishlist });
 }));
 exports.removeProductFromWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -43,6 +54,7 @@ exports.removeProductFromWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) =
         throw new customError_1.default("user not found!", 404);
     }
     const updatedWishlist = yield (0, wishlist_services_1.deleteProductFromWishlist)(userEmail, productId);
+    yield (0, cache_1.deleteCache)(`wishlist_${userEmail}`);
     res.status(200).json({ message: "Product removed from wishlist", wishlist: updatedWishlist });
 }));
 exports.removeAllProductFromWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -52,5 +64,6 @@ exports.removeAllProductFromWishlist = (0, TryCatch_1.TryCatch)((req, res, _next
         throw new customError_1.default("user not found!", 404);
     }
     yield (0, wishlist_services_1.deleteAllWishlist)(userEmail);
+    yield (0, cache_1.deleteCache)(`wishlist_${userEmail}`);
     res.status(200).json({ message: "Wishlist cleared" });
 }));

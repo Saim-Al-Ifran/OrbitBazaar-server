@@ -7,6 +7,7 @@ import {
     findWishlist
 } from "../../services/wishlist/wishlist.services";
 import CustomError from "../../utils/errors/customError";
+import { deleteCache, getCache, setCache } from "../../utils/cache";
 
 export const addToWishlist =  TryCatch(
     async(req:Request,res:Response,_next:NextFunction)=>{
@@ -16,6 +17,7 @@ export const addToWishlist =  TryCatch(
             throw new CustomError("user not found!", 404);
         }
         const wishlist = await createWishlist(userEmail, productId );
+        await deleteCache(`wishlist_${userEmail}`);
         res.status(200).json({ message: "Product added to wishlist", wishlist });
     }
 )
@@ -25,7 +27,18 @@ export const getAllWishlist =  TryCatch(
         if(!userEmail){
             throw new CustomError("user not found!", 404);
         }
+        const cachedKey = `wishlist_${userEmail}`;
+        const cachedWishlist = await getCache(cachedKey);
+        if(cachedWishlist){
+            return res.json(JSON.parse(cachedWishlist));
+        }
+
         const wishlist = await findWishlist(userEmail);
+        if(!wishlist){
+            throw new CustomError("No wishlist found!",404);
+        }
+        await setCache(cachedKey,wishlist,60);
+
         res.status(200).json({ wishlist });
     }
 )
@@ -37,6 +50,7 @@ export const removeProductFromWishlist =  TryCatch(
             throw new CustomError("user not found!", 404);
         }
         const updatedWishlist = await deleteProductFromWishlist(userEmail, productId);
+        await deleteCache(`wishlist_${userEmail}`);
         res.status(200).json({ message: "Product removed from wishlist", wishlist: updatedWishlist });
     
     }
@@ -48,6 +62,7 @@ export const removeAllProductFromWishlist =  TryCatch(
             throw new CustomError("user not found!", 404);
         }
         await  deleteAllWishlist(userEmail);
+        await deleteCache(`wishlist_${userEmail}`);
         res.status(200).json({ message: "Wishlist cleared" });
     
     }
