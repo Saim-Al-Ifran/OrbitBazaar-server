@@ -23,7 +23,10 @@ exports.addOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
+    const cachedKey = `orders_${userEmail}`;
     const order = yield (0, order_services_1.createOrder)(Object.assign({ userEmail }, req.body));
+    yield (0, cache_1.deleteCache)(cachedKey);
+    yield (0, cache_1.deleteCacheByPattern)("orders_*");
     res.status(201).json({ message: 'Order placed successfully', orderId: order.id });
 }));
 exports.getUserOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,10 +51,16 @@ exports.getUserSingleOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
+    const cachedKey = `orders_${userEmail}_${orderId}`;
+    const cachedOrders = yield (0, cache_1.getCache)(cachedKey);
+    if (cachedOrders) {
+        return res.json(JSON.parse(cachedOrders));
+    }
     const order = yield (0, order_services_1.findOrderById)(orderId, userEmail);
     if (!order) {
         throw new customError_1.default("Order not found", 404);
     }
+    yield (0, cache_1.setCache)(cachedKey, order, 60);
     res.json({ message: 'Order retrieve successfully', order });
 }));
 // Update order status (Only vendor can update)
@@ -63,10 +72,13 @@ exports.changeOrderStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __awai
     if (!vendorEmail) {
         throw new customError_1.default("user not found", 404);
     }
+    const cachedKey = `orders_${vendorEmail}`;
     const updatedOrder = yield (0, order_services_1.updateOrderStatus)(orderId, vendorEmail, status);
     if (!updatedOrder) {
         throw new customError_1.default("Not authorized to update this order", 403);
     }
+    yield (0, cache_1.deleteCache)(cachedKey);
+    yield (0, cache_1.deleteCacheByPattern)("orders_*");
     res.json(updatedOrder);
 }));
 // Get vendor orders
@@ -76,6 +88,12 @@ exports.vendorOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
     if (!vendorEmail) {
         throw new customError_1.default("user not found", 404);
     }
+    const cachedKey = `orders_${vendorEmail}`;
+    const cachedOrders = yield (0, cache_1.getCache)(cachedKey);
+    if (cachedOrders) {
+        return res.json(JSON.parse(cachedOrders));
+    }
     const orders = yield (0, order_services_1.getVendorOrders)(vendorEmail);
+    yield (0, cache_1.setCache)(cachedKey, orders, 60);
     res.json(orders);
 }));

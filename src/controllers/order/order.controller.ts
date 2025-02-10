@@ -8,7 +8,7 @@ import {
   updateOrderStatus
 } from "../../services/order/order.services";
 import CustomError from "../../utils/errors/customError";
-import { getCache, setCache } from "../../utils/cache";
+import { deleteCache, deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
 
 export const addOrder = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
@@ -16,7 +16,10 @@ export const addOrder = TryCatch(
         if(!userEmail){
             throw new CustomError("user not found", 404);
         }   
+        const cachedKey = `orders_${userEmail}`;
         const order = await createOrder({ userEmail, ...req.body });
+        await deleteCache(cachedKey);
+        await deleteCacheByPattern("orders_*");
         res.status(201).json({message:'Order placed successfully',orderId:order.id});
     }
   );
@@ -44,12 +47,20 @@ export const getUserSingleOrder = TryCatch(
       const userEmail = req.user?.email;
       if(!userEmail){
           throw new CustomError("user not found", 404);
+      }
+ 
+      const cachedKey = `orders_${userEmail}_${orderId}`;
+      const cachedOrders = await getCache(cachedKey);
+      if(cachedOrders){
+        return res.json(JSON.parse(cachedOrders));
       } 
+
       const order = await findOrderById(orderId,userEmail);
 
       if (!order) {
         throw new CustomError("Order not found", 404);
       }
+      await setCache(cachedKey,order,60);
       res.json({message:'Order retrieve successfully',order});
     }
   );
@@ -63,11 +74,14 @@ export const getUserSingleOrder = TryCatch(
       if(!vendorEmail){
           throw new CustomError("user not found", 404);
       } 
+      const cachedKey = `orders_${vendorEmail}`;
       const updatedOrder = await updateOrderStatus(orderId, vendorEmail, status);
       if (!updatedOrder){
         throw new CustomError("Not authorized to update this order",403);
         
       } 
+      await deleteCache(cachedKey);
+      await deleteCacheByPattern("orders_*");
       res.json(updatedOrder);
     }
   );
@@ -80,7 +94,13 @@ export const getUserSingleOrder = TryCatch(
       if(!vendorEmail){
           throw new CustomError("user not found", 404);
       } 
+      const cachedKey = `orders_${vendorEmail}`;
+      const cachedOrders = await getCache(cachedKey);
+      if(cachedOrders){
+        return res.json(JSON.parse(cachedOrders));
+      }
       const orders = await getVendorOrders(vendorEmail);
+      await setCache(cachedKey,orders,60);
       res.json(orders);
     }
   );
