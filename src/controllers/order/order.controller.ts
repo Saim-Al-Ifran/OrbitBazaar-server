@@ -3,11 +3,12 @@ import { TryCatch } from "../../middlewares/TryCatch";
 import {
   createOrder,
   findOrdersByUserEmail,
-  getOrderById,
+  findOrderById,
   getVendorOrders,
   updateOrderStatus
 } from "../../services/order/order.services";
 import CustomError from "../../utils/errors/customError";
+import { getCache, setCache } from "../../utils/cache";
 
 export const addOrder = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
@@ -26,17 +27,30 @@ export const getUserOrders = TryCatch(
         if(!userEmail){
             throw new CustomError("user not found", 404);
         } 
-      const orders = await findOrdersByUserEmail(userEmail);
-      res.json(orders);
+        const cachedKey = `orders_${userEmail}`;
+        const cachedOrders = await getCache(cachedKey);
+        if(cachedOrders){
+          return res.json(JSON.parse(cachedOrders));
+        }
+        const orders = await findOrdersByUserEmail(userEmail);
+        await setCache(cachedKey,orders,60);
+        res.json(orders);
     }
   );
 
-export const getSingleOrder = TryCatch(
+export const getUserSingleOrder = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
       const { orderId } = req.params;
-      const order = await getOrderById(orderId);
-      if (!order) return res.status(404).json({ message: 'Order not found' });
-      res.json(order);
+      const userEmail = req.user?.email;
+      if(!userEmail){
+          throw new CustomError("user not found", 404);
+      } 
+      const order = await findOrderById(orderId,userEmail);
+
+      if (!order) {
+        throw new CustomError("Order not found", 404);
+      }
+      res.json({message:'Order retrieve successfully',order});
     }
   );
 

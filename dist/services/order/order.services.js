@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getVendorOrders = exports.getAllOrders = exports.cancelOrder = exports.updateOrderStatus = exports.getOrderById = exports.findOrdersByUserEmail = exports.createOrder = void 0;
+exports.getVendorOrders = exports.getAllOrders = exports.cancelOrder = exports.updateOrderStatus = exports.findOrderById = exports.findOrdersByUserEmail = exports.createOrder = void 0;
 const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
 // Create a new order
@@ -27,10 +27,11 @@ const findOrdersByUserEmail = (userEmail) => __awaiter(void 0, void 0, void 0, f
 });
 exports.findOrdersByUserEmail = findOrdersByUserEmail;
 // Get order by ID
-const getOrderById = (orderId) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Order_1.default.findById(orderId).populate('items.productID');
+const findOrderById = (orderId, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log({ orderId, userEmail });
+    return yield Order_1.default.findOne({ _id: orderId, userEmail }).populate('items.productID');
 });
-exports.getOrderById = getOrderById;
+exports.findOrderById = findOrderById;
 // Update order status (only if vendor owns the product)
 const updateOrderStatus = (orderId, vendorEmail, status) => __awaiter(void 0, void 0, void 0, function* () {
     const order = yield Order_1.default.findById(orderId).populate('items.productID');

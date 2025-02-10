@@ -12,10 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.vendorOrders = exports.changeOrderStatus = exports.getSingleOrder = exports.getUserOrders = exports.addOrder = void 0;
+exports.vendorOrders = exports.changeOrderStatus = exports.getUserSingleOrder = exports.getUserOrders = exports.addOrder = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const order_services_1 = require("../../services/order/order.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const cache_1 = require("../../utils/cache");
 exports.addOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
@@ -31,15 +32,27 @@ exports.getUserOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     if (!userEmail) {
         throw new customError_1.default("user not found", 404);
     }
+    const cachedKey = `orders_${userEmail}`;
+    const cachedOrders = yield (0, cache_1.getCache)(cachedKey);
+    if (cachedOrders) {
+        return res.json(JSON.parse(cachedOrders));
+    }
     const orders = yield (0, order_services_1.findOrdersByUserEmail)(userEmail);
+    yield (0, cache_1.setCache)(cachedKey, orders, 60);
     res.json(orders);
 }));
-exports.getSingleOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getUserSingleOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const { orderId } = req.params;
-    const order = yield (0, order_services_1.getOrderById)(orderId);
-    if (!order)
-        return res.status(404).json({ message: 'Order not found' });
-    res.json(order);
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default("user not found", 404);
+    }
+    const order = yield (0, order_services_1.findOrderById)(orderId, userEmail);
+    if (!order) {
+        throw new customError_1.default("Order not found", 404);
+    }
+    res.json({ message: 'Order retrieve successfully', order });
 }));
 // Update order status (Only vendor can update)
 exports.changeOrderStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {

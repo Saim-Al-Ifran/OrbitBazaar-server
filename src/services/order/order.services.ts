@@ -15,8 +15,10 @@ export const findOrdersByUserEmail = async (userEmail: string) => {
   };
 
 // Get order by ID
-export const getOrderById = async (orderId: string) => {
-    return await Order.findById(orderId).populate('items.productID');
+export const findOrderById = async (orderId: string,userEmail:string) => {
+    console.log({orderId,userEmail});
+    
+    return await Order.findOne({_id:orderId,userEmail}).populate('items.productID');
   };
 
   // Update order status (only if vendor owns the product)

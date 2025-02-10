@@ -11,6 +11,6 @@ const router = express_1.default.Router();
 router.post('/orders', authenticate_1.default, order_controller_1.addOrder);
 router.get('/orders/user', authenticate_1.default, order_controller_1.getUserOrders);
 router.get('/orders/vendor', authenticate_1.default, authorizeVendor_1.default, order_controller_1.vendorOrders);
-router.get('/orders/:orderId', order_controller_1.getSingleOrder);
+router.get('/orders/user/:orderId', authenticate_1.default, order_controller_1.getUserSingleOrder);
 router.patch('/orders/:orderId', authenticate_1.default, authorizeVendor_1.default, order_controller_1.changeOrderStatus);
 exports.default = router;
