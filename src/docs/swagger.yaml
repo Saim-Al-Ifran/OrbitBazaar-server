@@ -3638,7 +3638,7 @@ paths:
                   message:
                     type: string
                     example: "An error occurred while retrieving the orders."
-  /orders/{orderId}:
+  /orders/vendor/{orderId}:
    patch:
       summary: Update the status of an order(vendor)
       description: Allows a vendor to update the status of a specific order by its ID.
@@ -3709,8 +3709,9 @@ paths:
  
         500:
           description: Server error
+  /orders/user/{orderId}:
    get:
-      summary: Retrive a specific order data 
+      summary: Retrive a specific order data of user
       description: Allows to get  a specific order by its ID.
       tags:
         - Order
