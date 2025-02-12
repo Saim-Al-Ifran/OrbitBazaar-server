@@ -112,6 +112,10 @@ export const getReportsByUser  = TryCatch(
         const limit = parseInt(req.query.limit as string) || 10;
     
         const { data, totalRecords, totalPages, prevPage, nextPage } = await findAllReportsByUser(userEmail, page, limit);
+
+        if(data.length === 0){
+           throw new CustomError("No reports found!!",404);
+        }
      
         res.status(200).json({
           success: true,

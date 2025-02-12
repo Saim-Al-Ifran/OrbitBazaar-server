@@ -98,6 +98,9 @@ exports.getReportsByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, report_services_1.findAllReportsByUser)(userEmail, page, limit);
+    if (data.length === 0) {
+        throw new customError_1.default("No reports found!!", 404);
+    }
     res.status(200).json({
         success: true,
         message: "Reports fetched successfully.",
