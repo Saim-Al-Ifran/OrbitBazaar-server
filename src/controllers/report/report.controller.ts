@@ -14,6 +14,7 @@ import {
     updateReport,
     updateReportStatus
 } from "../../services/report/report.services";
+import { deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
 
 export const addReport = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
@@ -23,7 +24,7 @@ export const addReport = TryCatch(
             throw new CustomError("User not found", 404);
         }
         const report = await createReport(productId, userEmail, comment, reason);
-
+        await deleteCacheByPattern("reports_user_*");
         res.status(201).json({
             message: "Report submitted successfully.",
             reportId: report.id
@@ -41,13 +42,18 @@ export const getReportsByVendor = TryCatch(
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const status = req.query.status as string; // Optional status filter
-  
+      const cacheKey = `reports_vendor_${vendorEmail}_page_${page}_limit_${limit}`;
+
+      const cachedData = await getCache(cacheKey);
+      if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+      }
      const { data, totalRecords, totalPages, prevPage, nextPage } = await findReportsByVendor(vendorEmail, page, limit, status);
 
      if(data.length === 0){
        throw new  CustomError(`No ${status} reports found!`,404);
      }
-  
+     await setCache(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
      res.status(200).json({
       success: true,
       message: "Reports fetched successfully.",
@@ -85,6 +91,7 @@ export const removeReportByUser = TryCatch(
         throw new CustomError("User not authenticated", 401);
       }
       const result = await deleteReport(reportId, userEmail);
+      await deleteCacheByPattern("reports_user_*");
       res.status(200).json(result);
     }
 );
@@ -97,7 +104,11 @@ export const editReportByUser  = TryCatch(
             throw new CustomError("user not found", 404);
         }
         const updatedReport = await updateReport(reportId,userEmail ,req.body);
-        if (!updatedReport) return res.status(400).json({ message: 'Cannot update resolved/rejected report' });
+
+        if (!updatedReport){
+          throw new CustomError("Cannot update resolved/rejected report", 400);
+        }  
+        await deleteCacheByPattern("reports_user_*");
         res.status(200).json(updatedReport);
     }
 ) 
@@ -110,13 +121,18 @@ export const getReportsByUser  = TryCatch(
         }
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
-    
+        const cacheKey = `reports_user_${userEmail}_page_${page}_limit_${limit}`;
+
+        const cachedData = await getCache(cacheKey);
+        if (cachedData) {
+          return res.status(200).json(JSON.parse(cachedData));
+        }
         const { data, totalRecords, totalPages, prevPage, nextPage } = await findAllReportsByUser(userEmail, page, limit);
 
         if(data.length === 0){
            throw new CustomError("No reports found!!",404);
         }
-     
+        await setCache(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
         res.status(200).json({
           success: true,
           message: "Reports fetched successfully.",
@@ -136,12 +152,17 @@ export const getSingleReportByUser = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
       const { reportId } = req.params;
       const userEmail = req.user?.email;
+      const cachedKey = `reports_user_${userEmail}_reportID_${reportId}`;
+      const cachedReport = await getCache(cachedKey);
+      if(cachedReport){
+        return res.json(JSON.parse(cachedReport));
+      }
       if (!userEmail) {
         throw new CustomError("User not authenticated", 401);
       }
   
       const report = await findReportByUser(reportId, userEmail);
-  
+      await setCache(cachedKey,{report},60);
       res.status(200).json({ report });
     }
   );
@@ -162,6 +183,7 @@ export const editReportStatus = TryCatch(
         throw new CustomError("User not authenticated", 401);
       }
       const updatedReport = await updateReportStatus(vendorEmail, reportId, status);
+      await deleteCacheByPattern("reports_vendor_*");
       res.status(200).json({
         message: "Report status updated successfully",
         report: updatedReport,
@@ -173,13 +195,17 @@ export const editReportStatus = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
       const vendorEmail = req.user?.email;
       const { reportId } = req.params;
-  
+      const cachedKey = `reports_vendor_${vendorEmail}_reportID_${reportId}`;
+      const cachedReport = await getCache(cachedKey);
+      if(cachedReport){
+        return res.json(JSON.parse(cachedReport));
+      }
       if (!vendorEmail) {
         throw new CustomError("User not authenticated", 401);
       }
   
       const report = await findReportByIdForVendor(vendorEmail, reportId);
-  
+      await setCache(cachedKey,report,60);
       res.status(200).json(report);
     }
   );
