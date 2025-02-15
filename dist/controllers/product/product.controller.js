@@ -17,11 +17,19 @@ const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const product_services_1 = require("../../services/product/product.services");
+const cache_1 = require("../../utils/cache");
 exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const { minPrice, maxPrice, category, sort } = req.query;
+    // Create a cache key based on query params
+    const cacheKey = `products:page=${page}&limit=${limit}&minPrice=${minPrice}&maxPrice=${maxPrice}&category=${category}&sort=${sort}`;
+    // Check cache first
+    const cachedData = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
     // Extract and prepare filtering options
-    const { minPrice, maxPrice, category } = req.query;
     const query = { isArchived: false };
     if (minPrice || maxPrice) {
         query.price = {};
@@ -38,18 +46,18 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         query.category = categoryData._id;
     }
     // Sorting logic
-    const sortOption = req.query.sort;
     const sortMapping = {
         "low-price": "price",
         "high-price": "-price",
         rating: "-ratings.average",
     };
-    const sortField = sortMapping[sortOption] || "createdAt";
+    const sortField = sortMapping[sort] || "createdAt";
+    // Fetch data from DB
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.findAllProducts)(page, limit, query, sortField);
     if (data.length === 0) {
-        throw new customError_1.default('No product data found!', 404);
+        throw new customError_1.default("No product data found!", 404);
     }
-    res.status(200).json({
+    const response = {
         success: true,
         message: "All products fetched successfully.",
         data,
@@ -60,7 +68,10 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    // Store result in cache
+    yield (0, cache_1.setCache)(cacheKey, response, 120);
+    res.status(200).json(response);
 }));
 exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -118,25 +129,36 @@ exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
 }));
 exports.getSingleProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
+    const cacheKey = `product:${id}`;
+    const cachedProduct = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedProduct) {
+        return res.status(200).json(JSON.parse(cachedProduct));
+    }
     const product = yield (0, product_services_1.findProductById)(id);
     if (!product) {
-        throw new customError_1.default('Product not found!', 404);
+        throw new customError_1.default("Product not found!", 404);
     }
-    res.status(200).json({
+    const response = {
         success: true,
         message: "Product fetched successfully",
         product,
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, response, 120);
+    res.status(200).json(response);
 }));
 exports.getAllFeaturedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const cacheKey = `featured_products:page=${page}:limit=${limit}`;
+    const cachedData = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getFeaturedProducts)(page, limit);
     if (data.length === 0) {
         throw new customError_1.default("No featured products found!", 404);
     }
-    // Return response
-    res.status(200).json({
+    const response = {
         success: true,
         message: "Featured products fetched successfully.",
         data,
@@ -147,7 +169,10 @@ exports.getAllFeaturedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => _
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    // Store response in cache
+    yield (0, cache_1.setCache)(cacheKey, response, 120);
+    res.status(200).json(response);
 }));
 exports.deleteProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -312,8 +337,16 @@ exports.getArchivedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __aw
 exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.keyword;
-    const sort = req.query.sort;
+    const search = req.query.keyword || "";
+    const sort = req.query.sort || "createdDsc";
+    // Generate cache key based on search and pagination
+    const cacheKey = `search_products:keyword=${search}:page=${page}:limit=${limit}:sort=${sort}`;
+    // Check if the data is already cached
+    const cachedData = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+    // Build query
     const query = { isArchived: false };
     if (search) {
         query.$or = [
@@ -321,6 +354,7 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
             { description: { $regex: search, $options: "i" } },
         ];
     }
+    // Sorting logic
     const sortMapping = {
         asc: "price",
         dsc: "-price",
@@ -328,11 +362,13 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         createdDsc: "-createdAt",
     };
     const sortField = sortMapping[sort] || "-createdAt";
+    // Fetch products from the database
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.searchProductsService)(page, limit, query, sortField);
     if (data.length === 0) {
-        throw new customError_1.default('No product data found!', 404);
+        throw new customError_1.default("No product data found!", 404);
     }
-    res.status(200).json({
+    // Response object
+    const response = {
         success: true,
         message: "All products fetched successfully.",
         data,
@@ -343,5 +379,8 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    // Store the response in Redis cache
+    yield (0, cache_1.setCache)(cacheKey, response, 120);
+    res.status(200).json(response);
 }));
