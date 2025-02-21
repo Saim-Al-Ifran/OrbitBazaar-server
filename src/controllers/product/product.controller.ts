@@ -589,6 +589,19 @@ export const getVendorProductDetails = TryCatch(
       throw new CustomError("Vendor authentication failed", 401);
     }
 
+    // **Check Redis Cache**
+    const cacheKey = `vendor:${vendorEmail}:product:${productId}`;
+    const cachedProduct = await getCache(cacheKey);
+
+    if (cachedProduct) {
+      return res.status(200).json({
+        success: true,
+        message: "Product details fetched successfully (from cache).",
+        product: JSON.parse(cachedProduct),
+      });
+    }
+
+   
     const product = await findProductById(productId);
     if (!product) {
       throw new CustomError("Product not found!", 404);
@@ -596,6 +609,9 @@ export const getVendorProductDetails = TryCatch(
     if (product.vendorEmail !== vendorEmail) {
       throw new CustomError("You are not authorized to view this product", 403);
     }
+ 
+    await setCache(cacheKey, product, 120);
+
     res.status(200).json({
       success: true,
       message: "Product details fetched successfully.",
