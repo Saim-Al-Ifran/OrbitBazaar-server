@@ -73,17 +73,62 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     yield (0, cache_1.setCache)(cacheKey, response, 120);
     res.status(200).json(response);
 }));
+// export const getAllProductsForVendor = TryCatch(
+//   async (req: Request, res: Response, _next: NextFunction) => {
+//     const page = parseInt(req.query.page as string) || 1;
+//     const limit = parseInt(req.query.limit as string) || 10;
+//     const vendorEmail = req.user?.email;
+//     const { search, sort } = req.query;
+//     // Build query
+//     const query: Record<string, any> = { isArchived: false };
+//     if (vendorEmail) {
+//       query.vendorEmail = vendorEmail; 
+//     }
+//     if (search) {
+//       query.name = { $regex: search, $options: "i" };
+//     }
+//     const sortMapping: Record<string, string> = {
+//       asc: "price",
+//       dsc: "-price",
+//     };
+//     const sortField = sortMapping[sort as string] || "-createdAt"; 
+//     const { data, totalRecords, totalPages, prevPage, nextPage } =
+//       await getVendorProducts(page, limit, query, sortField);
+//     if (data.length === 0) {
+//       throw new CustomError('No product data found!',404);
+//     }
+//     res.status(200).json({
+//       success: true,
+//       message: "All products fetched successfully.",
+//       data,
+//       pagination: {
+//         totalRecords,
+//         totalPages,
+//         prevPage,
+//         nextPage,
+//         currentPage: page,
+//       },
+//     });
+//   }
+// );
 exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
-    const { search, sort } = req.query;
-    // Build query
-    const query = { isArchived: false };
-    if (vendorEmail) {
-        query.vendorEmail = vendorEmail;
+    if (!vendorEmail) {
+        throw new customError_1.default("Unauthorized access. Vendor email missing.", 403);
     }
+    const { search, sort } = req.query;
+    // Generate cache key
+    const cacheKey = `vendor_products:${vendorEmail}:search=${search || ""}:page=${page}:limit=${limit}:sort=${sort || "createdAt"}`;
+    // Check Redis cache first
+    const cachedData = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+    // Build query
+    const query = { isArchived: false, vendorEmail };
     if (search) {
         query.name = { $regex: search, $options: "i" };
     }
@@ -92,11 +137,13 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
         dsc: "-price",
     };
     const sortField = sortMapping[sort] || "-createdAt";
+    // Fetch data from database
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getVendorProducts)(page, limit, query, sortField);
     if (data.length === 0) {
-        throw new customError_1.default('No product data found!', 404);
+        throw new customError_1.default("No product data found!", 404);
     }
-    res.status(200).json({
+    // Create response object
+    const response = {
         success: true,
         message: "All products fetched successfully.",
         data,
@@ -107,7 +154,10 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    // Store response in Redis cache
+    yield (0, cache_1.setCache)(cacheKey, response, 120);
+    res.status(200).json(response);
 }));
 exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -121,6 +171,7 @@ exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
         throw new customError_1.default("Vendor email is required", 400);
     }
     const newProduct = yield (0, product_services_1.addProduct)(productData, file, vendorEmail);
+    yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
     res.status(201).json({
         success: true,
         message: "Product created successfully",
@@ -192,6 +243,7 @@ exports.deleteProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
         yield (0, product_services_1.deleteProductImage)(product.image);
     }
     yield (0, product_services_1.deleteProductInDb)(id, vendorEmail);
+    yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
     res.status(200).json({
         success: true,
         message: "Product deleted successfully.",
@@ -305,23 +357,35 @@ exports.getArchivedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __aw
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const sort = req.query.sort;
-    const email = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!vendorEmail) {
+        throw new customError_1.default("Unauthorized access. Vendor email missing.", 403);
+    }
+    // Generate a unique cache key
+    const cacheKey = `vendor_products:${vendorEmail}_archived_products:${vendorEmail}:page=${page}:limit=${limit}:sort=${sort || "createdDsc"}`;
+    // Check Redis cache first
+    const cachedData = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+    // Query to find archived products
     const query = {
         isArchived: true,
-        vendorEmail: email
+        vendorEmail: vendorEmail,
     };
     const sortMapping = {
         createdAsc: "createdAt",
         createdDsc: "-createdAt",
     };
     const sortField = sortMapping[sort] || "-createdAt";
-    const { data, totalRecords, totalPages, prevPage, nextPage, } = yield (0, product_services_1.findArchivedProducts)(page, limit, query, sortField);
+    // Fetch data from database
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.findArchivedProducts)(page, limit, query, sortField);
     // Check if data exists
     if (data.length === 0) {
         throw new customError_1.default("No archived products found!", 404);
     }
-    // Send response
-    res.status(200).json({
+    // Create response object
+    const response = {
         success: true,
         message: "Archived products fetched successfully.",
         data,
@@ -332,7 +396,11 @@ exports.getArchivedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __aw
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    // Store response in Redis cache
+    yield (0, cache_1.setCache)(cacheKey, response, 120);
+    // Send response
+    res.status(200).json(response);
 }));
 exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const page = parseInt(req.query.page) || 1;
