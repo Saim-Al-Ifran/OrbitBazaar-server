@@ -8,6 +8,7 @@ import {
     getAllProductsForVendor,
     getArchivedProducts,
     getSingleProduct,
+    getVendorProductDetails,
     searchProducts,
     toggleProductArchivedStatus,
     toggleProductFeaturedStatus,
@@ -26,6 +27,7 @@ router.get("/products/featured", getAllFeaturedProducts);
 router.get('/products/search',searchProducts);
 router.get('/products/archived',authenticate,authorizeVendor,getArchivedProducts);
 router.get('/products/:id',getSingleProduct);
+router.get('/vendor/products/:id',authenticate,authorizeVendor,getVendorProductDetails);
 
 router.get('/vendor/products',authenticate,authorizeVendor,getAllProductsForVendor);
 router.post('/products',authenticate,authorizeVendor,upload.single('image'),createProduct);

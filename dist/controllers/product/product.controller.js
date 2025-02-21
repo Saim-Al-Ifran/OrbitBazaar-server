@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchProducts = exports.getArchivedProducts = exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductArchivedStatus = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
+exports.getVendorProductDetails = exports.searchProducts = exports.getArchivedProducts = exports.trackProductClickController = exports.trackProductViewController = exports.toggleProductArchivedStatus = exports.toggleProductFeaturedStatus = exports.updatedProduct = exports.deleteProduct = exports.getAllFeaturedProducts = exports.getSingleProduct = exports.createProduct = exports.getAllProductsForVendor = exports.getAllProducts = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const category_services_1 = require("../../services/category/category.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -451,4 +451,24 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     // Store the response in Redis cache
     yield (0, cache_1.setCache)(cacheKey, response, 120);
     res.status(200).json(response);
+}));
+exports.getVendorProductDetails = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const productId = req.params.id;
+    if (!vendorEmail) {
+        throw new customError_1.default("Vendor authentication failed", 401);
+    }
+    const product = yield (0, product_services_1.findProductById)(productId);
+    if (!product) {
+        throw new customError_1.default("Product not found!", 404);
+    }
+    if (product.vendorEmail !== vendorEmail) {
+        throw new customError_1.default("You are not authorized to view this product", 403);
+    }
+    res.status(200).json({
+        success: true,
+        message: "Product details fetched successfully.",
+        product,
+    });
 }));

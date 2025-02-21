@@ -578,3 +578,28 @@ export const searchProducts = TryCatch(
     res.status(200).json(response);
   }
 );
+
+
+export const getVendorProductDetails = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const vendorEmail = req.user?.email;
+    const productId = req.params.id;
+
+    if (!vendorEmail) {
+      throw new CustomError("Vendor authentication failed", 401);
+    }
+
+    const product = await findProductById(productId);
+    if (!product) {
+      throw new CustomError("Product not found!", 404);
+    }
+    if (product.vendorEmail !== vendorEmail) {
+      throw new CustomError("You are not authorized to view this product", 403);
+    }
+    res.status(200).json({
+      success: true,
+      message: "Product details fetched successfully.",
+      product,
+    });
+  }
+);
