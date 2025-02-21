@@ -1852,6 +1852,43 @@ paths:
           description: Not Found - Product not found for the provided ID.
         '500':
           description: Internal Server Error - Error occurred while deleting the product.
+  /vendor/products/{productId}:
+    get:
+      tags:
+        - Product
+      summary: Retrieve detailed  information about a specific product for vendor
+      description: Fetches detailed information about a product by its unique ID.
+      parameters:
+        - name: productId
+          in: path
+          description: The unique identifier of the product.
+          required: true
+          schema:
+            type: string
+            example: "64b8ecfa2a1234abc5678d9e"
+      responses:
+        '200':
+          description: Detailed information about the product.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product retrieved successfully"
+                  data:
+                    $ref: '#/components/schemas/Product'
+                  
+        '404':
+          description: Product not found
+        '400':
+          description: Bad Request - Invalid product ID format
+        '500':
+          description: Internal Server Error
   /products/search:
     get:
       tags:
