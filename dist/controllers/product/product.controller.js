@@ -244,6 +244,7 @@ exports.deleteProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     }
     yield (0, product_services_1.deleteProductInDb)(id, vendorEmail);
     yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
+    yield (0, cache_1.deleteCacheByPattern)(`products*`);
     res.status(200).json({
         success: true,
         message: "Product deleted successfully.",
@@ -273,6 +274,8 @@ exports.updatedProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     if (!updatedProduct) {
         throw new customError_1.default("Vendor can only update their own product", 401);
     }
+    yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
+    yield (0, cache_1.deleteCacheByPattern)(`products*`);
     res.status(200).json({
         success: true,
         message: "Product updated successfully.",
@@ -294,6 +297,8 @@ exports.toggleProductFeaturedStatus = (0, TryCatch_1.TryCatch)((req, res) => __a
     if (!updatedProduct) {
         throw new customError_1.default("Product not found or you do not have permission to update it.", 404);
     }
+    yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
+    yield (0, cache_1.deleteCacheByPattern)(`products*`);
     res.status(200).json({
         success: true,
         message: `Product '${updatedProduct.name}' ${isFeatured ? "featured" : "unfeatured"} successfully.`,
@@ -315,6 +320,8 @@ exports.toggleProductArchivedStatus = (0, TryCatch_1.TryCatch)((req, res) => __a
     if (!updatedProduct) {
         throw new customError_1.default("Product not found or you do not have permission to update it.", 404);
     }
+    yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
+    yield (0, cache_1.deleteCacheByPattern)(`products*`);
     res.status(200).json({
         success: true,
         message: `Product '${updatedProduct.name}' ${isArchived ? "Archived" : "unArchived"} successfully.`,
@@ -460,7 +467,7 @@ exports.getVendorProductDetails = (0, TryCatch_1.TryCatch)((req, res, _next) => 
         throw new customError_1.default("Vendor authentication failed", 401);
     }
     // **Check Redis Cache**
-    const cacheKey = `vendor:${vendorEmail}:product:${productId}`;
+    const cacheKey = `vendor_products:${vendorEmail}:product:${productId}`;
     const cachedProduct = yield (0, cache_1.getCache)(cacheKey);
     if (cachedProduct) {
         return res.status(200).json({

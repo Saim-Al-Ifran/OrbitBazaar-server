@@ -311,6 +311,7 @@ export const deleteProduct = TryCatch(
       }
       await  deleteProductInDb(id,vendorEmail);
       await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
+      await deleteCacheByPattern(`products*`);
       res.status(200).json({
         success: true,
         message: "Product deleted successfully.",
@@ -345,6 +346,8 @@ export const updatedProduct = TryCatch(
       if(!updatedProduct){
          throw new CustomError("Vendor can only update their own product",401);
       }
+      await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
+      await deleteCacheByPattern(`products*`);
       res.status(200).json({
         success: true,
         message: "Product updated successfully.",
@@ -373,7 +376,8 @@ export const toggleProductFeaturedStatus = TryCatch(
     if (!updatedProduct) {
       throw new CustomError("Product not found or you do not have permission to update it.", 404);
     }
-
+    await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
+    await deleteCacheByPattern(`products*`);
     res.status(200).json({
       success: true,
       message: `Product '${updatedProduct.name}' ${isFeatured ? "featured" : "unfeatured"} successfully.`,
@@ -400,7 +404,8 @@ export const toggleProductArchivedStatus = TryCatch(
     if (!updatedProduct) {
       throw new CustomError("Product not found or you do not have permission to update it.", 404);
     }
-
+    await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
+    await deleteCacheByPattern(`products*`);
     res.status(200).json({
       success: true,
       message: `Product '${updatedProduct.name}' ${isArchived ? "Archived" : "unArchived"} successfully.`,
@@ -590,7 +595,7 @@ export const getVendorProductDetails = TryCatch(
     }
 
     // **Check Redis Cache**
-    const cacheKey = `vendor:${vendorEmail}:product:${productId}`;
+    const cacheKey = `vendor_products:${vendorEmail}:product:${productId}`;
     const cachedProduct = await getCache(cacheKey);
 
     if (cachedProduct) {
