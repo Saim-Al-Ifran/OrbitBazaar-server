@@ -43,8 +43,8 @@ export const getProductReviews = TryCatch(
       if (data.length === 0) {
         throw new CustomError('No reviews found', 404);
       }
-     await setCache(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-      return res.status(200).json({ 
+
+      const reviewResponse = { 
         success: true,
         message: "Reviews fetched successfully.",
         data,
@@ -55,7 +55,9 @@ export const getProductReviews = TryCatch(
           nextPage,
           currentPage: page,
         },
-      });
+      };
+      await setCache(cacheKey,reviewResponse, 60);
+      return res.status(200).json(reviewResponse);
     }
   );
 export const editReview = TryCatch(
@@ -113,8 +115,7 @@ export const getUserReviews = TryCatch(
       if (data.length === 0) {
         throw new CustomError('No reviews found', 404);
       }
-      await setCache(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-      return res.status(200).json({ 
+      const reviewResponse = { 
         success: true,
         message: "Reviews fetched successfully.",
         data,
@@ -125,7 +126,9 @@ export const getUserReviews = TryCatch(
           nextPage,
           currentPage: page,
         },
-      });
+      }
+      await setCache(cacheKey, reviewResponse, 60);
+      return res.status(200).json(reviewResponse);
     }
 );
 export const getUserReview = TryCatch(
@@ -146,11 +149,12 @@ export const getUserReview = TryCatch(
     if(!review){
       throw new CustomError("Review not found", 404);
     }
-    await setCache(cacheKey,{review},60);
-    return res.json({
+    const reviewResponse = {
       success: true,
       message: "Review fetched successfully",
       data: review
-    });
+    }
+    await setCache(cacheKey,reviewResponse,60);
+    return res.json(reviewResponse);
   }
 )

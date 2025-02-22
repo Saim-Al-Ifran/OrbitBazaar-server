@@ -43,8 +43,7 @@ exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awai
     if (data.length === 0) {
         throw new customError_1.default('No reviews found', 404);
     }
-    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-    return res.status(200).json({
+    const reviewResponse = {
         success: true,
         message: "Reviews fetched successfully.",
         data,
@@ -55,7 +54,9 @@ exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awai
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, reviewResponse, 60);
+    return res.status(200).json(reviewResponse);
 }));
 exports.editReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -105,8 +106,7 @@ exports.getUserReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     if (data.length === 0) {
         throw new customError_1.default('No reviews found', 404);
     }
-    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-    return res.status(200).json({
+    const reviewResponse = {
         success: true,
         message: "Reviews fetched successfully.",
         data,
@@ -117,7 +117,9 @@ exports.getUserReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, reviewResponse, 60);
+    return res.status(200).json(reviewResponse);
 }));
 exports.getUserReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -135,10 +137,11 @@ exports.getUserReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     if (!review) {
         throw new customError_1.default("Review not found", 404);
     }
-    yield (0, cache_1.setCache)(cacheKey, { review }, 60);
-    return res.json({
+    const reviewResponse = {
         success: true,
         message: "Review fetched successfully",
         data: review
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, reviewResponse, 60);
+    return res.json(reviewResponse);
 }));
