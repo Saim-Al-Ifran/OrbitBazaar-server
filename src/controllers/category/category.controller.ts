@@ -47,10 +47,7 @@ export const findAllCategoriesForAdmin = TryCatch(
       throw new CustomError("No categories data found!", 404);
     }
 
-    // ✅ Return the response after setting cache
-    await setCache(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-
-    return res.status(200).json({ // 🔹 Add return here
+    const categoryResponse = {  
       success: true,
       message: "Categories fetched successfully.",
       data,
@@ -61,7 +58,11 @@ export const findAllCategoriesForAdmin = TryCatch(
         nextPage,
         currentPage: page,
       },
-    });
+    }
+
+    await setCache(cacheKey, categoryResponse, 60);
+
+    return res.status(200).json(categoryResponse);
   }
 );
 
@@ -70,19 +71,20 @@ export const getCategoryById = TryCatch(
     const { id } = req.params;
     const cacheKey = `category_${id}`;
 
-    // Check cache first
     const cachedCategory = await getCache(cacheKey);
     if (cachedCategory) {
       return res.status(200).json(JSON.parse(cachedCategory));
     }
     const category = await findCategoryById(id);
-    await setCache(cacheKey, {data: category}, 60);
-    
-    res.status(200).json({
+
+    const categoryResponse = {
       success: true,
       message: "Category fetched successfully.",
       data: category,
-    });
+    }
+
+    await setCache(cacheKey, categoryResponse, 60);
+    res.status(200).json(categoryResponse);
   }
 );
 

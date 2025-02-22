@@ -40,9 +40,7 @@ exports.findAllCategoriesForAdmin = (0, TryCatch_1.TryCatch)((req, res, _next) =
     if (data.length === 0) {
         throw new customError_1.default("No categories data found!", 404);
     }
-    // ✅ Return the response after setting cache
-    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-    return res.status(200).json({
+    const categoryResponse = {
         success: true,
         message: "Categories fetched successfully.",
         data,
@@ -53,23 +51,25 @@ exports.findAllCategoriesForAdmin = (0, TryCatch_1.TryCatch)((req, res, _next) =
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, categoryResponse, 60);
+    return res.status(200).json(categoryResponse);
 }));
 exports.getCategoryById = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const cacheKey = `category_${id}`;
-    // Check cache first
     const cachedCategory = yield (0, cache_1.getCache)(cacheKey);
     if (cachedCategory) {
         return res.status(200).json(JSON.parse(cachedCategory));
     }
     const category = yield (0, category_services_1.findCategoryById)(id);
-    yield (0, cache_1.setCache)(cacheKey, { data: category }, 60);
-    res.status(200).json({
+    const categoryResponse = {
         success: true,
         message: "Category fetched successfully.",
         data: category,
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, categoryResponse, 60);
+    res.status(200).json(categoryResponse);
 }));
 exports.addCategory = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { body, file } = req;
