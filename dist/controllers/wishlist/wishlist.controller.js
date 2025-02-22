@@ -44,7 +44,7 @@ exports.getAllWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         throw new customError_1.default("No wishlist found!", 404);
     }
     yield (0, cache_1.setCache)(cachedKey, wishlist, 60);
-    res.status(200).json({ wishlist });
+    res.status(200).json(wishlist);
 }));
 exports.removeProductFromWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

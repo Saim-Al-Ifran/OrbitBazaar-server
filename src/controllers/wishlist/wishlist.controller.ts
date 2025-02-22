@@ -39,7 +39,7 @@ export const getAllWishlist =  TryCatch(
         }
         await setCache(cachedKey,wishlist,60);
 
-        res.status(200).json({ wishlist });
+        res.status(200).json(wishlist);
     }
 )
 export const removeProductFromWishlist =  TryCatch(
