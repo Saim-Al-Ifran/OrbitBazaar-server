@@ -49,8 +49,7 @@ exports.getReportsByVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
     if (data.length === 0) {
         throw new customError_1.default(`No ${status} reports found!`, 404);
     }
-    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-    res.status(200).json({
+    const reportResponse = {
         success: true,
         message: "Reports fetched successfully.",
         data,
@@ -61,7 +60,9 @@ exports.getReportsByVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, reportResponse, 60);
+    res.status(200).json(reportResponse);
 }));
 exports.getReportsByProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { productId } = req.params;
@@ -117,8 +118,7 @@ exports.getReportsByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     if (data.length === 0) {
         throw new customError_1.default("No reports found!!", 404);
     }
-    yield (0, cache_1.setCache)(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-    res.status(200).json({
+    const reportResponse = {
         success: true,
         message: "Reports fetched successfully.",
         data,
@@ -129,7 +129,9 @@ exports.getReportsByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
             nextPage,
             currentPage: page,
         },
-    });
+    };
+    yield (0, cache_1.setCache)(cacheKey, reportResponse, 60);
+    res.status(200).json(reportResponse);
 }));
 exports.getSingleReportByUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

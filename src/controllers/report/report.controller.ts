@@ -53,8 +53,7 @@ export const getReportsByVendor = TryCatch(
      if(data.length === 0){
        throw new  CustomError(`No ${status} reports found!`,404);
      }
-     await setCache(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-     res.status(200).json({
+     const reportResponse = {
       success: true,
       message: "Reports fetched successfully.",
       data,
@@ -65,7 +64,9 @@ export const getReportsByVendor = TryCatch(
         nextPage,
         currentPage: page,
       },
-    });
+    }
+     await setCache(cacheKey, reportResponse , 60);
+     res.status(200).json(reportResponse);
     }
 ) 
 export const getReportsByProduct = TryCatch(
@@ -132,8 +133,7 @@ export const getReportsByUser  = TryCatch(
         if(data.length === 0){
            throw new CustomError("No reports found!!",404);
         }
-        await setCache(cacheKey, { data, totalRecords, totalPages, prevPage, nextPage, currentPage: page }, 60);
-        res.status(200).json({
+        const reportResponse = {
           success: true,
           message: "Reports fetched successfully.",
           data,
@@ -144,7 +144,9 @@ export const getReportsByUser  = TryCatch(
             nextPage,
             currentPage: page,
           },
-        });
+        }
+        await setCache(cacheKey,reportResponse, 60);
+        res.status(200).json(reportResponse);
     }
 ) 
 
