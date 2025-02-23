@@ -12,9 +12,10 @@ import {
   uploadUserProfileImage
 } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
+import { deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
 
 export const findAllUsers = TryCatch(
-    async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    async (req: Request, res: Response, _next: NextFunction) => {
       const role = req.user?.role;
   
       if (role !== "super-admin" && role !== "admin") {
@@ -25,8 +26,13 @@ export const findAllUsers = TryCatch(
       const limit = parseInt(req.query.limit as string) || 10;
       const sort = req.query.sort || { createdAt: -1 };
       const search = req.query.search as string | undefined;
-  
-   
+
+      const cachedKey = `users:role:${role}:page:${page}:limit:${limit}:sort:${JSON.stringify(sort)}:search:${search || "none"}`;   
+      const cachedData = await getCache(cachedKey);
+      if(cachedData){
+        return res.status(200).json(JSON.parse(cachedData));
+      }
+
       const searchQuery = search
         ? {
             $or: [
@@ -36,10 +42,10 @@ export const findAllUsers = TryCatch(
             ],
           }
         : {};
-  
+        
       const {data,totalRecords,totalPages,prevPage,nextPage}= await getAllUsers(role, page, limit, sort, searchQuery);
-  
-      res.status(200).json({
+      
+      const userResponse = {
         success: true,
         message: "Users fetched successfully.",
         data,
@@ -51,7 +57,10 @@ export const findAllUsers = TryCatch(
             currentPage:page
         }
 
-      });
+      };
+      await setCache(cachedKey,userResponse,120)
+
+      res.status(200).json(userResponse);
     }
   );
 
@@ -70,7 +79,7 @@ export const createUser = TryCatch(
             phoneNumber,
           };
         const newUser = await createNewUser(userData);
-
+        await deleteCacheByPattern("users:role*");
         res.status(201).json({
             success: true,
             message: 'User created successfully.',
@@ -98,7 +107,7 @@ export const updateUserStatus = TryCatch(
         const { id } = req.params;
         const { status } = req.body;
         const updatedUser = await toggleUserStatus(id, status,requesterRole);
-
+        await deleteCacheByPattern("users:role*");
         res.status(200).json({
             success: true,
             message: `User status updated to ${status} successfully.`,
@@ -119,6 +128,11 @@ export const updateUserRole = TryCatch(
         const { id } = req.params;
         const { role } = req.body;
         const updatedUser = await toggleUserRole(id, role);
+        if(updatedUser.role === 'admin'){
+          await deleteCacheByPattern(`users:role:${req.user?.role}*`);
+        }else{
+          await deleteCacheByPattern("users:role*");
+        }
 
         res.status(200).json({
             success: true,
@@ -140,6 +154,7 @@ export const updateVendorRequestStatus = TryCatch(
         const { userId } = req.params;
         const { status } = req.body;
         const updatedUser = await approveVendor(userId, status);
+        await deleteCacheByPattern("users:role*");
         res.status(200).json({
           success: true,
           message: `Vendor status updated successfully to '${status}'.`,

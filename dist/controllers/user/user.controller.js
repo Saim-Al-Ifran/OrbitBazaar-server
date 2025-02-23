@@ -16,6 +16,7 @@ exports.changePasswordHandler = exports.updateUserProfileHandler = exports.updat
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const user_services_1 = require("../../services/user/user.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const cache_1 = require("../../utils/cache");
 exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const role = (_a = req.user) === null || _a === void 0 ? void 0 : _a.role;
@@ -26,6 +27,11 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
     const limit = parseInt(req.query.limit) || 10;
     const sort = req.query.sort || { createdAt: -1 };
     const search = req.query.search;
+    const cachedKey = `users:role:${role}:page:${page}:limit:${limit}:sort:${JSON.stringify(sort)}:search:${search || "none"}`;
+    const cachedData = yield (0, cache_1.getCache)(cachedKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
     const searchQuery = search
         ? {
             $or: [
@@ -36,7 +42,7 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
         }
         : {};
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, user_services_1.getAllUsers)(role, page, limit, sort, searchQuery);
-    res.status(200).json({
+    const userResponse = {
         success: true,
         message: "Users fetched successfully.",
         data,
@@ -47,7 +53,9 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             nextPage,
             currentPage: page
         }
-    });
+    };
+    yield (0, cache_1.setCache)(cachedKey, userResponse, 120);
+    res.status(200).json(userResponse);
 }));
 exports.createUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -62,6 +70,7 @@ exports.createUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(voi
         phoneNumber,
     };
     const newUser = yield (0, user_services_1.createNewUser)(userData);
+    yield (0, cache_1.deleteCacheByPattern)("users:role*");
     res.status(201).json({
         success: true,
         message: 'User created successfully.',
@@ -85,6 +94,7 @@ exports.updateUserStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     const { id } = req.params;
     const { status } = req.body;
     const updatedUser = yield (0, user_services_1.toggleUserStatus)(id, status, requesterRole);
+    yield (0, cache_1.deleteCacheByPattern)("users:role*");
     res.status(200).json({
         success: true,
         message: `User status updated to ${status} successfully.`,
@@ -99,9 +109,16 @@ exports.updateUserStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     });
 }));
 exports.updateUserRole = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const { id } = req.params;
     const { role } = req.body;
     const updatedUser = yield (0, user_services_1.toggleUserRole)(id, role);
+    if (updatedUser.role === 'admin') {
+        yield (0, cache_1.deleteCacheByPattern)(`users:role:${(_a = req.user) === null || _a === void 0 ? void 0 : _a.role}*`);
+    }
+    else {
+        yield (0, cache_1.deleteCacheByPattern)("users:role*");
+    }
     res.status(200).json({
         success: true,
         message: `User status updated to ${role} successfully.`,
@@ -119,6 +136,7 @@ exports.updateVendorRequestStatus = (0, TryCatch_1.TryCatch)((req, res, _next) =
     const { userId } = req.params;
     const { status } = req.body;
     const updatedUser = yield (0, user_services_1.approveVendor)(userId, status);
+    yield (0, cache_1.deleteCacheByPattern)("users:role*");
     res.status(200).json({
         success: true,
         message: `Vendor status updated successfully to '${status}'.`,
