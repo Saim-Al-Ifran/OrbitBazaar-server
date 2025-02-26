@@ -42,6 +42,10 @@ const UserSchema: Schema = new Schema({
       enum: ['none', 'requested', 'approved', 'declined'],
       default: 'none',
     },
+    isDeleted: {
+      type: Boolean,
+      default: false
+    },
     refreshTokens: [
         {
          token: String,

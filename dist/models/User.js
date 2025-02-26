@@ -87,6 +87,10 @@ const UserSchema = new mongoose_1.Schema({
         enum: ['none', 'requested', 'approved', 'declined'],
         default: 'none',
     },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
     refreshTokens: [
         {
             token: String,

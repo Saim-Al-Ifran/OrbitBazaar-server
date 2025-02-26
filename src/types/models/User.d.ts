@@ -13,6 +13,7 @@ export interface IUser extends Document {
   role: 'user' | 'vendor' | 'admin' | 'super-admin';
   vendorRequestStatus: 'none'| 'requested' | 'approved'|  'declined';
   status: 'block' | 'active';
+  isDeleted:Boolean
   refreshTokens: IRefreshToken[];
   createdAt?: Date;
   updatedAt?: Date;
