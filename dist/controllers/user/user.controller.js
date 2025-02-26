@@ -155,12 +155,19 @@ exports.getUserProfile = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     if (!email) {
         throw new customError_1.default('User ID is missing', 400);
     }
+    const cachedKey = `user_profile:${email}`;
+    const cachedData = yield (0, cache_1.getCache)(cachedKey);
+    if (cachedData) {
+        return res.json(JSON.parse(cachedData));
+    }
     const user = yield (0, user_services_1.findUserByProperty)('email', email);
-    res.status(200).json({
+    const userProfileResponse = {
         success: true,
         message: 'User profile retrieved successfully.',
         data: user,
-    });
+    };
+    yield (0, cache_1.setCache)(cachedKey, userProfileResponse, 120);
+    res.status(200).json(userProfileResponse);
 }));
 exports.updateUserProfileImage = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -172,6 +179,7 @@ exports.updateUserProfileImage = (0, TryCatch_1.TryCatch)((req, res, _next) => _
         throw new customError_1.default('Profile image is required.', 400);
     }
     const updatedUser = yield (0, user_services_1.uploadUserProfileImage)(email, req.file);
+    yield (0, cache_1.deleteCache)(`user_profile:${email}`);
     res.status(200).json({
         success: true,
         message: 'Profile image uploaded successfully.',
@@ -187,8 +195,8 @@ exports.updateUserProfileHandler = (0, TryCatch_1.TryCatch)((req, res, _next) =>
         throw new customError_1.default('Email is required', 400);
     }
     const updates = req.body;
-    console.log(updates);
     const updatedUser = yield (0, user_services_1.updateUserProfile)(email, updates);
+    yield (0, cache_1.deleteCache)(`user_profile:${email}`);
     res.status(200).json({
         message: 'Profile updated successfully',
         data: {

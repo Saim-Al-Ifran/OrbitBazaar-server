@@ -12,7 +12,7 @@ import {
   uploadUserProfileImage
 } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
-import { deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
+import { deleteCache, deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
 
 export const findAllUsers = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
@@ -169,17 +169,24 @@ export const updateVendorRequestStatus = TryCatch(
   }
 )
 export const getUserProfile = TryCatch(
-  async(req:Request,res:Response,_next:NextFunction): Promise<void> =>{
+  async(req:Request,res:Response,_next:NextFunction) =>{
          const email=req.user?.email;
          if (!email) {
           throw new CustomError('User ID is missing', 400);
-        }
+         }
+         const cachedKey = `user_profile:${email}`;
+         const cachedData = await getCache(cachedKey);
+         if (cachedData) {
+          return res.json(JSON.parse(cachedData));
+         }
          const user = await findUserByProperty('email',email);
-         res.status(200).json({
-          success: true,
-          message: 'User profile retrieved successfully.',
-          data: user,
-        });
+         const userProfileResponse = {
+            success: true,
+            message: 'User profile retrieved successfully.',
+            data: user,
+         };
+         await setCache(cachedKey,userProfileResponse,120);
+         res.status(200).json(userProfileResponse);
   }
 )
 
@@ -195,7 +202,7 @@ export const updateUserProfileImage = TryCatch(
           throw new CustomError('Profile image is required.', 400);
         }
         const updatedUser = await uploadUserProfileImage(email, req.file);
-
+        await deleteCache(`user_profile:${email}`);
         res.status(200).json({
           success: true,
           message: 'Profile image uploaded successfully.',
@@ -214,10 +221,8 @@ export const updateUserProfileHandler = TryCatch(
       throw new CustomError('Email is required', 400);
     }
     const updates = req.body;
-    console.log(updates);
-    
     const updatedUser = await updateUserProfile(email, updates);
-    
+    await deleteCache(`user_profile:${email}`);
     res.status(200).json({
       message: 'Profile updated successfully',
       data: {
