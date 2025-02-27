@@ -12,8 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserProfile = exports.changePassword = exports.uploadUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserRole = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = exports.findUserForAuth = void 0;
+exports.deleteUserService = exports.updateUserProfile = exports.changePassword = exports.uploadUserProfileImage = exports.updateUserRole = exports.approveVendor = exports.toggleUserRole = exports.toggleUserStatus = exports.getAllUsers = exports.createNewUser = exports.findUserByProperty = exports.findUserForAuth = void 0;
+const Cart_1 = __importDefault(require("../../models/Cart"));
 const User_1 = __importDefault(require("../../models/User"));
+const Wishlist_1 = __importDefault(require("../../models/Wishlist"));
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const fileUpload_1 = require("../../utils/fileUpload");
 const paginate_1 = __importDefault(require("../../utils/paginate"));
@@ -122,3 +124,20 @@ const updateUserProfile = (email, updates) => __awaiter(void 0, void 0, void 0, 
     return yield user.save();
 });
 exports.updateUserProfile = updateUserProfile;
+// Service to delete(softDelete) a user
+const deleteUserService = (requesterRole, userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield User_1.default.findById(userId);
+    if (!user)
+        throw new Error("User not found");
+    // Check permissions: Admin can delete users, Super-admin can delete users & admins
+    if (requesterRole === "admin" && user.role !== "user") {
+        throw new customError_1.default("Admins can only delete users.", 403);
+    }
+    user.isDeleted = true;
+    yield user.save();
+    // Clear user's wishlist and cart
+    yield Wishlist_1.default.deleteOne({ userEmail: user.email });
+    yield Cart_1.default.deleteOne({ userEmail: user.email });
+    return user;
+});
+exports.deleteUserService = deleteUserService;

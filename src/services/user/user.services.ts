@@ -1,4 +1,6 @@
+import Cart from "../../models/Cart";
 import User from "../../models/User";
+import Wishlist from "../../models/Wishlist";
 import { IUser } from "../../types/models/User";
 import CustomError from "../../utils/errors/customError";
 import { uploadFileToCloudinary } from "../../utils/fileUpload";
@@ -119,4 +121,25 @@ export const updateUserProfile = async (email: string, updates: Partial<IUser>):
   user.phoneNumber = updates.phoneNumber || user.phoneNumber;
   user.role = 'user';  
   return await user.save();
+};
+
+// Service to delete(softDelete) a user
+export const deleteUserService = async (requesterRole: string, userId: string): Promise<IUser> => {
+ 
+  const user = await User.findById(userId);
+  if (!user) throw new Error("User not found");
+
+  // Check permissions: Admin can delete users, Super-admin can delete users & admins
+  if (requesterRole === "admin" && user.role !== "user") {
+      throw new CustomError("Admins can only delete users.",403);
+  }
+
+  user.isDeleted = true;
+  await user.save();
+
+  // Clear user's wishlist and cart
+  await Wishlist.deleteOne({ userEmail: user.email });
+  await Cart.deleteOne({ userEmail: user.email });
+
+  return user;
 };

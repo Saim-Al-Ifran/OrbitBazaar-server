@@ -13,6 +13,8 @@ const router = express_1.default.Router();
 router.get('/admin/users', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.findAllUsers);
 router.post('/admin/users', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.createUser);
 router.patch('/admin/users/:id/status', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.updateUserStatus);
+router.delete('/admin/users/:id', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.deleteUser);
+router.delete('/super-admin/entity/:id', authenticate_1.default, authorizeSuperAdmin_1.default, user_controller_1.deleteUser);
 router.patch('/super-admin/:id/role', authenticate_1.default, authorizeSuperAdmin_1.default, user_controller_1.updateUserRole);
 router.patch('/admin/vendors/:userId/status', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.updateVendorRequestStatus);
 router.get('/user/profile', authenticate_1.default, user_controller_1.getUserProfile);

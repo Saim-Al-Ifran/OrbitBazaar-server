@@ -4,6 +4,7 @@ import {
   approveVendor,
   changePassword,
   createNewUser,
+  deleteUserService,
   findUserByProperty,
   getAllUsers,
   toggleUserRole,
@@ -258,5 +259,18 @@ export const changePasswordHandler = TryCatch(
         name: updatedUser.name,
       },
     });
+  }
+)
+
+export const deleteUser = TryCatch(
+  async(req:Request,res:Response,_next:NextFunction)=>{
+    const requesterRole = req.user?.role; // Assume this comes from authentication middleware
+    const { id } = req.params;
+    if(!requesterRole){
+      throw new CustomError('Unauthorized', 401);
+    }
+    await deleteUserService(requesterRole, id);
+    await deleteCacheByPattern("users:role*");
+    return res.status(200).json({ message: "User deleted successfully, Wishlist & Cart cleared" });
   }
 )

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePasswordHandler = exports.updateUserProfileHandler = exports.updateUserProfileImage = exports.getUserProfile = exports.updateVendorRequestStatus = exports.updateUserRole = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
+exports.deleteUser = exports.changePasswordHandler = exports.updateUserProfileHandler = exports.updateUserProfileImage = exports.getUserProfile = exports.updateVendorRequestStatus = exports.updateUserRole = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const user_services_1 = require("../../services/user/user.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -227,4 +227,15 @@ exports.changePasswordHandler = (0, TryCatch_1.TryCatch)((req, res, _next) => __
             name: updatedUser.name,
         },
     });
+}));
+exports.deleteUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const requesterRole = (_a = req.user) === null || _a === void 0 ? void 0 : _a.role; // Assume this comes from authentication middleware
+    const { id } = req.params;
+    if (!requesterRole) {
+        throw new customError_1.default('Unauthorized', 401);
+    }
+    yield (0, cache_1.deleteCacheByPattern)("users:role*");
+    yield (0, user_services_1.deleteUserService)(requesterRole, id);
+    return res.status(200).json({ message: "User deleted successfully, Wishlist & Cart cleared" });
 }));
