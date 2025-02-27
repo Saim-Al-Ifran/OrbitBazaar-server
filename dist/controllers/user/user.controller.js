@@ -235,7 +235,7 @@ exports.deleteUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(voi
     if (!requesterRole) {
         throw new customError_1.default('Unauthorized', 401);
     }
-    yield (0, cache_1.deleteCacheByPattern)("users:role*");
     yield (0, user_services_1.deleteUserService)(requesterRole, id);
+    yield (0, cache_1.deleteCacheByPattern)("users:role*");
     return res.status(200).json({ message: "User deleted successfully, Wishlist & Cart cleared" });
 }));

@@ -20,31 +20,42 @@ const user_services_1 = require("../user/user.services");
 const secret_1 = require("../../secret");
 const registerUserService = (userData) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, phoneNumber, email, password } = userData;
-    if (!email) {
-        throw new customError_1.default('Email is required', 400);
+    if (!name || !phoneNumber || !email || !password) {
+        throw new customError_1.default("All fields (name, phoneNumber, email, password) are required", 400);
     }
-    const existingUser = yield (0, user_services_1.findUserForAuth)(email);
-    if (existingUser) {
-        throw new customError_1.default('User already exists with this email', 400);
+    let user = yield (0, user_services_1.findUserForAuth)(email);
+    if (user) {
+        if (user.isDeleted) {
+            user.name = name;
+            user.phoneNumber = phoneNumber;
+            user.isDeleted = false;
+            user.password = password;
+        }
+        else {
+            throw new customError_1.default("User already exists with this email", 400);
+        }
     }
-    const newUser = yield (0, user_services_1.createNewUser)({ name, phoneNumber, email, password });
+    else {
+        user = yield (0, user_services_1.createNewUser)({ name, phoneNumber, email, password });
+    }
     const payload = {
-        id: newUser._id,
-        username: newUser.name,
-        email: newUser.email,
-        role: newUser.role
+        id: user._id,
+        username: user.name,
+        email: user.email,
+        role: user.role,
     };
     const accessToken = (0, token_1.generateAccessToken)(payload);
     const refreshToken = (0, token_1.generateRefreshToken)(payload);
-    newUser.refreshTokens.push({ token: refreshToken });
-    yield newUser.save();
+    // Store the refresh token
+    user.refreshTokens.push({ token: refreshToken });
+    yield user.save();
     return { payload, accessToken, refreshToken };
 });
 exports.registerUserService = registerUserService;
 const loginUserService = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = loginData;
     const user = yield (0, user_services_1.findUserForAuth)(email);
-    if (!user) {
+    if (!user || user.isDeleted) {
         throw new customError_1.default('Invalid email or password', 401);
     }
     if (user.role === 'admin' || user.role === 'super-admin') {
