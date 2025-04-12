@@ -1,6 +1,6 @@
 import {  Request, Response, NextFunction} from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { loginAdminService, loginUserService, refreshTokenService, registerUserService } from "../../services/auth/auth.services";
+import { loginAdminService, loginUserService, refreshTokenService, registerUserService, registerVendorService } from "../../services/auth/auth.services";
 import CustomError from "../../utils/errors/customError";
 
 export const registerUser = TryCatch(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
@@ -19,6 +19,26 @@ export const registerUser = TryCatch(async (req: Request, res: Response, _next: 
         }
     });
 });
+
+export const registerVendor = TryCatch(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    const vendorData = req.body;
+
+    const newVendor = await registerVendorService(vendorData);
+
+    res.cookie('accessToken', newVendor.accessToken, { httpOnly: true, maxAge: 3600000 });
+    res.cookie('refreshToken', newVendor.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+    res.status(201).json({
+        success: true,
+        message: 'Vendor registered successfully',
+        data: {
+            accessToken: newVendor.accessToken,
+            refreshToken: newVendor.refreshToken,
+            user: newVendor.payload,
+        },
+    });
+});
+
 
 export const userLogin = TryCatch(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const loginData = req.body;

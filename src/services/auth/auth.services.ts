@@ -47,6 +47,54 @@ export const registerUserService = async (
   return { payload, accessToken, refreshToken };
 };
 
+export const registerVendorService = async (
+  vendorData: Partial<IUser>
+): Promise<{ payload: object; accessToken: string; refreshToken: string }> => {
+  const { name, phoneNumber, email, password } = vendorData;
+
+  if (!name || !phoneNumber || !email || !password) {
+    throw new CustomError("All fields (name, phoneNumber, email, password) are required", 400);
+  }
+
+  let user = await findUserForAuth(email);
+
+  if (user) {
+    if (user.isDeleted) {
+      user.name = name;
+      user.phoneNumber = phoneNumber;
+      user.password = password;
+      user.isDeleted = false;
+      user.role = "vendor";
+    } else {
+      throw new CustomError("Vendor already exists with this email", 400);
+    }
+  } else {
+    user = await createNewUser({
+      name,
+      phoneNumber,
+      email,
+      password,
+      role: 'vendor',
+      vendorRequestStatus:"requested" 
+    });
+  }
+
+  const payload = {
+    id: user._id,
+    username: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = generateAccessToken(payload);
+  const refreshToken = generateRefreshToken(payload);
+
+  user.refreshTokens.push({ token: refreshToken });
+  await user.save();
+
+  return { payload, accessToken, refreshToken };
+};
+
 
  export const loginUserService = async (loginData: { email: string; password: string }): Promise<{payload:object; accessToken: string; refreshToken: string }> => {
     const { email, password } = loginData;

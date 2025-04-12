@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerUser = void 0;
+exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerVendor = exports.registerUser = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const auth_services_1 = require("../../services/auth/auth.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -29,6 +29,21 @@ exports.registerUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             refreshToken: newUser.refreshToken,
             user: newUser.payload
         }
+    });
+}));
+exports.registerVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const vendorData = req.body;
+    const newVendor = yield (0, auth_services_1.registerVendorService)(vendorData);
+    res.cookie('accessToken', newVendor.accessToken, { httpOnly: true, maxAge: 3600000 });
+    res.cookie('refreshToken', newVendor.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.status(201).json({
+        success: true,
+        message: 'Vendor registered successfully',
+        data: {
+            accessToken: newVendor.accessToken,
+            refreshToken: newVendor.refreshToken,
+            user: newVendor.payload,
+        },
     });
 }));
 exports.userLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {

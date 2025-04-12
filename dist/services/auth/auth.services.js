@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshTokenService = exports.loginAdminService = exports.loginUserService = exports.registerUserService = void 0;
+exports.refreshTokenService = exports.loginAdminService = exports.loginUserService = exports.registerVendorService = exports.registerUserService = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const token_1 = require("../../utils/auth/token");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -52,6 +52,47 @@ const registerUserService = (userData) => __awaiter(void 0, void 0, void 0, func
     return { payload, accessToken, refreshToken };
 });
 exports.registerUserService = registerUserService;
+const registerVendorService = (vendorData) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name, phoneNumber, email, password } = vendorData;
+    if (!name || !phoneNumber || !email || !password) {
+        throw new customError_1.default("All fields (name, phoneNumber, email, password) are required", 400);
+    }
+    let user = yield (0, user_services_1.findUserForAuth)(email);
+    if (user) {
+        if (user.isDeleted) {
+            user.name = name;
+            user.phoneNumber = phoneNumber;
+            user.password = password;
+            user.isDeleted = false;
+            user.role = "vendor";
+        }
+        else {
+            throw new customError_1.default("Vendor already exists with this email", 400);
+        }
+    }
+    else {
+        user = yield (0, user_services_1.createNewUser)({
+            name,
+            phoneNumber,
+            email,
+            password,
+            role: 'vendor',
+            vendorRequestStatus: "requested"
+        });
+    }
+    const payload = {
+        id: user._id,
+        username: user.name,
+        email: user.email,
+        role: user.role,
+    };
+    const accessToken = (0, token_1.generateAccessToken)(payload);
+    const refreshToken = (0, token_1.generateRefreshToken)(payload);
+    user.refreshTokens.push({ token: refreshToken });
+    yield user.save();
+    return { payload, accessToken, refreshToken };
+});
+exports.registerVendorService = registerVendorService;
 const loginUserService = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = loginData;
     const user = yield (0, user_services_1.findUserForAuth)(email);
