@@ -158,17 +158,19 @@ const refreshTokenService = (refreshToken) => __awaiter(void 0, void 0, void 0, 
     if (!user || !user.refreshTokens.some((rt) => rt.token === refreshToken)) {
         throw new customError_1.default('Invalid refresh token', 403);
     }
-    const newAccessToken = (0, token_1.generateAccessToken)({
+    const newPayload = {
         id: user._id,
         username: user.name,
         email: user.email,
-        role: user.role,
-    });
+        role: user.role
+    };
+    const newAccessToken = (0, token_1.generateAccessToken)(newPayload);
     const newRefreshToken = (0, token_1.generateRefreshToken)({ id: user._id });
     user.refreshTokens = user.refreshTokens.filter((rt) => rt.token !== refreshToken);
     user.refreshTokens.push({ token: newRefreshToken });
     yield user.save();
     return {
+        newPayload,
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
     };

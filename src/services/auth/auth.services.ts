@@ -154,7 +154,7 @@ export const registerVendorService = async (
     return {payload,accessToken, refreshToken };
   };
 
-  export const refreshTokenService = async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
+  export const refreshTokenService = async (refreshToken: string): Promise<{newPayload:object; accessToken: string; refreshToken: string }> => {
     if (!refreshToken) {
       throw new CustomError('Refresh token not provided', 400);
     }
@@ -171,13 +171,14 @@ export const registerVendorService = async (
     if (!user || !user.refreshTokens.some((rt) => rt.token === refreshToken)) {
       throw new CustomError('Invalid refresh token', 403);
     }
-  
-    const newAccessToken = generateAccessToken({
+    const newPayload  = {
       id: user._id,
       username: user.name,
       email: user.email,
-      role: user.role,
-    });
+      role: user.role
+    };
+  
+    const newAccessToken = generateAccessToken(newPayload);
     const newRefreshToken = generateRefreshToken({ id: user._id });
   
     user.refreshTokens = user.refreshTokens.filter((rt) => rt.token !== refreshToken);
@@ -185,6 +186,7 @@ export const registerVendorService = async (
     await user.save();
   
     return {
+      newPayload,
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     };

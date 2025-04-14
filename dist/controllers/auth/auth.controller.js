@@ -77,12 +77,20 @@ exports.adminLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(voi
     });
 }));
 exports.refreshToken = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { refreshToken } = req.cookies;
-    if (!refreshToken) {
+    const { refreshToken: refreshTokenFromCookie } = req.cookies;
+    if (!refreshTokenFromCookie) {
         throw new customError_1.default('Refresh token not provided', 403);
     }
-    const tokens = yield (0, auth_services_1.refreshTokenService)(refreshToken);
-    res.cookie('accessToken', tokens.accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.json(tokens);
+    const { newPayload, accessToken, refreshToken: newRefreshToken } = yield (0, auth_services_1.refreshTokenService)(refreshTokenFromCookie);
+    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data: {
+            accessToken: accessToken,
+            refreshToken: newRefreshToken,
+            user: newPayload
+        }
+    });
 }));

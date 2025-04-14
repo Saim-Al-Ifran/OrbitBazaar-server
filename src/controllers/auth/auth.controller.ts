@@ -73,17 +73,25 @@ export const adminLogin = TryCatch(async (req: Request, res: Response, _next: Ne
 });
 
 export const refreshToken = TryCatch(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const { refreshToken } = req.cookies;
+    const { refreshToken: refreshTokenFromCookie} = req.cookies;
   
-    if (!refreshToken) {
+    if (!refreshTokenFromCookie) {
       throw new CustomError('Refresh token not provided', 403);
     }
 
-    const tokens = await refreshTokenService(refreshToken);
+    const  {newPayload,accessToken, refreshToken: newRefreshToken } = await refreshTokenService(refreshTokenFromCookie);
 
-    res.cookie('accessToken', tokens.accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.json(tokens);
+    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data:{
+            accessToken:  accessToken,
+            refreshToken:  newRefreshToken,
+            user:  newPayload
+        }
+    });
 });
 
 
