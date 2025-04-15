@@ -27,7 +27,12 @@ if (secret_1.nodeEnv !== 'production') {
 }
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: [
+        'http://localhost:5173' // local environment
+    ],
+    credentials: true
+}));
 app.use(index_1.default);
 app.get('/', (_req, res) => {
     res.status(200).json({ message: 'welcome, server is running' });
