@@ -135,7 +135,9 @@ export const registerVendorService = async (
       throw new CustomError('Unauthorized', 401);
     }
     
-    const isMatch =  user.comparePassword(password);
+    const isMatch = await user.comparePassword(password);
+    console.log(isMatch);
+    
     if (!isMatch) {
       throw new CustomError('Invalid credentials', 401);
     }
@@ -148,8 +150,8 @@ export const registerVendorService = async (
   
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
-    user.refreshTokens.push({ token: refreshToken });
-    await user.save();
+    // user.refreshTokens.push({ token: refreshToken });
+    // await user.save();
   
     return {payload,accessToken, refreshToken };
   };
