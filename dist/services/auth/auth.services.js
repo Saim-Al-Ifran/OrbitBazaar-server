@@ -123,11 +123,11 @@ const loginAdminService = (loginData) => __awaiter(void 0, void 0, void 0, funct
     const { email, password } = loginData;
     const user = yield (0, user_services_1.findUserForAuth)(email);
     if (!user || user.role == 'user') {
-        throw new customError_1.default('Only admins are allowed to login', 401);
+        throw new customError_1.default('Unauthorized', 401);
     }
     const isMatch = user.comparePassword(password);
     if (!isMatch) {
-        throw new customError_1.default('Invalid email or password', 401);
+        throw new customError_1.default('Invalid credentials', 401);
     }
     const payload = {
         id: user._id,

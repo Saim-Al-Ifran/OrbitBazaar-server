@@ -132,12 +132,12 @@ export const registerVendorService = async (
     const user = await findUserForAuth(email);
   
     if (!user || user.role == 'user') {
-      throw new CustomError('Only admins are allowed to login', 401);
+      throw new CustomError('Unauthorized', 401);
     }
     
     const isMatch =  user.comparePassword(password);
     if (!isMatch) {
-      throw new CustomError('Invalid email or password', 401);
+      throw new CustomError('Invalid credentials', 401);
     }
     const payload  = {
       id: user._id,
