@@ -20,7 +20,7 @@ const authenticate = (req, _res, next) => __awaiter(void 0, void 0, void 0, func
     try {
         const authHeader = req.headers.authorization;
         let token = req.cookies.accessToken || (authHeader && authHeader.split(' ')[1]);
-        console.log(token);
+        console.log(authHeader);
         if (!token) {
             return next(new customError_1.default('Unauthorized', 403));
         }

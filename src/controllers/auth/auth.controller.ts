@@ -59,8 +59,8 @@ export const userLogin = TryCatch(async (req: Request, res: Response, _next: Nex
 export const adminLogin = TryCatch(async (req: Request, res: Response, _next: NextFunction):Promise<void> => {
     const loginData = req.body;
     const {payload,accessToken, refreshToken} = await loginAdminService(loginData);
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -74,15 +74,15 @@ export const adminLogin = TryCatch(async (req: Request, res: Response, _next: Ne
 
 export const refreshToken = TryCatch(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const { refreshToken: refreshTokenFromCookie} = req.cookies;
-  
+    console.log("Rrefresh token from cookie", refreshTokenFromCookie);
     if (!refreshTokenFromCookie) {
       throw new CustomError('Refresh token not provided', 403);
     }
 
     const  {newPayload,accessToken, refreshToken: newRefreshToken } = await refreshTokenService(refreshTokenFromCookie);
 
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true,secure: false, maxAge: 3600000 });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true,secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',

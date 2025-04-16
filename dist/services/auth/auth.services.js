@@ -138,8 +138,8 @@ const loginAdminService = (loginData) => __awaiter(void 0, void 0, void 0, funct
     };
     const accessToken = (0, token_1.generateAccessToken)(payload);
     const refreshToken = (0, token_1.generateRefreshToken)(payload);
-    // user.refreshTokens.push({ token: refreshToken });
-    // await user.save();
+    user.refreshTokens.push({ token: refreshToken });
+    yield user.save();
     return { payload, accessToken, refreshToken };
 });
 exports.loginAdminService = loginAdminService;

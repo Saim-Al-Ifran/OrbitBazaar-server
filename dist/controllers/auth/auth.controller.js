@@ -64,8 +64,8 @@ exports.userLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void
 exports.adminLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const loginData = req.body;
     const { payload, accessToken, refreshToken } = yield (0, auth_services_1.loginAdminService)(loginData);
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -78,12 +78,13 @@ exports.adminLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(voi
 }));
 exports.refreshToken = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { refreshToken: refreshTokenFromCookie } = req.cookies;
+    console.log("Rrefresh token from cookie", refreshTokenFromCookie);
     if (!refreshTokenFromCookie) {
         throw new customError_1.default('Refresh token not provided', 403);
     }
     const { newPayload, accessToken, refreshToken: newRefreshToken } = yield (0, auth_services_1.refreshTokenService)(refreshTokenFromCookie);
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',

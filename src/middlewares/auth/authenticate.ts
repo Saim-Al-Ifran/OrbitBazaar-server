@@ -13,7 +13,7 @@ const authenticate = async (req: Request, _res: Response, next: NextFunction): P
     try {
         const authHeader = req.headers.authorization;
         let token = req.cookies.accessToken || (authHeader && authHeader.split(' ')[1]);
-          console.log(token);
+        console.log(authHeader);
           
         if (!token) {
             return next(new CustomError('Unauthorized', 403));

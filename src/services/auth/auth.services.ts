@@ -150,8 +150,8 @@ export const registerVendorService = async (
   
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
-    // user.refreshTokens.push({ token: refreshToken });
-    // await user.save();
+    user.refreshTokens.push({ token: refreshToken });
+    await user.save();
   
     return {payload,accessToken, refreshToken };
   };
