@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerVendor = exports.registerUser = void 0;
+exports.logout = exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerVendor = exports.registerUser = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const auth_services_1 = require("../../services/auth/auth.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -93,5 +93,13 @@ exports.refreshToken = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             refreshToken: newRefreshToken,
             user: newPayload
         }
+    });
+}));
+exports.logout = (0, TryCatch_1.TryCatch)((_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    res.clearCookie("accessToken", { httpOnly: true, secure: false });
+    res.clearCookie("refreshToken", { httpOnly: true, secure: false });
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
     });
 }));

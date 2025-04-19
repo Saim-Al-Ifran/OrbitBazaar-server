@@ -95,3 +95,12 @@ export const refreshToken = TryCatch(async (req: Request, res: Response, _next: 
 });
 
 
+export const logout = TryCatch(async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    res.clearCookie("accessToken", { httpOnly: true, secure: false });
+    res.clearCookie("refreshToken", { httpOnly: true, secure: false });
+
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
+    });
+});
