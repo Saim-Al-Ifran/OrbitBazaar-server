@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.firebaseLoginController = exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerVendor = exports.registerUser = void 0;
+exports.logout = exports.resetPassword = exports.firebaseLoginController = exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerVendor = exports.registerUser = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const auth_services_1 = require("../../services/auth/auth.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -138,6 +138,17 @@ exports.firebaseLoginController = (0, TryCatch_1.TryCatch)((req, res, _next) => 
             user: payload
         }
     });
+}));
+exports.resetPassword = (0, TryCatch_1.TryCatch)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const email = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const { oldPassword, newPassword } = req.body;
+    console.log(email);
+    if (!email || !oldPassword || !newPassword) {
+        throw new customError_1.default('Email, old password, and new password are required.', 400);
+    }
+    yield (0, auth_services_1.changePasswordService)(email, oldPassword, newPassword);
+    res.status(200).json({ success: true, message: 'Password changed successfully.' });
 }));
 exports.logout = (0, TryCatch_1.TryCatch)((_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     res.clearCookie("accessToken", { httpOnly: true, secure: false });

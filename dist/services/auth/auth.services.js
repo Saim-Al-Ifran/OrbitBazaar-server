@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshTokenService = exports.loginAdminService = exports.loginUserService = exports.registerVendorService = exports.registerUserService = void 0;
+exports.changePasswordService = exports.refreshTokenService = exports.loginAdminService = exports.loginUserService = exports.registerVendorService = exports.registerUserService = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const token_1 = require("../../utils/auth/token");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -177,3 +177,17 @@ const refreshTokenService = (refreshToken) => __awaiter(void 0, void 0, void 0, 
     };
 });
 exports.refreshTokenService = refreshTokenService;
+const changePasswordService = (email, oldPassword, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield (0, user_services_1.findUserForAuth)(email);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const isMatch = yield user.comparePassword(oldPassword);
+    if (!isMatch) {
+        throw new Error('Old password does not match');
+    }
+    user.password = newPassword;
+    yield user.save(); // triggers pre-save hook for hashing
+    return user;
+});
+exports.changePasswordService = changePasswordService;

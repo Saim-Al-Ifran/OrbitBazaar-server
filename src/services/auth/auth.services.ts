@@ -4,6 +4,7 @@ import { generateAccessToken, generateRefreshToken } from "../../utils/auth/toke
 import CustomError from "../../utils/errors/customError";
 import { createNewUser, findUserByProperty, findUserForAuth } from "../user/user.services";
 import { refreshSecretKey } from '../../secret';
+import User from '../../models/User';
 
  
 export const registerUserService = async (
@@ -194,5 +195,19 @@ export const registerVendorService = async (
     };
   };
   
- 
+  export const changePasswordService = async (email: string, oldPassword: string, newPassword: string) => {
+    const user = await findUserForAuth(email);
+  
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch) {
+      throw new Error('Old password does not match');
+    }
+  
+    user.password = newPassword;
+    await user.save(); // triggers pre-save hook for hashing
+    return user;
+  };
   

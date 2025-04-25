@@ -1,6 +1,6 @@
 import {  Request, Response, NextFunction} from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
-import { loginAdminService, loginUserService, refreshTokenService, registerUserService, registerVendorService } from "../../services/auth/auth.services";
+import { changePasswordService, loginAdminService, loginUserService, refreshTokenService, registerUserService, registerVendorService,} from "../../services/auth/auth.services";
 import CustomError from "../../utils/errors/customError";
 import {firebaseAdmin} from '../../firebase/firebase';
 import { createNewUser, findUserByProperty } from "../../services/user/user.services";
@@ -146,8 +146,24 @@ export const firebaseLoginController = TryCatch(async (req: Request, res: Respon
  
   });
 
+  export const resetPassword = TryCatch(
+    async (req: Request, res: Response) => {
+        const email = req.user?.email;
+        const {oldPassword, newPassword } = req.body;
+        console.log(email);
+        
+        if(!email || !oldPassword || !newPassword) {
+          throw new CustomError('Email, old password, and new password are required.', 400);
+        }
+    
+        await changePasswordService(email, oldPassword, newPassword);
+        res.status(200).json({ success:true,message: 'Password changed successfully.' });
+ 
+  });
 
-export const logout = TryCatch(async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
+
+export const logout = TryCatch(
+ async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
     res.clearCookie("accessToken", { httpOnly: true, secure: false });
     res.clearCookie("refreshToken", { httpOnly: true, secure: false });
 

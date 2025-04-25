@@ -6,8 +6,10 @@ import {
     refreshToken,
     registerUser,
     registerVendor,
+    resetPassword,
     userLogin
 } from '../../controllers/auth/auth.controller';
+import authenticate from '../../middlewares/auth/authenticate';
 const router = express.Router();
 
 router.post('/admin/login',adminLogin);
@@ -17,5 +19,6 @@ router.post('/vendors/register', registerVendor);
 router.post('/refresh_token',refreshToken);
 router.post('/logout',logout);
 router.post('/firebase_login',firebaseLoginController);
+router.post('/reset-password',authenticate, resetPassword);
 
 export default router;
