@@ -12,10 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerVendor = exports.registerUser = void 0;
+exports.logout = exports.firebaseLoginController = exports.refreshToken = exports.adminLogin = exports.userLogin = exports.registerVendor = exports.registerUser = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const auth_services_1 = require("../../services/auth/auth.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const firebase_1 = require("../../firebase/firebase");
+const user_services_1 = require("../../services/user/user.services");
+const token_1 = require("../../utils/auth/token");
 exports.registerUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = req.body;
     const newUser = yield (0, auth_services_1.registerUserService)(userData);
@@ -92,6 +95,47 @@ exports.refreshToken = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             accessToken: accessToken,
             refreshToken: newRefreshToken,
             user: newPayload
+        }
+    });
+}));
+exports.firebaseLoginController = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { idToken } = req.body;
+    if (!idToken)
+        throw new customError_1.default('No ID token provided', 400);
+    const decodedToken = yield firebase_1.firebaseAdmin.auth().verifyIdToken(idToken);
+    const { uid, email, name, phoneNumber, picture } = decodedToken;
+    if (!email) {
+        throw new customError_1.default('Email is missing', 400);
+    }
+    let user = yield (0, user_services_1.findUserByProperty)('email', email);
+    if (!user) {
+        user = yield (0, user_services_1.createNewUser)({
+            name: name || 'Anonymous',
+            phoneNumber: phoneNumber || 'N/A',
+            email,
+            firebaseUID: uid,
+            image: picture || 'N/A',
+        });
+    }
+    const payload = {
+        id: user._id,
+        email: user.email,
+        username: user.name,
+        role: user.role,
+    };
+    const accessToken = (0, token_1.generateAccessToken)(payload);
+    const refreshToken = (0, token_1.generateRefreshToken)(payload);
+    user.refreshTokens.push({ token: refreshToken });
+    yield user.save();
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data: {
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            user: payload
         }
     });
 }));

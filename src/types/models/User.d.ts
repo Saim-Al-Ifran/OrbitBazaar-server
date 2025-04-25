@@ -9,6 +9,7 @@ export interface IUser extends Document {
   image: string;
   email: string;
   password: string;
+  firebaseUID: string;
   phoneNumber: string;
   role: 'user' | 'vendor' | 'admin' | 'super-admin';
   vendorRequestStatus: 'none'| 'requested' | 'approved'|  'declined';

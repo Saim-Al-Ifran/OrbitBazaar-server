@@ -2,6 +2,9 @@ import {  Request, Response, NextFunction} from "express";
 import { TryCatch } from "../../middlewares/TryCatch";
 import { loginAdminService, loginUserService, refreshTokenService, registerUserService, registerVendorService } from "../../services/auth/auth.services";
 import CustomError from "../../utils/errors/customError";
+import {firebaseAdmin} from '../../firebase/firebase';
+import { createNewUser, findUserByProperty } from "../../services/user/user.services";
+import { generateAccessToken, generateRefreshToken } from "../../utils/auth/token";
 
 export const registerUser = TryCatch(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const userData = req.body;
@@ -93,6 +96,55 @@ export const refreshToken = TryCatch(async (req: Request, res: Response, _next: 
         }
     });
 });
+
+
+export const firebaseLoginController = TryCatch(async (req: Request, res: Response, _next: NextFunction) => {
+ 
+      const { idToken } = req.body;
+      if (!idToken) throw new CustomError('No ID token provided', 400);
+  
+      const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+      const { uid, email, name ,phoneNumber, picture} = decodedToken;
+    
+      if (!email) {
+        throw new CustomError('Email is missing', 400);
+      }
+      let user = await findUserByProperty('email', email);
+      if (!user) {
+        user = await createNewUser({ 
+            name: name|| 'Anonymous', 
+            phoneNumber:phoneNumber || 'N/A',
+            email,
+            firebaseUID: uid,
+            image: picture || 'N/A', 
+         });
+      }
+  
+      const payload = {
+        id: user._id,
+        email: user.email,
+        username: user.name,
+        role: user.role,
+      };
+  
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
+  
+      user.refreshTokens.push({ token: refreshToken });
+      await user.save();
+      res.cookie('accessToken', accessToken, { httpOnly: true,secure: false, maxAge: 3600000 });
+      res.cookie('refreshToken', refreshToken , { httpOnly: true,secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+      res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data:{
+            accessToken:  accessToken,
+            refreshToken:  refreshToken,
+            user:  payload
+        }
+    });
+ 
+  });
 
 
 export const logout = TryCatch(async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
