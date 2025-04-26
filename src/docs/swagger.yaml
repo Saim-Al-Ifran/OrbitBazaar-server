@@ -548,7 +548,7 @@ components:
     
   
 paths:
-  /admin/login:
+  /auth/admin/login:
       post:
         tags: 
         - Authentication
@@ -569,7 +569,7 @@ paths:
                   $ref: '#/components/schemas/LoginResponse'
           401:
             description: Unauthorized
-  /users/login:
+  /auth/users/login:
       post:
        tags:
          - Authentication
@@ -590,7 +590,7 @@ paths:
                  $ref: '#/components/schemas/LoginResponse'
          401:
            description: Unauthorized
-  /users/register:
+  /auth/users/register:
     post:
       tags:
         - Authentication
@@ -1088,7 +1088,7 @@ paths:
           description: Not Found - User profile not found
         '500':
           description: Internal Server Error - Unexpected error occurred
-  /users/profile-image:
+  /user/profile-image:
     put:
       tags:
         - User
@@ -1133,7 +1133,7 @@ paths:
           description: Unauthorized - Missing or invalid token
         '500':
           description: Internal Server Error
-  /users/{userId}/profile:
+  /users/profile:
     put:
       tags:
         - User
@@ -1141,7 +1141,6 @@ paths:
       description: Allows a user to update their personal information, such as name, email, phone number, or other profile details.
       security:
         - BearerAuth: []  
-      parameters:
         - name: userId
           in: path
           required: true
@@ -1208,10 +1207,10 @@ paths:
           description: User not found
         '500':
           description: Internal Server Error
-  /user/change-password:
+  /auth/user/reset_password:
     put:
       tags:
-        - User
+        - Authentication
       summary: Change user password
       description: Allows a user to update their password. The user must provide their current password and the new password.
       security:
