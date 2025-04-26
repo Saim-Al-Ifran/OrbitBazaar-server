@@ -184,7 +184,7 @@ const changePasswordService = (email, oldPassword, newPassword) => __awaiter(voi
     }
     const isMatch = yield user.comparePassword(oldPassword);
     if (!isMatch) {
-        throw new Error('Old password does not match');
+        throw new Error('Current password does not match');
     }
     user.password = newPassword;
     yield user.save(); // triggers pre-save hook for hashing

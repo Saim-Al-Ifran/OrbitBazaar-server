@@ -19,6 +19,6 @@ router.post('/vendors/register', registerVendor);
 router.post('/refresh_token',refreshToken);
 router.post('/logout',logout);
 router.post('/firebase_login',firebaseLoginController);
-router.post('/reset-password',authenticate, resetPassword);
+router.put('/reset_password',authenticate, resetPassword);
 
 export default router;

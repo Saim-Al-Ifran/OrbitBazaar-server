@@ -203,7 +203,7 @@ export const registerVendorService = async (
     }
     const isMatch = await user.comparePassword(oldPassword);
     if (!isMatch) {
-      throw new Error('Old password does not match');
+      throw new Error('Current password does not match');
     }
   
     user.password = newPassword;
