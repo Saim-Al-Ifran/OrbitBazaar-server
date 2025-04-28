@@ -31,13 +31,15 @@ export const getAllUsers = async (
   page: number,
   limit: number,
   sort: any,
-  searchQuery: object,
+  searchQuery: any,
 ) => {
-  const query = {
-    ...searchQuery,
-    role: role === "super-admin" ? { $ne: "super-admin" } : "user",
-  };
+  const query = { ...searchQuery };
 
+  // ✅ Only add this role condition if role is NOT already filtered in searchQuery
+  if (!searchQuery.role) {
+    query.role = role === "super-admin" ? { $ne: "super-admin" } : "user";
+  }
+  
   return await paginate(User, query, page, limit, sort,"-password -refreshTokens");
 };
 

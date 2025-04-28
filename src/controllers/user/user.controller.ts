@@ -18,23 +18,33 @@ import { deleteCache, deleteCacheByPattern, getCache, setCache } from "../../uti
 export const findAllUsers = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
       const role = req.user?.role;
-  
+
       if (role !== "super-admin" && role !== "admin") {
         throw new CustomError("Unauthorized role for fetching users", 403);
       }
-  
+      
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const sort = req.query.sort || { createdAt: -1 };
+      
+      // Updated Sort Parsing
+      const sortParam = (req.query.sort as string) || "createdAt:desc";
+      const [sortField, sortOrder] = sortParam.split(":");
+      const sort = { [sortField]: sortOrder === "asc" ? 1 : -1 };
+      
       const search = req.query.search as string | undefined;
+      
+      // ✨ New Filters
+      const filterRole = req.query.role as string | undefined;
+      const vendorRequestStatus = req.query.vendorRequestStatus as string | undefined;
+      const status = req.query.status as string | undefined;
 
-      const cachedKey = `users:role:${role}:page:${page}:limit:${limit}:sort:${JSON.stringify(sort)}:search:${search || "none"}`;   
-      const cachedData = await getCache(cachedKey);
-      if(cachedData){
-        return res.status(200).json(JSON.parse(cachedData));
+      if(role === 'admin' && filterRole === 'admin'){
+        throw new CustomError("Unauthorized role for fetching users", 403);
       }
 
-      const searchQuery = search
+      
+      // Build search query
+      const searchQuery: any = search
         ? {
             $or: [
               { name: { $regex: search, $options: "i" } },
@@ -43,25 +53,51 @@ export const findAllUsers = TryCatch(
             ],
           }
         : {};
-        
-      const {data,totalRecords,totalPages,prevPage,nextPage}= await getAllUsers(role, page, limit, sort, searchQuery);
       
+      // 🧠 Add filter conditions
+      if (filterRole) {
+        searchQuery.role = filterRole;
+      }
+      if (vendorRequestStatus) {
+        searchQuery.vendorRequestStatus = vendorRequestStatus;
+      }
+      if (status) {
+        searchQuery.status = status;
+      }
+      
+      // Cache key (also updated with new filters)
+      const cachedKey = `users:authRole:${role}:filterRole:${filterRole || "none"}:vendorStatus:${vendorRequestStatus || "none"}:userStatus:${status || "none"}:page:${page}:limit:${limit}:sort:${sortField}_${sortOrder}:search:${search || "none"}`;
+      
+      // Check cache
+      const cachedData = await getCache(cachedKey);
+      // if (cachedData) {
+      //   return res.status(200).json(JSON.parse(cachedData));
+      // }
+      
+      // Fetch from DB
+      const { data, totalRecords, totalPages, prevPage, nextPage } = await getAllUsers(role, page, limit, sort, searchQuery);
+      if(data.length === 0){
+        throw new CustomError("No users found", 404);
+      }
+      
+      // Return
       const userResponse = {
         success: true,
         message: "Users fetched successfully.",
         data,
-        pagination:{
-            totalRecords,
-            totalPages,
-            prevPage,
-            nextPage,
-            currentPage:page
+        pagination: {
+          totalRecords,
+          totalPages,
+          prevPage,
+          nextPage,
+          currentPage: page,
         }
-
       };
-      await setCache(cachedKey,userResponse,120)
-
+      
+     // await setCache(cachedKey, userResponse, 120);
+      
       res.status(200).json(userResponse);
+      
     }
   );
 

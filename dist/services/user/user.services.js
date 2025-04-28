@@ -40,7 +40,11 @@ const createNewUser = (userData) => __awaiter(void 0, void 0, void 0, function* 
 exports.createNewUser = createNewUser;
 // Service to get all users
 const getAllUsers = (role, page, limit, sort, searchQuery) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = Object.assign(Object.assign({}, searchQuery), { role: role === "super-admin" ? { $ne: "super-admin" } : "user" });
+    const query = Object.assign({}, searchQuery);
+    // ✅ Only add this role condition if role is NOT already filtered in searchQuery
+    if (!searchQuery.role) {
+        query.role = role === "super-admin" ? { $ne: "super-admin" } : "user";
+    }
     return yield (0, paginate_1.default)(User_1.default, query, page, limit, sort, "-password -refreshTokens");
 });
 exports.getAllUsers = getAllUsers;
