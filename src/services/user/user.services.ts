@@ -34,7 +34,6 @@ export const getAllUsers = async (
   searchQuery: any,
 ) => {
   const query = { ...searchQuery };
-
   // ✅ Only add this role condition if role is NOT already filtered in searchQuery
   if (!searchQuery.role) {
     query.role = role === "super-admin" ? { $ne: "super-admin" } : "user";

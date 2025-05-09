@@ -30,7 +30,6 @@ export const findAllUsers = TryCatch(
       const sortParam = (req.query.sort as string) || "createdAt:desc";
       const [sortField, sortOrder] = sortParam.split(":");
       const sort = { [sortField]: sortOrder === "asc" ? 1 : -1 };
-      
       const search = req.query.search as string | undefined;
       
       // ✨ New Filters
@@ -66,13 +65,13 @@ export const findAllUsers = TryCatch(
       }
       
       // Cache key (also updated with new filters)
-      const cachedKey = `users:authRole:${role}:filterRole:${filterRole || "none"}:vendorStatus:${vendorRequestStatus || "none"}:userStatus:${status || "none"}:page:${page}:limit:${limit}:sort:${sortField}_${sortOrder}:search:${search || "none"}`;
+      const cachedKey = `users:role:${role}:filterRole:${filterRole || "none"}:vendorStatus:${vendorRequestStatus || "none"}:userStatus:${status || "none"}:page:${page}:limit:${limit}:sort:${sortField}_${sortOrder}:search:${search || "none"}`;
       
       // Check cache
       const cachedData = await getCache(cachedKey);
-      // if (cachedData) {
-      //   return res.status(200).json(JSON.parse(cachedData));
-      // }
+      if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+      }
       
       // Fetch from DB
       const { data, totalRecords, totalPages, prevPage, nextPage } = await getAllUsers(role, page, limit, sort, searchQuery);
@@ -94,7 +93,7 @@ export const findAllUsers = TryCatch(
         }
       };
       
-     // await setCache(cachedKey, userResponse, 120);
+      await setCache(cachedKey, userResponse, 120);
       
       res.status(200).json(userResponse);
       
@@ -143,6 +142,7 @@ export const updateUserStatus = TryCatch(
       
         const { id } = req.params;
         const { status } = req.body;
+        console.log(req.body)
         const updatedUser = await toggleUserStatus(id, status,requesterRole);
         await deleteCacheByPattern("users:role*");
         res.status(200).json({
@@ -165,12 +165,7 @@ export const updateUserRole = TryCatch(
         const { id } = req.params;
         const { role } = req.body;
         const updatedUser = await toggleUserRole(id, role);
-        if(updatedUser.role === 'admin'){
-          await deleteCacheByPattern(`users:role:${req.user?.role}*`);
-        }else{
-          await deleteCacheByPattern("users:role*");
-        }
-
+        await deleteCacheByPattern("users:role*");
         res.status(200).json({
             success: true,
             message: `User status updated to ${role} successfully.`,
@@ -307,6 +302,6 @@ export const deleteUser = TryCatch(
     }
     await deleteUserService(requesterRole, id);
     await deleteCacheByPattern("users:role*");
-    return res.status(200).json({ message: "User deleted successfully, Wishlist & Cart cleared" });
+    return res.status(200).json({success:true,message: "User deleted successfully, Wishlist & Cart cleared" });
   }
 )

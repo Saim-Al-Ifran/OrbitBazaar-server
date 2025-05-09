@@ -58,12 +58,12 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
         searchQuery.status = status;
     }
     // Cache key (also updated with new filters)
-    const cachedKey = `users:authRole:${role}:filterRole:${filterRole || "none"}:vendorStatus:${vendorRequestStatus || "none"}:userStatus:${status || "none"}:page:${page}:limit:${limit}:sort:${sortField}_${sortOrder}:search:${search || "none"}`;
+    const cachedKey = `users:role:${role}:filterRole:${filterRole || "none"}:vendorStatus:${vendorRequestStatus || "none"}:userStatus:${status || "none"}:page:${page}:limit:${limit}:sort:${sortField}_${sortOrder}:search:${search || "none"}`;
     // Check cache
     const cachedData = yield (0, cache_1.getCache)(cachedKey);
-    // if (cachedData) {
-    //   return res.status(200).json(JSON.parse(cachedData));
-    // }
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
     // Fetch from DB
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, user_services_1.getAllUsers)(role, page, limit, sort, searchQuery);
     if (data.length === 0) {
@@ -82,7 +82,7 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             currentPage: page,
         }
     };
-    // await setCache(cachedKey, userResponse, 120);
+    yield (0, cache_1.setCache)(cachedKey, userResponse, 120);
     res.status(200).json(userResponse);
 }));
 exports.createUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -121,6 +121,7 @@ exports.updateUserStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     }
     const { id } = req.params;
     const { status } = req.body;
+    console.log(req.body);
     const updatedUser = yield (0, user_services_1.toggleUserStatus)(id, status, requesterRole);
     yield (0, cache_1.deleteCacheByPattern)("users:role*");
     res.status(200).json({
@@ -137,16 +138,10 @@ exports.updateUserStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
     });
 }));
 exports.updateUserRole = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     const { id } = req.params;
     const { role } = req.body;
     const updatedUser = yield (0, user_services_1.toggleUserRole)(id, role);
-    if (updatedUser.role === 'admin') {
-        yield (0, cache_1.deleteCacheByPattern)(`users:role:${(_a = req.user) === null || _a === void 0 ? void 0 : _a.role}*`);
-    }
-    else {
-        yield (0, cache_1.deleteCacheByPattern)("users:role*");
-    }
+    yield (0, cache_1.deleteCacheByPattern)("users:role*");
     res.status(200).json({
         success: true,
         message: `User status updated to ${role} successfully.`,
@@ -265,5 +260,5 @@ exports.deleteUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(voi
     }
     yield (0, user_services_1.deleteUserService)(requesterRole, id);
     yield (0, cache_1.deleteCacheByPattern)("users:role*");
-    return res.status(200).json({ message: "User deleted successfully, Wishlist & Cart cleared" });
+    return res.status(200).json({ success: true, message: "User deleted successfully, Wishlist & Cart cleared" });
 }));
