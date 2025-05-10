@@ -35,6 +35,11 @@ exports.findUserByProperty = findUserByProperty;
 // Service to create a new user
 const createNewUser = (userData) => __awaiter(void 0, void 0, void 0, function* () {
     const user = new User_1.default(userData);
+    // Check if the user already exists
+    const existingUser = yield (0, exports.findUserByProperty)('email', user.email);
+    if (existingUser) {
+        throw new customError_1.default('User already exists', 409);
+    }
     return yield user.save();
 });
 exports.createNewUser = createNewUser;

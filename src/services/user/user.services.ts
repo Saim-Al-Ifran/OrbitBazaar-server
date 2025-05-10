@@ -22,6 +22,11 @@ export const findUserByProperty = async (key: keyof IUser, value: string): Promi
 // Service to create a new user
 export const createNewUser = async (userData: Partial<IUser>): Promise<IUser> => {
   const user = new User(userData);
+  // Check if the user already exists
+  const existingUser = await findUserByProperty('email', user.email);
+  if(existingUser) {
+    throw new CustomError('User already exists', 409);
+  }
   return await user.save();
 };
 

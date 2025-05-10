@@ -52,7 +52,7 @@ export const findAllUsers = TryCatch(
             ],
           }
         : {};
-      
+      searchQuery.isDeleted = false;
       // 🧠 Add filter conditions
       if (filterRole) {
         searchQuery.role = filterRole;

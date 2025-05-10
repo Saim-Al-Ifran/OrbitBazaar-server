@@ -47,6 +47,7 @@ exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
             ],
         }
         : {};
+    searchQuery.isDeleted = false;
     // 🧠 Add filter conditions
     if (filterRole) {
         searchQuery.role = filterRole;
