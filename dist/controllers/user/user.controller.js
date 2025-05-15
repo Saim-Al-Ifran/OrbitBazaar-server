@@ -159,6 +159,7 @@ exports.updateUserRole = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
 exports.updateVendorRequestStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
     const { status } = req.body;
+    console.log(req.body);
     const updatedUser = yield (0, user_services_1.approveVendor)(userId, status);
     yield (0, cache_1.deleteCacheByPattern)("users:role*");
     res.status(200).json({

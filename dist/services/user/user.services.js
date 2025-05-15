@@ -72,6 +72,9 @@ const toggleUserRole = (userId, value) => __awaiter(void 0, void 0, void 0, func
     if (!user) {
         throw new customError_1.default('User not found', 404);
     }
+    if (value === 'vendor') {
+        user.vendorRequestStatus = 'approved';
+    }
     user.role = value;
     return yield user.save();
 });

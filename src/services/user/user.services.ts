@@ -66,7 +66,9 @@ export const toggleUserRole = async (userId: string, value: 'user'|'admin'|'vend
   if (!user) {
     throw new CustomError('User not found', 404);
   }
- 
+  if(value === 'vendor'){
+    user.vendorRequestStatus = 'approved';
+  }
   user.role = value;
   return await user.save();
 };

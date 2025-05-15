@@ -185,6 +185,7 @@ export const updateVendorRequestStatus = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
         const { userId } = req.params;
         const { status } = req.body;
+        console.log(req.body)
         const updatedUser = await approveVendor(userId, status);
         await deleteCacheByPattern("users:role*");
         res.status(200).json({
