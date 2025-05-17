@@ -7,7 +7,7 @@ export interface IProduct extends Document {
     vendorEmail: string;
     price: number;
     stock: number;
-    image: string;
+    images: [string];
     ratings: {
       average: number;
       count: number;

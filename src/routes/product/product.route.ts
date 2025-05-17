@@ -30,8 +30,8 @@ router.get('/products/:id',getSingleProduct);
 router.get('/vendor/products/:id',authenticate,authorizeVendor,getVendorProductDetails);
 
 router.get('/vendor/products',authenticate,authorizeVendor,getAllProductsForVendor);
-router.post('/products',authenticate,authorizeVendor,upload.single('image'),createProduct);
-router.put('/products/:id',authenticate,authorizeVendor,upload.single('image'),updatedProduct);
+router.post('/products',authenticate,authorizeVendor,upload.array('images',5),createProduct);
+router.put('/products/:id',authenticate,authorizeVendor,upload.array('images',5),updatedProduct);
 router.patch("/products/:id/feature", authenticate, authorizeVendor, toggleProductFeaturedStatus);
 router.patch("/products/:id/archive", authenticate, authorizeVendor, toggleProductArchivedStatus);
 

@@ -147,7 +147,6 @@ export const getAllProductsForVendor = TryCatch(
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const vendorEmail = req.user?.email;
-
     if (!vendorEmail) {
       throw new CustomError("Unauthorized access. Vendor email missing.", 403);
     }
@@ -205,27 +204,31 @@ export const getAllProductsForVendor = TryCatch(
 );
 
 export const createProduct = TryCatch(
-  async(req: Request,res: Response,_next: NextFunction)=>{
+  async (req: Request, res: Response, _next: NextFunction) => {
     const vendorEmail = req.user?.email;
-    const productData  = req.body;
-    const file = req.file; 
-  
-    
-    if (!file) {
-      throw new CustomError("Product image is required",400)
+    const productData = req.body;
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      throw new CustomError("At least one product image is required", 400);
     }
+
     if (!vendorEmail) {
-      throw new CustomError("Vendor email is required",400)
+      throw new CustomError("Vendor email is required", 400);
     }
-    const newProduct = await addProduct(productData, file,vendorEmail);
+
+    const newProduct = await addProduct(productData, files, vendorEmail);
+
     await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
+
     res.status(201).json({
       success: true,
       message: "Product created successfully",
       product: newProduct,
     });
   }
-)
+);
+
 
 export const getSingleProduct = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -306,9 +309,12 @@ export const deleteProduct = TryCatch(
       if (!product) {
         throw new CustomError('Product not found!', 404);
       }
-      if(product.image){
-        await deleteProductImage(product.image);
-      }
+    if (product.images && Array.isArray(product.images)) {
+      await Promise.all(
+        product.images.map(async (imgUrl) => await deleteProductImage(imgUrl))
+      );
+    }
+
       await  deleteProductInDb(id,vendorEmail);
       await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
       await deleteCacheByPattern(`products*`);
@@ -320,41 +326,54 @@ export const deleteProduct = TryCatch(
 )
 
 export const updatedProduct = TryCatch(
-  async(req:Request,res:Response,_next:NextFunction)=>{
-      const { id } = req.params;
-      const updates = req.body;
-      const file = req.file;
-      const vendorEmail = req.user?.email;
-      const product = await findProductById(id);
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+    const updates = req.body;
+    const files = req.files as Express.Multer.File[];
+    const vendorEmail = req.user?.email;
 
-      if(!vendorEmail){
-        throw new CustomError("Vendor email is required",400)
-      }
-      if(!product){
-        throw new CustomError('Product not found!', 404);
+    const product = await findProductById(id);
+
+    if (!vendorEmail) {
+      throw new CustomError("Vendor email is required", 400);
+    }
+
+    if (!product) {
+      throw new CustomError("Product not found!", 404);
+    } 
+     // Validate blank input: user manually sends images as ""
+    if (typeof updates.images === "string" && updates.images.trim() === "") {
+      throw new CustomError("Images field cannot be an empty string", 400);
+    }
+
+    // Handle image update
+    if (files && files.length > 0) {
+      if (product.images && product.images.length > 0) {
+        // Delete old images
+        await Promise.all(product.images.map(img => deleteProductImage(img)));
       }
 
-      if (file) {
-        if(product.image){
-          await deleteProductImage(product.image);
-        }
-        const newImageUrl= await uploadProductImage(file);
-        updates.imageUrl = newImageUrl;
-      }
+      // Upload new images
+      const uploadedImageUrls = await Promise.all(files.map(file => uploadProductImage(file)));
+      updates.images = uploadedImageUrls;
+    }
 
-      const updatedProduct = await updateProductInDb(id,updates,vendorEmail);
-      if(!updatedProduct){
-         throw new CustomError("Vendor can only update their own product",401);
-      }
-      await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
-      await deleteCacheByPattern(`products*`);
-      res.status(200).json({
-        success: true,
-        message: "Product updated successfully.",
-        data: updatedProduct,
-      });
+    const updatedProduct = await updateProductInDb(id, updates, vendorEmail);
+
+    if (!updatedProduct) {
+      throw new CustomError("Vendor can only update their own product", 401);
+    }
+
+    await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
+    await deleteCacheByPattern(`products*`);
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully.",
+      data: updatedProduct,
+    });
   }
-)
+);
 
 
 export const toggleProductFeaturedStatus = TryCatch(

@@ -163,14 +163,14 @@ exports.createProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     var _a;
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     const productData = req.body;
-    const file = req.file;
-    if (!file) {
-        throw new customError_1.default("Product image is required", 400);
+    const files = req.files;
+    if (!files || files.length === 0) {
+        throw new customError_1.default("At least one product image is required", 400);
     }
     if (!vendorEmail) {
         throw new customError_1.default("Vendor email is required", 400);
     }
-    const newProduct = yield (0, product_services_1.addProduct)(productData, file, vendorEmail);
+    const newProduct = yield (0, product_services_1.addProduct)(productData, files, vendorEmail);
     yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
     res.status(201).json({
         success: true,
@@ -239,8 +239,8 @@ exports.deleteProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     if (!product) {
         throw new customError_1.default('Product not found!', 404);
     }
-    if (product.image) {
-        yield (0, product_services_1.deleteProductImage)(product.image);
+    if (product.images && Array.isArray(product.images)) {
+        yield Promise.all(product.images.map((imgUrl) => __awaiter(void 0, void 0, void 0, function* () { return yield (0, product_services_1.deleteProductImage)(imgUrl); })));
     }
     yield (0, product_services_1.deleteProductInDb)(id, vendorEmail);
     yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
@@ -254,21 +254,28 @@ exports.updatedProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     var _a;
     const { id } = req.params;
     const updates = req.body;
-    const file = req.file;
+    const files = req.files;
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     const product = yield (0, product_services_1.findProductById)(id);
     if (!vendorEmail) {
         throw new customError_1.default("Vendor email is required", 400);
     }
     if (!product) {
-        throw new customError_1.default('Product not found!', 404);
+        throw new customError_1.default("Product not found!", 404);
     }
-    if (file) {
-        if (product.image) {
-            yield (0, product_services_1.deleteProductImage)(product.image);
+    // Validate blank input: user manually sends images as ""
+    if (typeof updates.images === "string" && updates.images.trim() === "") {
+        throw new customError_1.default("Images field cannot be an empty string", 400);
+    }
+    // Handle image update
+    if (files && files.length > 0) {
+        if (product.images && product.images.length > 0) {
+            // Delete old images
+            yield Promise.all(product.images.map(img => (0, product_services_1.deleteProductImage)(img)));
         }
-        const newImageUrl = yield (0, product_services_1.uploadProductImage)(file);
-        updates.imageUrl = newImageUrl;
+        // Upload new images
+        const uploadedImageUrls = yield Promise.all(files.map(file => (0, product_services_1.uploadProductImage)(file)));
+        updates.images = uploadedImageUrls;
     }
     const updatedProduct = yield (0, product_services_1.updateProductInDb)(id, updates, vendorEmail);
     if (!updatedProduct) {

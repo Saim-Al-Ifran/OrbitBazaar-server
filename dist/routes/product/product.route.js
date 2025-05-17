@@ -16,8 +16,8 @@ router.get('/products/archived', authenticate_1.default, authorizeVendor_1.defau
 router.get('/products/:id', product_controller_1.getSingleProduct);
 router.get('/vendor/products/:id', authenticate_1.default, authorizeVendor_1.default, product_controller_1.getVendorProductDetails);
 router.get('/vendor/products', authenticate_1.default, authorizeVendor_1.default, product_controller_1.getAllProductsForVendor);
-router.post('/products', authenticate_1.default, authorizeVendor_1.default, uploadFile_1.default.single('image'), product_controller_1.createProduct);
-router.put('/products/:id', authenticate_1.default, authorizeVendor_1.default, uploadFile_1.default.single('image'), product_controller_1.updatedProduct);
+router.post('/products', authenticate_1.default, authorizeVendor_1.default, uploadFile_1.default.array('images', 5), product_controller_1.createProduct);
+router.put('/products/:id', authenticate_1.default, authorizeVendor_1.default, uploadFile_1.default.array('images', 5), product_controller_1.updatedProduct);
 router.patch("/products/:id/feature", authenticate_1.default, authorizeVendor_1.default, product_controller_1.toggleProductFeaturedStatus);
 router.patch("/products/:id/archive", authenticate_1.default, authorizeVendor_1.default, product_controller_1.toggleProductArchivedStatus);
 router.patch("/products/:id/view", product_controller_1.trackProductViewController);

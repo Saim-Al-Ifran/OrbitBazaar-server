@@ -23,10 +23,9 @@ const findAllProducts = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_
 });
 exports.findAllProducts = findAllProducts;
 // Add a new product (vendors)
-const addProduct = (productData, file, email) => __awaiter(void 0, void 0, void 0, function* () {
-    const imageUrl = yield (0, exports.uploadProductImage)(file);
-    const product = new Product_1.default(Object.assign(Object.assign({}, productData), { vendorEmail: email, image: imageUrl }));
-    // Save the product to the database
+const addProduct = (productData, files, email) => __awaiter(void 0, void 0, void 0, function* () {
+    const imageUrls = yield Promise.all(files.map(file => (0, exports.uploadProductImage)(file)));
+    const product = new Product_1.default(Object.assign(Object.assign({}, productData), { vendorEmail: email, images: imageUrls }));
     return yield product.save();
 });
 exports.addProduct = addProduct;

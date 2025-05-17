@@ -22,18 +22,17 @@ export const findAllProducts = async (
 // Add a new product (vendors)
 export const addProduct = async (
   productData: Partial<IProduct>,
-  file: Express.Multer.File,
-  email:string
+  files: Express.Multer.File[],
+  email: string
 ): Promise<IProduct> => {
-
-  const imageUrl = await uploadProductImage(file);
+  const imageUrls = await Promise.all(files.map(file => uploadProductImage(file)));
+ 
   const product = new Product({
     ...productData,
-    vendorEmail:email,
-    image: imageUrl,
+    vendorEmail: email,
+    images: imageUrls, 
   });
 
-  // Save the product to the database
   return await product.save();
 };
 

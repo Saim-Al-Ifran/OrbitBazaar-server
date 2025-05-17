@@ -60,9 +60,9 @@ const ProductSchema = new mongoose_1.Schema({
         type: Number,
         required: true
     },
-    image: {
-        type: String,
-        required: true
+    images: {
+        type: [String],
+        required: true,
     },
     ratings: {
         average: {

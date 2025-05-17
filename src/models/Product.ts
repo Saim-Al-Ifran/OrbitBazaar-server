@@ -30,9 +30,9 @@ const ProductSchema: Schema = new Schema(
         type: Number,
         required: true
     },
-    image: {
-        type: String,
-        required: true
+    images: {
+      type: [String],  
+      required: true,
     },
     ratings: {
       average: {

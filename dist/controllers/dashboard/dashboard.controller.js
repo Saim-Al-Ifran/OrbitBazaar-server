@@ -11,17 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDashboardStatsController = void 0;
 const dashboard_services_1 = require("../../services/dashboard/dashboard.services");
-const getDashboardStatsController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const stats = yield (0, dashboard_services_1.getDashboardStatsService)();
-        res.status(200).json({
-            success: true,
-            message: 'Dashboard statistics fetched successfully',
-            data: stats
-        });
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.getDashboardStatsController = getDashboardStatsController;
+const TryCatch_1 = require("../../middlewares/TryCatch");
+exports.getDashboardStatsController = (0, TryCatch_1.TryCatch)((_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const stats = yield (0, dashboard_services_1.getDashboardStatsService)();
+    res.status(200).json({
+        success: true,
+        message: 'Dashboard statistics fetched successfully',
+        data: stats
+    });
+}));
