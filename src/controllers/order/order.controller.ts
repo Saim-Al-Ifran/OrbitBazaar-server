@@ -88,19 +88,45 @@ export const getUserSingleOrder = TryCatch(
 
 
 // Get vendor orders
-  export const vendorOrders = TryCatch(
-    async (req: Request, res: Response, _next: NextFunction) => {
-      const vendorEmail = req.user?.email;
-      if(!vendorEmail){
-          throw new CustomError("user not found", 404);
-      } 
-      const cachedKey = `orders_${vendorEmail}`;
-      const cachedOrders = await getCache(cachedKey);
-      if(cachedOrders){
-        return res.json(JSON.parse(cachedOrders));
-      }
-      const orders = await getVendorOrders(vendorEmail);
-      await setCache(cachedKey,orders,60);
-      res.json(orders);
+export const vendorOrders = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const vendorEmail = req.user?.email;
+
+    if (!vendorEmail) {
+      throw new CustomError("User not found", 404);
     }
-  );
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const cachedKey = `orders_${vendorEmail}_page_${page}_limit_${limit}`;
+    const cachedOrders = await getCache(cachedKey);
+
+    if (cachedOrders) {
+      return res.json(JSON.parse(cachedOrders));
+    }
+
+     const { data, totalRecords, totalPages, prevPage, nextPage } =
+     await getVendorOrders(vendorEmail, page, limit);
+    if (data.length === 0) {
+      throw new CustomError("No orders found!", 404);
+    }
+
+    const response = {
+      success: true,
+      message: "Orders fetched successfully.",
+      data,
+      pagination: {
+        totalRecords,
+        totalPages,
+        prevPage,
+        nextPage,
+        currentPage: page,
+      },
+    };
+
+    await setCache(cachedKey, response, 60); // Cache for 60 seconds
+
+     res.status(200).json(response);
+  }
+)

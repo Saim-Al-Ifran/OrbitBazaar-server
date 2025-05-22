@@ -2,6 +2,7 @@ import { FilterQuery } from "mongoose";
 import Order from "../../models/Order";
 import { IOrder } from "../../types/models/Order";
 import Product from "../../models/Product";
+import paginate from "../../utils/paginate";
 
 // Create a new order
 export const createOrder = async (orderData: IOrder) => {
@@ -49,9 +50,32 @@ export const getAllOrders = async (filter: FilterQuery<IOrder> = {}) => {
   };
 
 // Get vendor orders (orders containing vendor's products)
-export const getVendorOrders = async (vendorEmail: string) => {
-    const products = await Product.find({ vendorEmail });
-    const productIds = products.map(product => product._id);
-    return await Order.find({ 'items.productID': { $in: productIds } }).populate('items.productID');
-  };
-  
+export const getVendorOrders = async (
+  vendorEmail: string,
+  page: number,
+  limit: number
+) => {
+  const products = await Product.find({ vendorEmail }).select("_id");
+  const productIds = products.map((product) => product._id);
+
+  if (!productIds.length) {
+    return {
+      data: [],
+      totalRecords: 0,
+      totalPages: 0,
+      prevPage: null,
+      nextPage: null,
+      page,
+    };
+  }
+
+  return await paginate(
+    Order,
+    { "items.productID": { $in: productIds } },
+    page,
+    limit,
+    { createdAt: -1 }, // optional sorting
+    "", // projection
+    "items.productID" // populate
+  );
+};

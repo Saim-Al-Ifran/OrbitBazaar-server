@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.post('/reports', authenticate, addReport);
 router.get('/reports/vendor',authenticate,authorizeVendor,getReportsByVendor);
-router.get("/reports/vendor/report/:reportId", authenticate,authorizeVendor, getReportByIdForVendor  );
+router.get("/reports/vendor/:reportId", authenticate,authorizeVendor, getReportByIdForVendor  );
 router.get('/reports/user/:reportId', authenticate, getSingleReportByUser );
 router.delete('/reports/user/:reportId', authenticate, removeReportByUser);
 router.put('/reports/user/:reportId',authenticate , editReportByUser);

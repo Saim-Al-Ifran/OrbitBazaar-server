@@ -22,7 +22,7 @@ const ReportSchema = new Schema<IReport>(
     },
     status: {
         type: String,
-        num: ['pending', 'resolve', 'reject'],
+        enum: ['pending', 'resolve', 'reject'],
         default: 'pending'
     },
   },

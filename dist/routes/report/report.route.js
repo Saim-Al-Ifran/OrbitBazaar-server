@@ -10,7 +10,7 @@ const authorizeVendor_1 = __importDefault(require("../../middlewares/auth/author
 const router = express_1.default.Router();
 router.post('/reports', authenticate_1.default, report_controller_1.addReport);
 router.get('/reports/vendor', authenticate_1.default, authorizeVendor_1.default, report_controller_1.getReportsByVendor);
-router.get("/reports/vendor/report/:reportId", authenticate_1.default, authorizeVendor_1.default, report_controller_1.getReportByIdForVendor);
+router.get("/reports/vendor/:reportId", authenticate_1.default, authorizeVendor_1.default, report_controller_1.getReportByIdForVendor);
 router.get('/reports/user/:reportId', authenticate_1.default, report_controller_1.getSingleReportByUser);
 router.delete('/reports/user/:reportId', authenticate_1.default, report_controller_1.removeReportByUser);
 router.put('/reports/user/:reportId', authenticate_1.default, report_controller_1.editReportByUser);

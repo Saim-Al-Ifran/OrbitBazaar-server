@@ -86,14 +86,31 @@ exports.vendorOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
     var _a;
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     if (!vendorEmail) {
-        throw new customError_1.default("user not found", 404);
+        throw new customError_1.default("User not found", 404);
     }
-    const cachedKey = `orders_${vendorEmail}`;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const cachedKey = `orders_${vendorEmail}_page_${page}_limit_${limit}`;
     const cachedOrders = yield (0, cache_1.getCache)(cachedKey);
     if (cachedOrders) {
         return res.json(JSON.parse(cachedOrders));
     }
-    const orders = yield (0, order_services_1.getVendorOrders)(vendorEmail);
-    yield (0, cache_1.setCache)(cachedKey, orders, 60);
-    res.json(orders);
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, order_services_1.getVendorOrders)(vendorEmail, page, limit);
+    if (data.length === 0) {
+        throw new customError_1.default("No orders found!", 404);
+    }
+    const response = {
+        success: true,
+        message: "Orders fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    };
+    yield (0, cache_1.setCache)(cachedKey, response, 60); // Cache for 60 seconds
+    res.status(200).json(response);
 }));

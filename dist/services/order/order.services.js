@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getVendorOrders = exports.getAllOrders = exports.cancelOrder = exports.updateOrderStatus = exports.findOrderById = exports.findOrdersByUserEmail = exports.createOrder = void 0;
 const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
+const paginate_1 = __importDefault(require("../../utils/paginate"));
 // Create a new order
 const createOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* () {
     const newOrder = new Order_1.default(orderData);
@@ -60,9 +61,22 @@ const getAllOrders = (...args_1) => __awaiter(void 0, [...args_1], void 0, funct
 });
 exports.getAllOrders = getAllOrders;
 // Get vendor orders (orders containing vendor's products)
-const getVendorOrders = (vendorEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    const products = yield Product_1.default.find({ vendorEmail });
-    const productIds = products.map(product => product._id);
-    return yield Order_1.default.find({ 'items.productID': { $in: productIds } }).populate('items.productID');
+const getVendorOrders = (vendorEmail, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const products = yield Product_1.default.find({ vendorEmail }).select("_id");
+    const productIds = products.map((product) => product._id);
+    if (!productIds.length) {
+        return {
+            data: [],
+            totalRecords: 0,
+            totalPages: 0,
+            prevPage: null,
+            nextPage: null,
+            page,
+        };
+    }
+    return yield (0, paginate_1.default)(Order_1.default, { "items.productID": { $in: productIds } }, page, limit, { createdAt: -1 }, // optional sorting
+    "", // projection
+    "items.productID" // populate
+    );
 });
 exports.getVendorOrders = getVendorOrders;
