@@ -30,7 +30,8 @@ app.use(helmet());
 app.use(compression());
 app.use(cors({
   origin: [
-    'http://localhost:5173'// local environment
+    'http://localhost:5173',
+    'https://orbitbazaar-39cf5.web.app'
   ], 
   credentials: true
 }));
