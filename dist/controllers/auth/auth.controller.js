@@ -22,8 +22,8 @@ const token_1 = require("../../utils/auth/token");
 exports.registerUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = req.body;
     const newUser = yield (0, auth_services_1.registerUserService)(userData);
-    res.cookie('accessToken', newUser.accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', newUser.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', newUser.accessToken, { httpOnly: true, secure: true, maxAge: 3600000 });
+    res.cookie('refreshToken', newUser.refreshToken, { httpOnly: true, secure: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -37,8 +37,8 @@ exports.registerUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
 exports.registerVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const vendorData = req.body;
     const newVendor = yield (0, auth_services_1.registerVendorService)(vendorData);
-    res.cookie('accessToken', newVendor.accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', newVendor.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', newVendor.accessToken, { httpOnly: true, secure: true, maxAge: 3600000 });
+    res.cookie('refreshToken', newVendor.refreshToken, { httpOnly: true, secure: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'Vendor registered successfully',
@@ -52,8 +52,8 @@ exports.registerVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
 exports.userLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const loginData = req.body;
     const { payload, accessToken, refreshToken } = yield (0, auth_services_1.loginUserService)(loginData);
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -67,8 +67,8 @@ exports.userLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void
 exports.adminLogin = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const loginData = req.body;
     const { payload, accessToken, refreshToken } = yield (0, auth_services_1.loginAdminService)(loginData);
-    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -86,8 +86,8 @@ exports.refreshToken = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
         throw new customError_1.default('Refresh token not provided', 403);
     }
     const { newPayload, accessToken, refreshToken: newRefreshToken } = yield (0, auth_services_1.refreshTokenService)(refreshTokenFromCookie);
-    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
-    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 3600000 });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -127,8 +127,8 @@ exports.firebaseLoginController = (0, TryCatch_1.TryCatch)((req, res, _next) => 
     const refreshToken = (0, token_1.generateRefreshToken)(payload);
     user.refreshTokens.push({ token: refreshToken });
     yield user.save();
-    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -151,8 +151,8 @@ exports.resetPassword = (0, TryCatch_1.TryCatch)((req, res) => __awaiter(void 0,
     res.status(200).json({ success: true, message: 'Password changed successfully.' });
 }));
 exports.logout = (0, TryCatch_1.TryCatch)((_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    res.clearCookie("accessToken", { httpOnly: true, secure: false });
-    res.clearCookie("refreshToken", { httpOnly: true, secure: false });
+    res.clearCookie("accessToken", { httpOnly: true, secure: true });
+    res.clearCookie("refreshToken", { httpOnly: true, secure: true });
     res.status(200).json({
         success: true,
         message: "Logged out successfully",

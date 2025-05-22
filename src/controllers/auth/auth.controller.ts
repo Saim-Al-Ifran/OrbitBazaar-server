@@ -10,8 +10,8 @@ export const registerUser = TryCatch(async (req: Request, res: Response, _next: 
     const userData = req.body;
     
     const newUser = await registerUserService(userData);
-    res.cookie('accessToken', newUser.accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken',newUser.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', newUser.accessToken, { httpOnly: true,secure:true,maxAge: 3600000 });
+    res.cookie('refreshToken',newUser.refreshToken, { httpOnly: true,secure:true ,maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -28,8 +28,8 @@ export const registerVendor = TryCatch(async (req: Request, res: Response, _next
 
     const newVendor = await registerVendorService(vendorData);
 
-    res.cookie('accessToken', newVendor.accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', newVendor.refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', newVendor.accessToken, { httpOnly: true,secure:true, maxAge: 3600000 });
+    res.cookie('refreshToken', newVendor.refreshToken, { httpOnly: true,secure:true, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
     res.status(201).json({
         success: true,
@@ -46,8 +46,8 @@ export const registerVendor = TryCatch(async (req: Request, res: Response, _next
 export const userLogin = TryCatch(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const loginData = req.body;
     const {payload,accessToken, refreshToken} = await loginUserService(loginData);
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true,secure:true ,maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true,secure:true ,maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -62,8 +62,8 @@ export const userLogin = TryCatch(async (req: Request, res: Response, _next: Nex
 export const adminLogin = TryCatch(async (req: Request, res: Response, _next: NextFunction):Promise<void> => {
     const loginData = req.body;
     const {payload,accessToken, refreshToken} = await loginAdminService(loginData);
-    res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure:true, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure:true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -84,8 +84,8 @@ export const refreshToken = TryCatch(async (req: Request, res: Response, _next: 
 
     const  {newPayload,accessToken, refreshToken: newRefreshToken } = await refreshTokenService(refreshTokenFromCookie);
 
-    res.cookie('accessToken', accessToken, { httpOnly: true,secure: false, maxAge: 3600000 });
-    res.cookie('refreshToken', newRefreshToken, { httpOnly: true,secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure:true , maxAge: 3600000 });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure:true , maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -132,8 +132,8 @@ export const firebaseLoginController = TryCatch(async (req: Request, res: Respon
   
       user.refreshTokens.push({ token: refreshToken });
       await user.save();
-      res.cookie('accessToken', accessToken, { httpOnly: true,secure: false, maxAge: 3600000 });
-      res.cookie('refreshToken', refreshToken , { httpOnly: true,secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+      res.cookie('accessToken', accessToken, { httpOnly: true, secure: true , maxAge: 3600000 });
+      res.cookie('refreshToken', refreshToken , { httpOnly: true, secure:true , maxAge: 7 * 24 * 60 * 60 * 1000 });
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
@@ -164,8 +164,8 @@ export const firebaseLoginController = TryCatch(async (req: Request, res: Respon
 
 export const logout = TryCatch(
  async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    res.clearCookie("accessToken", { httpOnly: true, secure: false });
-    res.clearCookie("refreshToken", { httpOnly: true, secure: false });
+    res.clearCookie("accessToken", { httpOnly: true,secure:true  });
+    res.clearCookie("refreshToken", { httpOnly: true,secure:true   });
 
     res.status(200).json({
         success: true,
