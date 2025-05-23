@@ -53,7 +53,8 @@ export const getAllOrders = async (filter: FilterQuery<IOrder> = {}) => {
 export const getVendorOrders = async (
   vendorEmail: string,
   page: number,
-  limit: number
+  limit: number,
+  sort: Record<string, 1 | -1>  
 ) => {
   const products = await Product.find({ vendorEmail }).select("_id");
   const productIds = products.map((product) => product._id);
@@ -74,8 +75,8 @@ export const getVendorOrders = async (
     { "items.productID": { $in: productIds } },
     page,
     limit,
-    { createdAt: -1 }, // optional sorting
-    "", // projection
-    "items.productID" // populate
+    sort,          
+    "",             // projection
+    "items.productID"
   );
 };

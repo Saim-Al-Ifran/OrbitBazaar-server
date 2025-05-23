@@ -61,7 +61,7 @@ const getAllOrders = (...args_1) => __awaiter(void 0, [...args_1], void 0, funct
 });
 exports.getAllOrders = getAllOrders;
 // Get vendor orders (orders containing vendor's products)
-const getVendorOrders = (vendorEmail, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+const getVendorOrders = (vendorEmail, page, limit, sort) => __awaiter(void 0, void 0, void 0, function* () {
     const products = yield Product_1.default.find({ vendorEmail }).select("_id");
     const productIds = products.map((product) => product._id);
     if (!productIds.length) {
@@ -74,9 +74,7 @@ const getVendorOrders = (vendorEmail, page, limit) => __awaiter(void 0, void 0, 
             page,
         };
     }
-    return yield (0, paginate_1.default)(Order_1.default, { "items.productID": { $in: productIds } }, page, limit, { createdAt: -1 }, // optional sorting
-    "", // projection
-    "items.productID" // populate
-    );
+    return yield (0, paginate_1.default)(Order_1.default, { "items.productID": { $in: productIds } }, page, limit, sort, "", // projection
+    "items.productID");
 });
 exports.getVendorOrders = getVendorOrders;

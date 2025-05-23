@@ -71,6 +71,8 @@ export const getUserSingleOrder = TryCatch(
       const { orderId } = req.params;
       const { status } = req.body;
       const vendorEmail = req.user?.email;
+      console.log(req.body);
+      console.log(status);
       if(!vendorEmail){
           throw new CustomError("user not found", 404);
       } 
@@ -99,34 +101,42 @@ export const vendorOrders = TryCatch(
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
 
-    const cachedKey = `orders_${vendorEmail}_page_${page}_limit_${limit}`;
-    const cachedOrders = await getCache(cachedKey);
+    // Sorting logic
+    const sortParam = (req.query.sort as string) || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sort: Record<string, 1 | -1> = {
+      [field]: order === "asc" ? 1 : -1,
+    };
 
-    if (cachedOrders) {
-      return res.json(JSON.parse(cachedOrders));
+    // Cache key includes sort info
+    const cacheKey = `orders_${vendorEmail}_page_${page}_limit_${limit}_sort_${field}_${order}`;
+    const cached = await getCache(cacheKey);
+
+    if (cached) {
+      return res.json(JSON.parse(cached));
     }
 
-     const { data, totalRecords, totalPages, prevPage, nextPage } =
-     await getVendorOrders(vendorEmail, page, limit);
-    if (data.length === 0) {
+    const result = await getVendorOrders(vendorEmail, page, limit, sort);
+
+    if (result.data.length === 0) {
       throw new CustomError("No orders found!", 404);
     }
 
     const response = {
       success: true,
       message: "Orders fetched successfully.",
-      data,
+      data: result.data,
       pagination: {
-        totalRecords,
-        totalPages,
-        prevPage,
-        nextPage,
+        totalRecords: result.totalRecords,
+        totalPages: result.totalPages,
+        prevPage: result.prevPage,
+        nextPage: result.nextPage,
         currentPage: page,
       },
     };
 
-    await setCache(cachedKey, response, 60); // Cache for 60 seconds
+    await setCache(cacheKey, response, 60); // Cache for 60 seconds
 
-     res.status(200).json(response);
+    res.status(200).json(response);
   }
-)
+);

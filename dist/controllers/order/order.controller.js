@@ -69,6 +69,8 @@ exports.changeOrderStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __awai
     const { orderId } = req.params;
     const { status } = req.body;
     const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    console.log(req.body);
+    console.log(status);
     if (!vendorEmail) {
         throw new customError_1.default("user not found", 404);
     }
@@ -90,27 +92,34 @@ exports.vendorOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
     }
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const cachedKey = `orders_${vendorEmail}_page_${page}_limit_${limit}`;
-    const cachedOrders = yield (0, cache_1.getCache)(cachedKey);
-    if (cachedOrders) {
-        return res.json(JSON.parse(cachedOrders));
+    // Sorting logic
+    const sortParam = req.query.sort || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sort = {
+        [field]: order === "asc" ? 1 : -1,
+    };
+    // Cache key includes sort info
+    const cacheKey = `orders_${vendorEmail}_page_${page}_limit_${limit}_sort_${field}_${order}`;
+    const cached = yield (0, cache_1.getCache)(cacheKey);
+    if (cached) {
+        return res.json(JSON.parse(cached));
     }
-    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, order_services_1.getVendorOrders)(vendorEmail, page, limit);
-    if (data.length === 0) {
+    const result = yield (0, order_services_1.getVendorOrders)(vendorEmail, page, limit, sort);
+    if (result.data.length === 0) {
         throw new customError_1.default("No orders found!", 404);
     }
     const response = {
         success: true,
         message: "Orders fetched successfully.",
-        data,
+        data: result.data,
         pagination: {
-            totalRecords,
-            totalPages,
-            prevPage,
-            nextPage,
+            totalRecords: result.totalRecords,
+            totalPages: result.totalPages,
+            prevPage: result.prevPage,
+            nextPage: result.nextPage,
             currentPage: page,
         },
     };
-    yield (0, cache_1.setCache)(cachedKey, response, 60); // Cache for 60 seconds
+    yield (0, cache_1.setCache)(cacheKey, response, 60); // Cache for 60 seconds
     res.status(200).json(response);
 }));
