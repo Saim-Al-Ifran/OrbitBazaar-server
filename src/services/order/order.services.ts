@@ -59,16 +59,6 @@ export const getVendorOrders = async (
   const products = await Product.find({ vendorEmail }).select("_id");
   const productIds = products.map((product) => product._id);
 
-  if (!productIds.length) {
-    return {
-      data: [],
-      totalRecords: 0,
-      totalPages: 0,
-      prevPage: null,
-      nextPage: null,
-      page,
-    };
-  }
 
   return await paginate(
     Order,

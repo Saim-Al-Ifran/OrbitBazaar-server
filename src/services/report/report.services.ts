@@ -30,10 +30,10 @@ export const findReportsByVendor = async (
   vendorEmail: string,
   page: number,
   limit: number,
-  status?: string
-):Promise<PaginationResult<IReport>> => {
- 
-  // Get all products owned by the vendor
+  status?: string,
+  sort: Record<string, 1 | -1> = { createdAt: -1 }
+): Promise<PaginationResult<IReport>> => {
+  // Find all products owned by this vendor
   const products = await Product.find({ vendorEmail }).select("_id");
 
   if (!products.length) {
@@ -43,12 +43,15 @@ export const findReportsByVendor = async (
   const productIds = products.map((p) => p._id);
 
   // Build filter query
-  const filter: any = { productID: { $in: productIds } };
+  const filter: any = {
+    productID: { $in: productIds },
+  };
+
   if (status) {
     filter.status = status;
   }
 
-  return await paginate(Report, filter, page, limit, { createdAt: -1 }, "", "productID");
+  return await paginate(Report, filter, page, limit, sort, "", "productID");
 };
 
 

@@ -33,27 +33,43 @@ export const addReport = TryCatch(
 );
 
 export const getReportsByVendor = TryCatch(
-    async (req: Request, res: Response, _next: NextFunction) => {
-      const vendorEmail = req.user?.email;
-      if (!vendorEmail) {
-        throw new CustomError("User not authenticated", 401);
-      }
-  
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const status = req.query.status as string; // Optional status filter
-      const cacheKey = `reports_vendor_${vendorEmail}_page_${page}_limit_${limit}`;
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const vendorEmail = req.user?.email;
+    if (!vendorEmail) {
+      throw new CustomError("User not authenticated", 401);
+    }
 
-      const cachedData = await getCache(cacheKey);
-      if (cachedData) {
-        return res.status(200).json(JSON.parse(cachedData));
-      }
-     const { data, totalRecords, totalPages, prevPage, nextPage } = await findReportsByVendor(vendorEmail, page, limit, status);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const status = req.query.status as string;
 
-     if(data.length === 0){
-       throw new  CustomError(`No ${status} reports found!`,404);
-     }
-     const reportResponse = {
+    // Sorting logic
+    const sortParam = (req.query.sort as string) || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sort: Record<string, 1 | -1> = {
+      [field]: order === "asc" ? 1 : -1,
+    };
+
+    const cacheKey = `reports_vendor_${vendorEmail}_page_${page}_limit_${limit}_status_${status || "all"}_sort_${field}_${order}`;
+
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    const {
+      data,
+      totalRecords,
+      totalPages,
+      prevPage,
+      nextPage,
+    } = await findReportsByVendor(vendorEmail, page, limit, status, sort);
+
+    if (data.length === 0) {
+      throw new CustomError(`No ${status || ""} reports found!`, 404);
+    }
+
+    const reportResponse = {
       success: true,
       message: "Reports fetched successfully.",
       data,
@@ -64,11 +80,12 @@ export const getReportsByVendor = TryCatch(
         nextPage,
         currentPage: page,
       },
-    }
-     await setCache(cacheKey, reportResponse , 60);
-     res.status(200).json(reportResponse);
-    }
-) 
+    };
+
+    await setCache(cacheKey, reportResponse, 60); // cache for 60 seconds
+    res.status(200).json(reportResponse);
+  }
+);
 export const getReportsByProduct = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
         const { productId } = req.params;

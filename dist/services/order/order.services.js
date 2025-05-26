@@ -64,16 +64,6 @@ exports.getAllOrders = getAllOrders;
 const getVendorOrders = (vendorEmail, page, limit, sort) => __awaiter(void 0, void 0, void 0, function* () {
     const products = yield Product_1.default.find({ vendorEmail }).select("_id");
     const productIds = products.map((product) => product._id);
-    if (!productIds.length) {
-        return {
-            data: [],
-            totalRecords: 0,
-            totalPages: 0,
-            prevPage: null,
-            nextPage: null,
-            page,
-        };
-    }
     return yield (0, paginate_1.default)(Order_1.default, { "items.productID": { $in: productIds } }, page, limit, sort, "", // projection
     "items.productID");
 });

@@ -32,19 +32,21 @@ const createReport = (productID, userEmail, comment, reason) => __awaiter(void 0
 });
 exports.createReport = createReport;
 // Get all reports for a vendor's products
-const findReportsByVendor = (vendorEmail, page, limit, status) => __awaiter(void 0, void 0, void 0, function* () {
-    // Get all products owned by the vendor
+const findReportsByVendor = (vendorEmail_1, page_1, limit_1, status_1, ...args_1) => __awaiter(void 0, [vendorEmail_1, page_1, limit_1, status_1, ...args_1], void 0, function* (vendorEmail, page, limit, status, sort = { createdAt: -1 }) {
+    // Find all products owned by this vendor
     const products = yield Product_1.default.find({ vendorEmail }).select("_id");
     if (!products.length) {
         throw new customError_1.default("No products found for this vendor", 404);
     }
     const productIds = products.map((p) => p._id);
     // Build filter query
-    const filter = { productID: { $in: productIds } };
+    const filter = {
+        productID: { $in: productIds },
+    };
     if (status) {
         filter.status = status;
     }
-    return yield (0, paginate_1.default)(Report_1.default, filter, page, limit, { createdAt: -1 }, "", "productID");
+    return yield (0, paginate_1.default)(Report_1.default, filter, page, limit, sort, "", "productID");
 });
 exports.findReportsByVendor = findReportsByVendor;
 // Get all reports for a specific product

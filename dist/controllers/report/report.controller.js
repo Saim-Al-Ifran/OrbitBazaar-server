@@ -39,15 +39,21 @@ exports.getReportsByVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
     }
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const status = req.query.status; // Optional status filter
-    const cacheKey = `reports_vendor_${vendorEmail}_page_${page}_limit_${limit}`;
+    const status = req.query.status;
+    // Sorting logic
+    const sortParam = req.query.sort || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sort = {
+        [field]: order === "asc" ? 1 : -1,
+    };
+    const cacheKey = `reports_vendor_${vendorEmail}_page_${page}_limit_${limit}_status_${status || "all"}_sort_${field}_${order}`;
     const cachedData = yield (0, cache_1.getCache)(cacheKey);
     if (cachedData) {
         return res.status(200).json(JSON.parse(cachedData));
     }
-    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, report_services_1.findReportsByVendor)(vendorEmail, page, limit, status);
+    const { data, totalRecords, totalPages, prevPage, nextPage, } = yield (0, report_services_1.findReportsByVendor)(vendorEmail, page, limit, status, sort);
     if (data.length === 0) {
-        throw new customError_1.default(`No ${status} reports found!`, 404);
+        throw new customError_1.default(`No ${status || ""} reports found!`, 404);
     }
     const reportResponse = {
         success: true,
@@ -61,7 +67,7 @@ exports.getReportsByVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
             currentPage: page,
         },
     };
-    yield (0, cache_1.setCache)(cacheKey, reportResponse, 60);
+    yield (0, cache_1.setCache)(cacheKey, reportResponse, 60); // cache for 60 seconds
     res.status(200).json(reportResponse);
 }));
 exports.getReportsByProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
