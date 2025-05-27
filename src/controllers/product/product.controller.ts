@@ -168,15 +168,16 @@ export const getAllProductsForVendor = TryCatch(
       query.name = { $regex: search, $options: "i" };
     }
 
-    const sortMapping: Record<string, string> = {
-      asc: "price",
-      dsc: "-price",
+     // Sorting logic
+    const sortParam = (req.query.sort as string) || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption: Record<string, 1 | -1> = {
+      [field]: order === "asc" ? 1 : -1,
     };
-    const sortField = sortMapping[sort as string] || "-createdAt";
 
     // Fetch data from database
     const { data, totalRecords, totalPages, prevPage, nextPage } =
-      await getVendorProducts(page, limit, query, sortField);
+      await getVendorProducts(page, limit, query, sortOption);
 
     if (data.length === 0) {
       throw new CustomError("No product data found!", 404);

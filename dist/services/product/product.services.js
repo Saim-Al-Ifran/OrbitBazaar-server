@@ -64,7 +64,7 @@ const getFeaturedProducts = (page, limit) => __awaiter(void 0, void 0, void 0, f
 exports.getFeaturedProducts = getFeaturedProducts;
 // Retrieve all products for a vendor
 const getVendorProducts = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_1, limit_1, ...args_1], void 0, function* (page, limit, query = {}, sort) {
-    return (0, paginate_1.default)(Product_1.default, query, page, limit, sort);
+    return (0, paginate_1.default)(Product_1.default, query, page, limit, sort, undefined, "category");
 });
 exports.getVendorProducts = getVendorProducts;
 // Retrieve archived products for a vendor

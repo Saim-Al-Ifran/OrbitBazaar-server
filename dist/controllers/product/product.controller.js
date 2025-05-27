@@ -132,13 +132,14 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
     if (search) {
         query.name = { $regex: search, $options: "i" };
     }
-    const sortMapping = {
-        asc: "price",
-        dsc: "-price",
+    // Sorting logic
+    const sortParam = req.query.sort || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption = {
+        [field]: order === "asc" ? 1 : -1,
     };
-    const sortField = sortMapping[sort] || "-createdAt";
     // Fetch data from database
-    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getVendorProducts)(page, limit, query, sortField);
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getVendorProducts)(page, limit, query, sortOption);
     if (data.length === 0) {
         throw new customError_1.default("No product data found!", 404);
     }

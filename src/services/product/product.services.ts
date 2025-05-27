@@ -95,9 +95,9 @@ export const getVendorProducts = async (
     page:number,
     limit:number,
     query: object = {} ,
-    sort:string
+    sort: Record<string, 1 | -1>
 ): Promise<PaginationResult<IProduct> > => {
-      return paginate(Product,query,page,limit,sort);
+       return paginate(Product, query, page, limit, sort, undefined, "category");
   };
 
 // Retrieve archived products for a vendor
