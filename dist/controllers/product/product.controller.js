@@ -141,7 +141,14 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
     // Fetch data from database
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getVendorProducts)(page, limit, query, sortOption);
     if (data.length === 0) {
-        throw new customError_1.default("No product data found!", 404);
+        const noDataMessage = search
+            ? "No products matched your search!"
+            : "No products found!";
+        return res.status(200).json({
+            success: true,
+            message: noDataMessage,
+            data: [],
+        });
     }
     // Create response object
     const response = {

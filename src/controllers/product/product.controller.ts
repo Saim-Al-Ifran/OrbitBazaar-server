@@ -95,53 +95,7 @@ export const getAllProducts = TryCatch(
     res.status(200).json(response);
   }
 );
-
-// export const getAllProductsForVendor = TryCatch(
-//   async (req: Request, res: Response, _next: NextFunction) => {
-//     const page = parseInt(req.query.page as string) || 1;
-//     const limit = parseInt(req.query.limit as string) || 10;
-//     const vendorEmail = req.user?.email;
-
-//     const { search, sort } = req.query;
-
-//     // Build query
-//     const query: Record<string, any> = { isArchived: false };
-//     if (vendorEmail) {
-//       query.vendorEmail = vendorEmail; 
-//     }
-//     if (search) {
-//       query.name = { $regex: search, $options: "i" };
-//     }
-
-//     const sortMapping: Record<string, string> = {
-//       asc: "price",
-//       dsc: "-price",
-//     };
-//     const sortField = sortMapping[sort as string] || "-createdAt"; 
  
-//     const { data, totalRecords, totalPages, prevPage, nextPage } =
-//       await getVendorProducts(page, limit, query, sortField);
-
- 
-//     if (data.length === 0) {
-//       throw new CustomError('No product data found!',404);
-//     }
-    
-//     res.status(200).json({
-//       success: true,
-//       message: "All products fetched successfully.",
-//       data,
-//       pagination: {
-//         totalRecords,
-//         totalPages,
-//         prevPage,
-//         nextPage,
-//         currentPage: page,
-//       },
-//     });
-//   }
-// );
-
 export const getAllProductsForVendor = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -179,9 +133,18 @@ export const getAllProductsForVendor = TryCatch(
     const { data, totalRecords, totalPages, prevPage, nextPage } =
       await getVendorProducts(page, limit, query, sortOption);
 
-    if (data.length === 0) {
-      throw new CustomError("No product data found!", 404);
-    }
+   if (data.length === 0) {
+      const noDataMessage = search
+        ? "No products matched your search!"
+        : "No products found!";
+
+        return res.status(200).json({
+            success: true,
+            message: noDataMessage,
+            data: [],
+        });
+
+   }
 
     // Create response object
     const response = {
