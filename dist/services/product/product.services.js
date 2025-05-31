@@ -74,7 +74,7 @@ const findArchivedProducts = (page_1, limit_1, ...args_1) => __awaiter(void 0, [
 exports.findArchivedProducts = findArchivedProducts;
 // Fetch detailed information about a product by its ID
 const findProductById = (productId) => __awaiter(void 0, void 0, void 0, function* () {
-    return Product_1.default.findById(productId);
+    return Product_1.default.findById(productId).populate("category");
 });
 exports.findProductById = findProductById;
 // Search products by name or description

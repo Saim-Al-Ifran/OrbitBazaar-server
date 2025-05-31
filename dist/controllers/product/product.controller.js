@@ -73,44 +73,6 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     yield (0, cache_1.setCache)(cacheKey, response, 120);
     res.status(200).json(response);
 }));
-// export const getAllProductsForVendor = TryCatch(
-//   async (req: Request, res: Response, _next: NextFunction) => {
-//     const page = parseInt(req.query.page as string) || 1;
-//     const limit = parseInt(req.query.limit as string) || 10;
-//     const vendorEmail = req.user?.email;
-//     const { search, sort } = req.query;
-//     // Build query
-//     const query: Record<string, any> = { isArchived: false };
-//     if (vendorEmail) {
-//       query.vendorEmail = vendorEmail; 
-//     }
-//     if (search) {
-//       query.name = { $regex: search, $options: "i" };
-//     }
-//     const sortMapping: Record<string, string> = {
-//       asc: "price",
-//       dsc: "-price",
-//     };
-//     const sortField = sortMapping[sort as string] || "-createdAt"; 
-//     const { data, totalRecords, totalPages, prevPage, nextPage } =
-//       await getVendorProducts(page, limit, query, sortField);
-//     if (data.length === 0) {
-//       throw new CustomError('No product data found!',404);
-//     }
-//     res.status(200).json({
-//       success: true,
-//       message: "All products fetched successfully.",
-//       data,
-//       pagination: {
-//         totalRecords,
-//         totalPages,
-//         prevPage,
-//         nextPage,
-//         currentPage: page,
-//       },
-//     });
-//   }
-// );
 exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const page = parseInt(req.query.page) || 1;
@@ -290,7 +252,7 @@ exports.updatedProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         throw new customError_1.default("Vendor can only update their own product", 401);
     }
     yield (0, cache_1.deleteCacheByPattern)(`vendor_products:${vendorEmail}*`);
-    yield (0, cache_1.deleteCacheByPattern)(`products*`);
+    yield (0, cache_1.deleteCacheByPattern)(`product*`);
     res.status(200).json({
         success: true,
         message: "Product updated successfully.",

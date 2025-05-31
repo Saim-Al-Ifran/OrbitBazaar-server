@@ -114,7 +114,7 @@ export const findArchivedProducts = async (
 export const findProductById = async (
     productId: string
 ): Promise<IProduct | null> => {
-    return Product.findById(productId);
+    return Product.findById(productId).populate("category");
   };
 
 // Search products by name or description

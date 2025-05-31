@@ -329,7 +329,7 @@ export const updatedProduct = TryCatch(
     }
 
     await deleteCacheByPattern(`vendor_products:${vendorEmail}*`);
-    await deleteCacheByPattern(`products*`);
+    await deleteCacheByPattern(`product*`);
 
     res.status(200).json({
       success: true,
