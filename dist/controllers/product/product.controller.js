@@ -233,20 +233,30 @@ exports.updatedProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     if (!product) {
         throw new customError_1.default("Product not found!", 404);
     }
-    // Validate blank input: user manually sends images as ""
+    // Sanity check: Don't allow blank string
     if (typeof updates.images === "string" && updates.images.trim() === "") {
         throw new customError_1.default("Images field cannot be an empty string", 400);
     }
-    // Handle image update
-    if (files && files.length > 0) {
-        if (product.images && product.images.length > 0) {
-            // Delete old images
-            yield Promise.all(product.images.map(img => (0, product_services_1.deleteProductImage)(img)));
+    // Convert single existingImages string to array if needed
+    let existingImages = [];
+    if (updates.existingImages) {
+        if (typeof updates.existingImages === "string") {
+            existingImages = [updates.existingImages];
         }
-        // Upload new images
-        const uploadedImageUrls = yield Promise.all(files.map(file => (0, product_services_1.uploadProductImage)(file)));
-        updates.images = uploadedImageUrls;
+        else if (Array.isArray(updates.existingImages)) {
+            existingImages = updates.existingImages;
+        }
     }
+    // Upload new images
+    let newUploadedUrls = [];
+    if (files && files.length > 0) {
+        newUploadedUrls = yield Promise.all(files.map(file => (0, product_services_1.uploadProductImage)(file)));
+    }
+    // Final combined image array
+    updates.images = [...existingImages, ...newUploadedUrls];
+    // Optional: delete removed old images that are not in existingImages anymore
+    const removedImages = (product.images || []).filter(img => !existingImages.includes(img));
+    yield Promise.all(removedImages.map(img => (0, product_services_1.deleteProductImage)(img)));
     const updatedProduct = yield (0, product_services_1.updateProductInDb)(id, updates, vendorEmail);
     if (!updatedProduct) {
         throw new customError_1.default("Vendor can only update their own product", 401);

@@ -305,23 +305,33 @@ export const updatedProduct = TryCatch(
     if (!product) {
       throw new CustomError("Product not found!", 404);
     } 
-     // Validate blank input: user manually sends images as ""
+    // Sanity check: Don't allow blank string
     if (typeof updates.images === "string" && updates.images.trim() === "") {
       throw new CustomError("Images field cannot be an empty string", 400);
     }
-
-    // Handle image update
-    if (files && files.length > 0) {
-      if (product.images && product.images.length > 0) {
-        // Delete old images
-        await Promise.all(product.images.map(img => deleteProductImage(img)));
+    // Convert single existingImages string to array if needed
+    let existingImages: string[] = [];
+    if (updates.existingImages) {
+      if (typeof updates.existingImages === "string") {
+        existingImages = [updates.existingImages];
+      } else if (Array.isArray(updates.existingImages)) {
+        existingImages = updates.existingImages;
       }
-
-      // Upload new images
-      const uploadedImageUrls = await Promise.all(files.map(file => uploadProductImage(file)));
-      updates.images = uploadedImageUrls;
     }
 
+    // Upload new images
+    let newUploadedUrls: string[] = [];
+    if (files && files.length > 0) {
+      newUploadedUrls = await Promise.all(files.map(file => uploadProductImage(file)));
+    }
+
+    // Final combined image array
+    updates.images = [...existingImages, ...newUploadedUrls];
+
+    // Optional: delete removed old images that are not in existingImages anymore
+    const removedImages = (product.images || []).filter(img => !existingImages.includes(img));
+    await Promise.all(removedImages.map(img => deleteProductImage(img)));
+    
     const updatedProduct = await updateProductInDb(id, updates, vendorEmail);
 
     if (!updatedProduct) {
