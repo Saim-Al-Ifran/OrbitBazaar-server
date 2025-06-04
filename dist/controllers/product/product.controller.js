@@ -81,26 +81,40 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
     if (!vendorEmail) {
         throw new customError_1.default("Unauthorized access. Vendor email missing.", 403);
     }
-    const { search, sort } = req.query;
-    // Generate cache key
-    const cacheKey = `vendor_products:${vendorEmail}:search=${search || ""}:page=${page}:limit=${limit}:sort=${sort || "createdAt"}`;
-    // Check Redis cache first
-    const cachedData = yield (0, cache_1.getCache)(cacheKey);
-    if (cachedData) {
-        return res.status(200).json(JSON.parse(cachedData));
-    }
-    // Build query
-    const query = { isArchived: false, vendorEmail };
+    const { search, sort, filter } = req.query;
+    // Build base query
+    const query = { vendorEmail };
+    // Add search filter
     if (search) {
         query.name = { $regex: search, $options: "i" };
     }
+    // Handle filter for isFeatured / isArchived
+    switch (filter) {
+        case "featured":
+            query.isArchived = false;
+            query.isFeatured = true;
+            break;
+        case "archived":
+            query.isArchived = true;
+            break;
+        default:
+            // default case: show non-archived products
+            query.isArchived = false;
+            break;
+    }
     // Sorting logic
-    const sortParam = req.query.sort || "createdAt:desc";
+    const sortParam = sort || "createdAt:desc";
     const [field, order] = sortParam.split(":");
     const sortOption = {
         [field]: order === "asc" ? 1 : -1,
     };
-    // Fetch data from database
+    // Generate cache key
+    const cacheKey = `vendor_products:${vendorEmail}:search=${search || ""}:filter=${filter || "all"}:page=${page}:limit=${limit}:sort=${sort || "createdAt"}`;
+    const cachedData = yield (0, cache_1.getCache)(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+    // Fetch data from DB
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getVendorProducts)(page, limit, query, sortOption);
     if (data.length === 0) {
         const noDataMessage = search
@@ -112,7 +126,6 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
             data: [],
         });
     }
-    // Create response object
     const response = {
         success: true,
         message: "All products fetched successfully.",
@@ -125,7 +138,6 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
             currentPage: page,
         },
     };
-    // Store response in Redis cache
     yield (0, cache_1.setCache)(cacheKey, response, 120);
     res.status(200).json(response);
 }));
@@ -301,7 +313,7 @@ exports.toggleProductArchivedStatus = (0, TryCatch_1.TryCatch)((req, res) => __a
         throw new customError_1.default("Vendor email is required", 400);
     }
     if (typeof isArchived !== "boolean") {
-        throw new customError_1.default("Invalid value for 'isFeatured'. It must be a boolean.", 400);
+        throw new customError_1.default("Invalid value for 'isArchived'. It must be a boolean.", 400);
     }
     const updatedProduct = yield (0, product_services_1.toggleArchivedProduct)(productId, isArchived, vendorEmail);
     if (!updatedProduct) {

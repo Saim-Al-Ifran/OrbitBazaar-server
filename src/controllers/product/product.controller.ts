@@ -101,52 +101,67 @@ export const getAllProductsForVendor = TryCatch(
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const vendorEmail = req.user?.email;
+
     if (!vendorEmail) {
       throw new CustomError("Unauthorized access. Vendor email missing.", 403);
     }
 
-    const { search, sort } = req.query;
+    const { search, sort, filter } = req.query;
 
-    // Generate cache key
-    const cacheKey = `vendor_products:${vendorEmail}:search=${search || ""}:page=${page}:limit=${limit}:sort=${sort || "createdAt"}`;
+    // Build base query
+    const query: Record<string, any> = { vendorEmail };
 
-    // Check Redis cache first
-    const cachedData = await getCache(cacheKey);
-    if (cachedData) {
-      return res.status(200).json(JSON.parse(cachedData));
-    }
-
-    // Build query
-    const query: Record<string, any> = { isArchived: false, vendorEmail };
+    // Add search filter
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
 
-     // Sorting logic
-    const sortParam = (req.query.sort as string) || "createdAt:desc";
+    // Handle filter for isFeatured / isArchived
+    switch (filter) {
+      case "featured":
+        query.isArchived = false;
+        query.isFeatured = true;
+        break;
+      case "archived":
+        query.isArchived = true;
+        break;
+      default:
+        // default case: show non-archived products
+        query.isArchived = false;
+        break;
+    }
+
+    // Sorting logic
+    const sortParam = (sort as string) || "createdAt:desc";
     const [field, order] = sortParam.split(":");
     const sortOption: Record<string, 1 | -1> = {
       [field]: order === "asc" ? 1 : -1,
     };
 
-    // Fetch data from database
+    // Generate cache key
+    const cacheKey = `vendor_products:${vendorEmail}:search=${search || ""}:filter=${filter || "all"}:page=${page}:limit=${limit}:sort=${sort || "createdAt"}`;
+
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    // Fetch data from DB
     const { data, totalRecords, totalPages, prevPage, nextPage } =
       await getVendorProducts(page, limit, query, sortOption);
 
-   if (data.length === 0) {
+    if (data.length === 0) {
       const noDataMessage = search
         ? "No products matched your search!"
         : "No products found!";
 
-        return res.status(200).json({
-            success: true,
-            message: noDataMessage,
-            data: [],
-        });
+      return res.status(200).json({
+        success: true,
+        message: noDataMessage,
+        data: [],
+      });
+    }
 
-   }
-
-    // Create response object
     const response = {
       success: true,
       message: "All products fetched successfully.",
@@ -160,7 +175,6 @@ export const getAllProductsForVendor = TryCatch(
       },
     };
 
-    // Store response in Redis cache
     await setCache(cacheKey, response, 120);
 
     res.status(200).json(response);
@@ -383,15 +397,13 @@ export const toggleProductArchivedStatus = TryCatch(
     const productId = req.params.id;
     const isArchived= req.body.isArchived;
     const vendorEmail = req.user?.email;
- 
     if (!vendorEmail) {
       throw new CustomError("Vendor email is required",400);
     }
- 
-    if (typeof isArchived!== "boolean") {
-      throw new CustomError("Invalid value for 'isFeatured'. It must be a boolean.", 400);
+    
+    if (typeof isArchived !== "boolean") {
+      throw new CustomError("Invalid value for 'isArchived'. It must be a boolean.", 400);
     }
- 
     const updatedProduct = await toggleArchivedProduct(productId, isArchived, vendorEmail);
  
     if (!updatedProduct) {
