@@ -9,14 +9,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDashboardStatsController = void 0;
+exports.getVendorDashboardStats = exports.getDashboardStats = void 0;
 const dashboard_services_1 = require("../../services/dashboard/dashboard.services");
 const TryCatch_1 = require("../../middlewares/TryCatch");
-exports.getDashboardStatsController = (0, TryCatch_1.TryCatch)((_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getDashboardStats = (0, TryCatch_1.TryCatch)((_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const stats = yield (0, dashboard_services_1.getDashboardStatsService)();
     res.status(200).json({
         success: true,
         message: 'Dashboard statistics fetched successfully',
         data: stats
     });
+}));
+exports.getVendorDashboardStats = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const vendorEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!vendorEmail) {
+        return res.status(400).json({ message: 'Vendor email is required' });
+    }
+    const dashboardData = yield (0, dashboard_services_1.getVendorDashboardService)(vendorEmail);
+    res.status(200).json(dashboardData);
 }));
