@@ -239,15 +239,27 @@ export const getAllFeaturedProducts = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const sortParam = (req.query.sort as string) || "createdAt:desc";
 
-    const cacheKey = `featured_products:page=${page}:limit=${limit}`;
+    const [fieldRaw, orderRaw] = sortParam.includes(":")
+      ? sortParam.split(":")
+      : ["createdAt", "desc"];
+
+    const field = fieldRaw.trim();
+    const order = orderRaw.trim().toLowerCase();
+
+    const sortOption: Record<string, 1 | -1> = {
+      [field || "createdAt"]: order === "asc" ? 1 : -1,
+    };
+
+    const cacheKey = `featured_products:page=${page}:limit=${limit}:sort=${sortParam}`;
     const cachedData = await getCache(cacheKey);
     if (cachedData) {
       return res.status(200).json(JSON.parse(cachedData));
     }
 
     const { data, totalRecords, totalPages, prevPage, nextPage } =
-      await getFeaturedProducts(page, limit);
+      await getFeaturedProducts(page, limit, sortOption);
 
     if (data.length === 0) {
       throw new CustomError("No featured products found!", 404);
@@ -266,12 +278,11 @@ export const getAllFeaturedProducts = TryCatch(
       },
     };
 
-    // Store response in cache
     await setCache(cacheKey, response, 120);
-
     res.status(200).json(response);
   }
 );
+
 
 export const deleteProduct = TryCatch(
   async(req:Request,res:Response,_next:NextFunction)=>{

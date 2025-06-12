@@ -182,12 +182,21 @@ exports.getSingleProduct = (0, TryCatch_1.TryCatch)((req, res, _next) => __await
 exports.getAllFeaturedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const cacheKey = `featured_products:page=${page}:limit=${limit}`;
+    const sortParam = req.query.sort || "createdAt:desc";
+    const [fieldRaw, orderRaw] = sortParam.includes(":")
+        ? sortParam.split(":")
+        : ["createdAt", "desc"];
+    const field = fieldRaw.trim();
+    const order = orderRaw.trim().toLowerCase();
+    const sortOption = {
+        [field || "createdAt"]: order === "asc" ? 1 : -1,
+    };
+    const cacheKey = `featured_products:page=${page}:limit=${limit}:sort=${sortParam}`;
     const cachedData = yield (0, cache_1.getCache)(cacheKey);
     if (cachedData) {
         return res.status(200).json(JSON.parse(cachedData));
     }
-    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getFeaturedProducts)(page, limit);
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getFeaturedProducts)(page, limit, sortOption);
     if (data.length === 0) {
         throw new customError_1.default("No featured products found!", 404);
     }
@@ -203,7 +212,6 @@ exports.getAllFeaturedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => _
             currentPage: page,
         },
     };
-    // Store response in cache
     yield (0, cache_1.setCache)(cacheKey, response, 120);
     res.status(200).json(response);
 }));

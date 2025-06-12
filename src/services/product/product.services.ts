@@ -80,14 +80,15 @@ export const addProduct = async (
 // Retrieve featured products
 export const getFeaturedProducts = async (
     page: number,
-    limit: number
+    limit: number,
+    sort: Record<string, 1 | -1>
   ): Promise<PaginationResult<IProduct>> => {
     const query = {
       isFeatured: true,
       isArchived: false,
     };
   
-    return paginate(Product, query, page, limit );
+    return paginate(Product, query, page, limit,sort, undefined, "category");
   };
  
 // Retrieve all products for a vendor

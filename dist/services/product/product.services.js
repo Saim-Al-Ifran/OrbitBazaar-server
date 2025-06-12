@@ -54,12 +54,12 @@ const deleteProductInDb = (productId, email) => __awaiter(void 0, void 0, void 0
 });
 exports.deleteProductInDb = deleteProductInDb;
 // Retrieve featured products
-const getFeaturedProducts = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+const getFeaturedProducts = (page, limit, sort) => __awaiter(void 0, void 0, void 0, function* () {
     const query = {
         isFeatured: true,
         isArchived: false,
     };
-    return (0, paginate_1.default)(Product_1.default, query, page, limit);
+    return (0, paginate_1.default)(Product_1.default, query, page, limit, sort, undefined, "category");
 });
 exports.getFeaturedProducts = getFeaturedProducts;
 // Retrieve all products for a vendor
