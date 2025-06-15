@@ -57,25 +57,21 @@ export const getAllProducts = TryCatch(
     }
 
     // Sorting logic
-    const sortMapping: Record<string, string> = {
-      "low-price": "price",
-      "high-price": "-price",
-      rating: "-ratings.average",
+    const sortParam = (sort as string) || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption: Record<string, 1 | -1> = {
+      [field]: order === "asc" ? 1 : -1,
     };
-    const sortField = sortMapping[sort as string] || "createdAt";
 
     // Fetch data from DB
     const { data, totalRecords, totalPages, prevPage, nextPage } = await findAllProducts(
       page,
       limit,
       query,
-      sortField
+      sortOption
     );
 
-    if (data.length === 0) {
-      throw new CustomError("No product data found!", 404);
-    }
-
+ 
     const response = {
       success: true,
       message: "All products fetched successfully.",

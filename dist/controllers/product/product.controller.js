@@ -46,17 +46,13 @@ exports.getAllProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         query.category = categoryData._id;
     }
     // Sorting logic
-    const sortMapping = {
-        "low-price": "price",
-        "high-price": "-price",
-        rating: "-ratings.average",
+    const sortParam = sort || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption = {
+        [field]: order === "asc" ? 1 : -1,
     };
-    const sortField = sortMapping[sort] || "createdAt";
     // Fetch data from DB
-    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.findAllProducts)(page, limit, query, sortField);
-    if (data.length === 0) {
-        throw new customError_1.default("No product data found!", 404);
-    }
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.findAllProducts)(page, limit, query, sortOption);
     const response = {
         success: true,
         message: "All products fetched successfully.",

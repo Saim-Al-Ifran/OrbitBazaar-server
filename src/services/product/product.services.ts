@@ -11,7 +11,7 @@ export const findAllProducts = async (
     page:number,
     limit:number,
     query:any={},
-    sort: string,
+    sort: Record<string, 1 | -1>,
 ) : Promise<PaginationResult<IProduct>> => {
  
    
