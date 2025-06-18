@@ -65,9 +65,6 @@ export const getReportsByVendor = TryCatch(
       nextPage,
     } = await findReportsByVendor(vendorEmail, page, limit, status, sort);
 
-    if (data.length === 0) {
-      throw new CustomError(`No ${status || ""} reports found!`, 404);
-    }
 
     const reportResponse = {
       success: true,

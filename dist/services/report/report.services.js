@@ -35,9 +35,6 @@ exports.createReport = createReport;
 const findReportsByVendor = (vendorEmail_1, page_1, limit_1, status_1, ...args_1) => __awaiter(void 0, [vendorEmail_1, page_1, limit_1, status_1, ...args_1], void 0, function* (vendorEmail, page, limit, status, sort = { createdAt: -1 }) {
     // Find all products owned by this vendor
     const products = yield Product_1.default.find({ vendorEmail }).select("_id");
-    if (!products.length) {
-        throw new customError_1.default("No products found for this vendor", 404);
-    }
     const productIds = products.map((p) => p._id);
     // Build filter query
     const filter = {

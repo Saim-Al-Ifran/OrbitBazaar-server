@@ -113,9 +113,16 @@ exports.getAllProductsForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => 
     // Fetch data from DB
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.getVendorProducts)(page, limit, query, sortOption);
     if (data.length === 0) {
-        const noDataMessage = search
-            ? "No products matched your search!"
-            : "No products found!";
+        let noDataMessage = "No products found!";
+        if (search) {
+            noDataMessage = "No products matched your search!";
+        }
+        else if (filter === "archived") {
+            noDataMessage = "No archived products found!";
+        }
+        else if (filter === "featured") {
+            noDataMessage = "No featured products found!";
+        }
         return res.status(200).json({
             success: true,
             message: noDataMessage,
@@ -432,6 +439,7 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
             { description: { $regex: search, $options: "i" } },
         ];
     }
+    console.log("hellloooo");
     // Sorting logic
     const sortMapping = {
         asc: "price",
@@ -442,9 +450,6 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     const sortField = sortMapping[sort] || "-createdAt";
     // Fetch products from the database
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.searchProductsService)(page, limit, query, sortField);
-    if (data.length === 0) {
-        throw new customError_1.default("No product data found!", 404);
-    }
     // Response object
     const response = {
         success: true,

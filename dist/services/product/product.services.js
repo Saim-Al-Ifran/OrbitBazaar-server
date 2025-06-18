@@ -79,6 +79,7 @@ const findProductById = (productId) => __awaiter(void 0, void 0, void 0, functio
 exports.findProductById = findProductById;
 // Search products by name or description
 const searchProductsService = (page_1, limit_1, ...args_1) => __awaiter(void 0, [page_1, limit_1, ...args_1], void 0, function* (page, limit, query = {}, sort) {
+    console.log("Search query:", query);
     return (0, paginate_1.default)(Product_1.default, query, page, limit, sort);
 });
 exports.searchProductsService = searchProductsService;

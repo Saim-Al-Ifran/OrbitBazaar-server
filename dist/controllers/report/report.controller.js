@@ -52,9 +52,6 @@ exports.getReportsByVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
         return res.status(200).json(JSON.parse(cachedData));
     }
     const { data, totalRecords, totalPages, prevPage, nextPage, } = yield (0, report_services_1.findReportsByVendor)(vendorEmail, page, limit, status, sort);
-    if (data.length === 0) {
-        throw new customError_1.default(`No ${status || ""} reports found!`, 404);
-    }
     const reportResponse = {
         success: true,
         message: "Reports fetched successfully.",

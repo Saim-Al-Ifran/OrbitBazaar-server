@@ -147,9 +147,15 @@ export const getAllProductsForVendor = TryCatch(
       await getVendorProducts(page, limit, query, sortOption);
 
     if (data.length === 0) {
-      const noDataMessage = search
-        ? "No products matched your search!"
-        : "No products found!";
+        let noDataMessage = "No products found!";
+
+        if (search) {
+          noDataMessage = "No products matched your search!";
+        } else if (filter === "archived") {
+          noDataMessage = "No archived products found!";
+        } else if (filter === "featured") {
+          noDataMessage = "No featured products found!";
+        }
 
       return res.status(200).json({
         success: true,
@@ -557,6 +563,7 @@ export const searchProducts = TryCatch(
         { description: { $regex: search, $options: "i" } },   
       ];
     }
+    console.log("hellloooo")
 
     // Sorting logic
     const sortMapping: Record<string, string> = {
@@ -571,10 +578,7 @@ export const searchProducts = TryCatch(
     const { data, totalRecords, totalPages, prevPage, nextPage } =
       await searchProductsService(page, limit, query, sortField);
 
-    if (data.length === 0) {
-      throw new CustomError("No product data found!", 404);
-    }
-
+ 
     // Response object
     const response = {
       success: true,

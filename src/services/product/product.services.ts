@@ -125,6 +125,7 @@ export const searchProductsService = async (
     query: object = {},
     sort:string
 ):Promise<PaginationResult<IProduct> > => {
+    console.log("Search query:", query);
     return paginate(Product,query,page,limit,sort);
   };
 

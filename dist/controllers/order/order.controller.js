@@ -105,9 +105,6 @@ exports.vendorOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(v
         return res.json(JSON.parse(cached));
     }
     const result = yield (0, order_services_1.getVendorOrders)(vendorEmail, page, limit, sort);
-    if (result.data.length === 0) {
-        throw new customError_1.default("No orders found!", 404);
-    }
     const response = {
         success: true,
         message: "Orders fetched successfully.",

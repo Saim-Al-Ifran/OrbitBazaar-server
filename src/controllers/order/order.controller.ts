@@ -118,10 +118,6 @@ export const vendorOrders = TryCatch(
 
     const result = await getVendorOrders(vendorEmail, page, limit, sort);
 
-    if (result.data.length === 0) {
-      throw new CustomError("No orders found!", 404);
-    }
-
     const response = {
       success: true,
       message: "Orders fetched successfully.",

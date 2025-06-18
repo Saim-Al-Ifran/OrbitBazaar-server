@@ -36,9 +36,6 @@ export const findReportsByVendor = async (
   // Find all products owned by this vendor
   const products = await Product.find({ vendorEmail }).select("_id");
 
-  if (!products.length) {
-    throw new CustomError("No products found for this vendor", 404);
-  }
 
   const productIds = products.map((p) => p._id);
 
