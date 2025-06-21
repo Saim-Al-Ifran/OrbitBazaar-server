@@ -423,7 +423,7 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.keyword || "";
-    const sort = req.query.sort || "createdDsc";
+    const sort = req.query.sort || "createdAt:desc";
     // Generate cache key based on search and pagination
     const cacheKey = `search_products:keyword=${search}:page=${page}:limit=${limit}:sort=${sort}`;
     // Check if the data is already cached
@@ -436,20 +436,16 @@ exports.searchProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     if (search) {
         query.$or = [
             { name: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
         ];
     }
-    console.log("hellloooo");
     // Sorting logic
-    const sortMapping = {
-        asc: "price",
-        dsc: "-price",
-        createdAsc: "createdAt",
-        createdDsc: "-createdAt",
+    const sortParam = sort || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption = {
+        [field]: order === "asc" ? 1 : -1,
     };
-    const sortField = sortMapping[sort] || "-createdAt";
     // Fetch products from the database
-    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.searchProductsService)(page, limit, query, sortField);
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, product_services_1.searchProductsService)(page, limit, query, sortOption);
     // Response object
     const response = {
         success: true,

@@ -544,8 +544,8 @@ export const searchProducts = TryCatch(
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.keyword as string || "";
-    const sort = req.query.sort as string || "createdDsc";
-
+    const sort = req.query.sort as string || "createdAt:desc";
+ 
     // Generate cache key based on search and pagination
     const cacheKey = `search_products:keyword=${search}:page=${page}:limit=${limit}:sort=${sort}`;
 
@@ -559,24 +559,20 @@ export const searchProducts = TryCatch(
     const query: Record<string, any> = { isArchived: false };
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },  
-        { description: { $regex: search, $options: "i" } },   
+        { name: { $regex: search, $options: "i" } },    
       ];
     }
-    console.log("hellloooo")
-
+ 
     // Sorting logic
-    const sortMapping: Record<string, string> = {
-      asc: "price",     
-      dsc: "-price",       
-      createdAsc: "createdAt", 
-      createdDsc: "-createdAt",  
+    const sortParam = (sort as string) || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption: Record<string, 1 | -1> = {
+      [field]: order === "asc" ? 1 : -1,
     };
-    const sortField = sortMapping[sort] || "-createdAt"; 
 
     // Fetch products from the database
     const { data, totalRecords, totalPages, prevPage, nextPage } =
-      await searchProductsService(page, limit, query, sortField);
+      await searchProductsService(page, limit, query, sortOption);
 
  
     // Response object
