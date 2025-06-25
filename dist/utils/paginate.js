@@ -18,7 +18,12 @@ const paginate = (model_1, filter_1, page_1, limit_1, ...args_1) => __awaiter(vo
     }
     // Apply population if provided
     if (populate) {
-        query = query.populate(populate);
+        if (typeof populate === "string") {
+            query = query.populate([populate]);
+        }
+        else {
+            query = query.populate(populate);
+        }
     }
     const data = yield query.skip(skip).limit(limit).sort(sort).exec();
     const totalRecords = yield model.countDocuments(filter).exec();

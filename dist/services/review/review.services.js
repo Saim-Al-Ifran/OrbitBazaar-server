@@ -81,7 +81,10 @@ exports.deleteReviewInDb = deleteReviewInDb;
 // Retrieves all reviews for a specific product.
 const findProductReviews = (productID_1, page_1, limit_1, ...args_1) => __awaiter(void 0, [productID_1, page_1, limit_1, ...args_1], void 0, function* (productID, page, limit, sortField = 'createdAt', sortOrder = 'dsc') {
     const sort = { [sortField]: sortOrder === 'asc' ? 1 : -1 };
-    return yield (0, paginate_1.default)(Review_1.default, { productID }, page, limit, sort, 'rating comment createdAt');
+    return yield (0, paginate_1.default)(Review_1.default, { productID }, page, limit, sort, 'rating comment createdAt user', {
+        path: 'user',
+        select: 'name email image',
+    });
 });
 exports.findProductReviews = findProductReviews;
 // Retrieves all reviews by a specific user.

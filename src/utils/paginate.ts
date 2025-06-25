@@ -1,4 +1,4 @@
-import { Model, Document } from "mongoose";
+import { Model, Document,PopulateOptions } from "mongoose";
 import { PaginationResult } from "../types/types";
 
 const paginate = async <T extends Document>(
@@ -8,7 +8,7 @@ const paginate = async <T extends Document>(
   limit: number,
   sort: any = {},
   projection?: string,
-  populate?: string  
+  populate?: string  | PopulateOptions 
 ): Promise<PaginationResult<T>> => {
   const skip = (page - 1) * limit;
 
@@ -19,7 +19,11 @@ const paginate = async <T extends Document>(
   }
   // Apply population if provided
   if (populate) {
-    query = query.populate(populate);
+    if (typeof populate === "string") {
+      query = query.populate([populate]);
+    } else {
+      query = query.populate(populate);
+    }
   }
 
   const data:T[] = await query.skip(skip).limit(limit).sort(sort).exec();

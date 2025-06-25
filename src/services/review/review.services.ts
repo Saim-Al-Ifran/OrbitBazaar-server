@@ -79,16 +79,29 @@ export const deleteReviewInDb = async (reviewID: string, userEmail: string) => {
   };
 
 // Retrieves all reviews for a specific product.
+ 
 export const findProductReviews = async (
   productID: string,
   page: number,
   limit: number,
-  sortField: string = 'createdAt',
-  sortOrder: string = 'dsc'
+  sortField = 'createdAt',
+  sortOrder = 'dsc'
 ) => {
-  const sort = { [sortField]: sortOrder === 'asc' ? 1 : -1 }; 
+  const sort = { [sortField]: sortOrder === 'asc' ? 1 : -1 };
+ 
+  return await paginate(
+    Review,
+    { productID },
+    page,
+    limit,
+    sort,
+    'rating comment createdAt user', 
+     {
+      path: 'user',
+      select: 'name email image', 
+     }
+  );
 
-  return await paginate(Review, { productID }, page, limit, sort, 'rating comment createdAt');
 };
 
 // Retrieves all reviews by a specific user.
