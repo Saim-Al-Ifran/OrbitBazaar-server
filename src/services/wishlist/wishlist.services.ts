@@ -20,8 +20,12 @@ export const createWishlist = async (userEmail: string, productID: string) => {
 
 // Get all wishlist items for a user
 export const findWishlist = async (userEmail: string) => {
-    return await Wishlist.findOne({ userEmail }).populate("items.productID");
-  };
+  return await Wishlist.findOne({ userEmail }).populate({
+    path: "items.productID",
+    select: "price images name",  
+  });
+};
+
 
 // Remove a specific product from the wishlist
 export const deleteProductFromWishlist = async (userEmail: string, productId: string) => {

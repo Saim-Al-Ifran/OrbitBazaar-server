@@ -34,7 +34,10 @@ const createWishlist = (userEmail, productID) => __awaiter(void 0, void 0, void 
 exports.createWishlist = createWishlist;
 // Get all wishlist items for a user
 const findWishlist = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Wishlist_1.default.findOne({ userEmail }).populate("items.productID");
+    return yield Wishlist_1.default.findOne({ userEmail }).populate({
+        path: "items.productID",
+        select: "price images name",
+    });
 });
 exports.findWishlist = findWishlist;
 // Remove a specific product from the wishlist
