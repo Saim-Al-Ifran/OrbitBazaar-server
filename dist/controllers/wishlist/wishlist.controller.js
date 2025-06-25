@@ -40,9 +40,9 @@ exports.getAllWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         return res.json(JSON.parse(cachedWishlist));
     }
     const wishlist = yield (0, wishlist_services_1.findWishlist)(userEmail);
-    if (!wishlist) {
-        throw new customError_1.default("No wishlist found!", 404);
-    }
+    // if(!wishlist){
+    //     throw new CustomError("No wishlist found!",404);
+    // }
     yield (0, cache_1.setCache)(cachedKey, wishlist, 60);
     res.status(200).json(wishlist);
 }));
@@ -63,7 +63,7 @@ exports.removeAllProductFromWishlist = (0, TryCatch_1.TryCatch)((req, res, _next
     if (!userEmail) {
         throw new customError_1.default("user not found!", 404);
     }
-    yield (0, wishlist_services_1.deleteAllWishlist)(userEmail);
+    const wishlistResponse = yield (0, wishlist_services_1.deleteAllWishlist)(userEmail);
     yield (0, cache_1.deleteCache)(`wishlist_${userEmail}`);
-    res.status(200).json({ message: "Wishlist cleared" });
+    res.status(200).json({ message: "Wishlist cleared", wishlist: wishlistResponse });
 }));

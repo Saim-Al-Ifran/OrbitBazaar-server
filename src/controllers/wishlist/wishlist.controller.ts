@@ -34,9 +34,6 @@ export const getAllWishlist =  TryCatch(
         }
 
         const wishlist = await findWishlist(userEmail);
-        if(!wishlist){
-            throw new CustomError("No wishlist found!",404);
-        }
         await setCache(cachedKey,wishlist,60);
 
         res.status(200).json(wishlist);
@@ -61,9 +58,9 @@ export const removeAllProductFromWishlist =  TryCatch(
         if(!userEmail){
             throw new CustomError("user not found!", 404);
         }
-        await  deleteAllWishlist(userEmail);
+        const wishlistResponse =  await  deleteAllWishlist(userEmail);
         await deleteCache(`wishlist_${userEmail}`);
-        res.status(200).json({ message: "Wishlist cleared" });
+        res.status(200).json({ message: "Wishlist cleared",wishlist:wishlistResponse  });
     
     }
 )
