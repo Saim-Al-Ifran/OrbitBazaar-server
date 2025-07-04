@@ -40,9 +40,6 @@ exports.getAllWishlist = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         return res.json(JSON.parse(cachedWishlist));
     }
     const wishlist = yield (0, wishlist_services_1.findWishlist)(userEmail);
-    // if(!wishlist){
-    //     throw new CustomError("No wishlist found!",404);
-    // }
     yield (0, cache_1.setCache)(cachedKey, wishlist, 60);
     res.status(200).json(wishlist);
 }));

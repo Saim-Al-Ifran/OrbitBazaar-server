@@ -12,12 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCartItem = exports.updateCartItem = exports.deleteAllCart = exports.createCart = exports.findCart = void 0;
+exports.updateCartItemQuantity = exports.deleteCartItem = exports.updateCartItem = exports.deleteAllCart = exports.createCart = exports.findCart = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const Cart_1 = __importDefault(require("../../models/Cart"));
+const product_services_1 = require("../product/product.services");
 // Fetch the current cart for the authenticated user.
 const findCart = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Cart_1.default.findOne({ userEmail }).populate("items.productID");
+    return yield Cart_1.default.findOne({ userEmail }).populate({
+        path: "items.productID",
+        select: "price images name",
+    });
 });
 exports.findCart = findCart;
 // Add a product to the cart. 
@@ -27,17 +31,33 @@ const createCart = (userEmail, productID, quantity, price) => __awaiter(void 0, 
         cart = new Cart_1.default({ userEmail, items: [], totalQuantity: 0, totalPrice: 0 });
     }
     const existingItem = cart.items.find((item) => item.productID.toString() === productID);
+    let message = '';
+    let updatedQuantity = quantity;
     if (existingItem) {
         existingItem.quantity += quantity;
         existingItem.total = existingItem.quantity * price;
+        updatedQuantity = existingItem.quantity;
+        message = 'Quantity updated';
     }
     else {
-        cart.items.push({ productID: new mongoose_1.default.Types.ObjectId(productID), quantity, price, total: quantity * price });
+        cart.items.push({
+            productID: new mongoose_1.default.Types.ObjectId(productID),
+            quantity,
+            price,
+            total: quantity * price,
+        });
+        message = 'Added to cart';
     }
-    cart.totalQuantity += quantity;
-    cart.totalPrice += quantity * price;
+    // Recalculate total quantity and price
+    cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
     yield cart.save();
-    return cart;
+    return {
+        message,
+        productId: productID,
+        updatedQuantity,
+        cart,
+    };
 });
 exports.createCart = createCart;
 // Remove all items from the cart.
@@ -56,6 +76,13 @@ const updateCartItem = (userEmail, productID, quantity) => __awaiter(void 0, voi
     const item = cart.items.find((item) => item.productID.toString() === productID);
     if (!item)
         throw new Error("Item not found in cart");
+    // Fetch the actual product to check stock
+    const product = yield (0, product_services_1.findProductById)(productID);
+    if (!product)
+        throw new Error("Product not found");
+    if (quantity > product.stock) {
+        throw new Error(`Sorry, only ${product.stock} unit${product.stock > 1 ? 's' : ''} are available in stock.`);
+    }
     if (quantity === 0) {
         cart.items = cart.items.filter((item) => item.productID.toString() !== productID);
     }
@@ -81,3 +108,22 @@ const deleteCartItem = (userEmail, productID) => __awaiter(void 0, void 0, void 
     return cart;
 });
 exports.deleteCartItem = deleteCartItem;
+const updateCartItemQuantity = (userEmail, productId, quantity) => __awaiter(void 0, void 0, void 0, function* () {
+    const cart = yield Cart_1.default.findOne({ userEmail });
+    if (!cart) {
+        throw new Error("Cart not found");
+    }
+    const itemIndex = cart.items.findIndex(item => item.productID.toString() === productId);
+    if (itemIndex === -1) {
+        throw new Error("Product not found in cart");
+    }
+    // Update the quantity
+    cart.items[itemIndex].quantity = quantity;
+    cart.items[itemIndex].total = cart.items[itemIndex].price * quantity;
+    // Recalculate totalQuantity and totalPrice
+    cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
+    yield cart.save();
+    return cart;
+});
+exports.updateCartItemQuantity = updateCartItemQuantity;

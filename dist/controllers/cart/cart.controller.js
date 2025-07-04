@@ -28,9 +28,16 @@ exports.getCart = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0
     if (cachedCart) {
         return res.json(JSON.parse(cachedCart));
     }
-    const cart = yield (0, cart_services_1.findCart)(userEmail);
-    if (!cart || cart.items.length === 0) {
-        throw new customError_1.default("No data found in the cart!", 404);
+    let cart = yield (0, cart_services_1.findCart)(userEmail);
+    if (!cart) {
+        // If no cart found, return an empty cart response, not a fake ICart object
+        yield (0, cache_1.setCache)(cachedKey, null, 60);
+        return res.status(200).json({
+            userEmail,
+            items: [],
+            totalQuantity: 0,
+            totalPrice: 0
+        });
     }
     yield (0, cache_1.setCache)(cachedKey, cart, 60);
     res.status(200).json(cart);
@@ -40,12 +47,18 @@ exports.addToCart = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void
     const { productId, quantity, price } = req.body;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     if (!userEmail) {
-        throw new customError_1.default("user not found!", 404);
+        throw new customError_1.default("User not found!", 404);
     }
     const cachedKey = `cart_${userEmail}`;
-    const cart = yield (0, cart_services_1.createCart)(userEmail, productId, quantity, price);
+    const result = yield (0, cart_services_1.createCart)(userEmail, productId, quantity, price);
     yield (0, cache_1.deleteCache)(cachedKey);
-    res.status(201).json(cart);
+    // Return the dynamic message and useful info
+    res.status(201).json({
+        message: result.message, // "Added to cart" or "Quantity updated"
+        productId: result.productId,
+        updatedQuantity: result.updatedQuantity,
+        cart: result.cart,
+    });
 }));
 exports.clearCart = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -83,3 +96,16 @@ exports.removeCartItem = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
     yield (0, cache_1.deleteCache)(cachedKey);
     res.status(200).json(cart);
 }));
+// export const updateCartItem =  TryCatch(
+//     async(req:Request,res:Response,_next:NextFunction)=>{
+//         const { productId } = req.params;
+//         const userEmail = req.user?.email;
+//         if(!userEmail){
+//             throw new CustomError("user not found!", 404);
+//         }
+//         const cachedKey = `cart_${userEmail}`;
+//         const cart = await deleteCartItem(userEmail, productId);
+//         await deleteCache(cachedKey);
+//         res.status(200).json(cart);
+//     }
+// )
