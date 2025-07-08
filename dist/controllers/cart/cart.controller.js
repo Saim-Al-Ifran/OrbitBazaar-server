@@ -30,7 +30,6 @@ exports.getCart = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0
     }
     let cart = yield (0, cart_services_1.findCart)(userEmail);
     if (!cart) {
-        // If no cart found, return an empty cart response, not a fake ICart object
         yield (0, cache_1.setCache)(cachedKey, null, 60);
         return res.status(200).json({
             userEmail,

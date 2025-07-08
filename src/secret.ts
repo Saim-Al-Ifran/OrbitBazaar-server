@@ -9,6 +9,7 @@ const {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET_KEY,
+  STRIPE_SECRET_KEY,
   FIREBASE_TYPE,
   FIREBASE_PROJECT_ID,
   FIREBASE_PRIVATE_KEY_ID,
@@ -42,6 +43,9 @@ if (!CLOUDINARY_API_SECRET_KEY) {
 }
 if(!JWT_REFRESH_TOKEN_KEY){
   throw new Error('Missing CLOUDINARY_API_SECRET_KEY environment variable');
+}
+if(!STRIPE_SECRET_KEY){
+  throw new Error('Missing STRIPE_SECRET_KEY environment variable');
 }
 if(!FIREBASE_TYPE){
   throw new Error('Missing FIREBASE_TYPE environment variable');
@@ -81,6 +85,7 @@ export const refreshSecretKey =  JWT_REFRESH_TOKEN_KEY;
 export const cloudinaryCloudName = CLOUDINARY_CLOUD_NAME;
 export const cloudinaryApiKey = CLOUDINARY_API_KEY;
 export const cloudinarySecretKey = CLOUDINARY_API_SECRET_KEY;
+export const stripeSecretKey = STRIPE_SECRET_KEY;
 export const firebaseType = FIREBASE_TYPE;
 export const firebaseProjectId = FIREBASE_PROJECT_ID;
 export const firebasePrivateKeyId = FIREBASE_PRIVATE_KEY_ID;

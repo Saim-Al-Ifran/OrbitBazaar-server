@@ -128,17 +128,21 @@ const getVendorDashboardService = (vendorEmail) => __awaiter(void 0, void 0, voi
     const now = new Date();
     const monthLabels = [];
     for (let i = monthsToShow - 1; i >= 0; i--) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const date = new Date(now.getFullYear(), now.getMonth() + 1 - i, 1);
         const label = date.toISOString().slice(0, 7);
         monthLabels.push(label);
     }
+    console.log(monthLabels);
+    console.log(chartDataAgg);
     // Convert chartDataAgg to a Map for quick lookup
     const chartMap = new Map(chartDataAgg.map(item => [item._id.month, item.monthlyRevenue]));
-    // Fill missing months with 0 revenue
+    //console.log("chartMap",chartMap);
+    // Fill missing months with 0 revenue 
     const chartData = monthLabels.map(month => ({
         month,
         revenue: chartMap.get(month) || 0,
     }));
+    console.log("charData", chartData);
     // 3. Total Revenue and Sales (Overall)
     const overallStats = yield Order_1.default.aggregate([
         { $match: { 'items.productID': { $in: productIDs } } },

@@ -131,25 +131,31 @@ const chartDataAgg = await Order.aggregate([
 ]);
 
 // Generate last 12 months labels (format: YYYY-MM)
+ 
+
 const monthsToShow = 12;
 const now = new Date();
 const monthLabels: string[] = [];
 
 for (let i = monthsToShow - 1; i >= 0; i--) {
-  const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+  const date = new Date(now.getFullYear(), now.getMonth() + 1 - i, 1);
   const label = date.toISOString().slice(0, 7);
   monthLabels.push(label);
 }
 
+console.log(monthLabels);
+console.log(chartDataAgg)
+
 // Convert chartDataAgg to a Map for quick lookup
 const chartMap = new Map(chartDataAgg.map(item => [item._id.month, item.monthlyRevenue]));
-
-// Fill missing months with 0 revenue
+ 
+//console.log("chartMap",chartMap);
+// Fill missing months with 0 revenue 
 const chartData = monthLabels.map(month => ({
   month,
   revenue: chartMap.get(month) || 0,
 }));
-
+ console.log("charData",chartData);
   // 3. Total Revenue and Sales (Overall)
   const overallStats = await Order.aggregate([
     { $match: { 'items.productID': { $in: productIDs } } },
