@@ -3,6 +3,7 @@ import Order from "../../models/Order";
 import { IOrder } from "../../types/models/Order";
 import Product from "../../models/Product";
 import paginate from "../../utils/paginate";
+import { PaginationResult } from "../../types/types";
 
 // Create a new order
 export const createOrder = async (orderData: IOrder) => {
@@ -11,9 +12,14 @@ export const createOrder = async (orderData: IOrder) => {
   };
 
 // Get orders by user email
-export const findOrdersByUserEmail = async (userEmail: string) => {
-    return await Order.find({ userEmail });
-  };
+export const findOrdersByUserEmail = async (
+  userEmail: string,
+  page: number,
+  limit: number,
+  sort: Record<string, number>
+): Promise<PaginationResult<IOrder>> => {
+  return await paginate(Order, { userEmail }, page, limit, sort);
+};
 
 // Get order by ID
 export const findOrderById = async (orderId: string,userEmail:string) => {

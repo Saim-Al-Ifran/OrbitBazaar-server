@@ -33,16 +33,27 @@ exports.getUserOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     var _a;
     const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
     if (!userEmail) {
-        throw new customError_1.default("user not found", 404);
+        throw new customError_1.default("User not found", 404);
     }
-    const cachedKey = `orders_${userEmail}`;
-    const cachedOrders = yield (0, cache_1.getCache)(cachedKey);
+    // Extract pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    // Extract sort and split
+    const sortQuery = req.query.sort || "createdAt:desc";
+    const [field, order] = sortQuery.split(":");
+    const sortOption = {
+        [field]: order === "asc" ? 1 : -1,
+    };
+    // Generate a safe cache key
+    const cacheKey = `orders_${userEmail}_page${page}_limit${limit}_sort_${field}_${order}`;
+    const cachedOrders = yield (0, cache_1.getCache)(cacheKey);
     if (cachedOrders) {
         return res.json(JSON.parse(cachedOrders));
     }
-    const orders = yield (0, order_services_1.findOrdersByUserEmail)(userEmail);
-    yield (0, cache_1.setCache)(cachedKey, orders, 60);
-    res.json(orders);
+    // Use proper paginated service
+    const paginatedOrders = yield (0, order_services_1.findOrdersByUserEmail)(userEmail, page, limit, sortOption);
+    yield (0, cache_1.setCache)(cacheKey, paginatedOrders, 60); // cache for 60 seconds
+    res.json(paginatedOrders);
 }));
 exports.getUserSingleOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

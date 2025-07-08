@@ -25,21 +25,43 @@ export const addOrder = TryCatch(
   );
 
 export const getUserOrders = TryCatch(
-    async (req: Request, res: Response, _next: NextFunction) => {
-        const userEmail = req.user?.email;
-        if(!userEmail){
-            throw new CustomError("user not found", 404);
-        } 
-        const cachedKey = `orders_${userEmail}`;
-        const cachedOrders = await getCache(cachedKey);
-        if(cachedOrders){
-          return res.json(JSON.parse(cachedOrders));
-        }
-        const orders = await findOrdersByUserEmail(userEmail);
-        await setCache(cachedKey,orders,60);
-        res.json(orders);
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const userEmail = req.user?.email;
+    if (!userEmail) {
+      throw new CustomError("User not found", 404);
     }
-  );
+
+    // Extract pagination
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    // Extract sort and split
+    const sortQuery = (req.query.sort as string) || "createdAt:desc";
+    const [field, order] = sortQuery.split(":");
+    const sortOption: Record<string, 1 | -1> = {
+      [field]: order === "asc" ? 1 : -1,
+    };
+
+    // Generate a safe cache key
+    const cacheKey = `orders_${userEmail}_page${page}_limit${limit}_sort_${field}_${order}`;
+
+    const cachedOrders = await getCache(cacheKey);
+    if (cachedOrders) {
+      return res.json(JSON.parse(cachedOrders));
+    }
+
+    // Use proper paginated service
+    const paginatedOrders = await findOrdersByUserEmail(
+      userEmail,
+      page,
+      limit,
+      sortOption
+    );
+
+    await setCache(cacheKey, paginatedOrders, 60); // cache for 60 seconds
+    res.json(paginatedOrders);
+  }
+);
 
 export const getUserSingleOrder = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {

@@ -23,8 +23,8 @@ const createOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.createOrder = createOrder;
 // Get orders by user email
-const findOrdersByUserEmail = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Order_1.default.find({ userEmail });
+const findOrdersByUserEmail = (userEmail, page, limit, sort) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield (0, paginate_1.default)(Order_1.default, { userEmail }, page, limit, sort);
 });
 exports.findOrdersByUserEmail = findOrdersByUserEmail;
 // Get order by ID
