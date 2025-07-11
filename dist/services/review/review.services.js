@@ -33,32 +33,35 @@ const recalculateProductRating = (productID) => __awaiter(void 0, void 0, void 0
 });
 exports.recalculateProductRating = recalculateProductRating;
 // added review 
-const createReview = (userEmail, productID, rating, comment) => __awaiter(void 0, void 0, void 0, function* () {
+const createReview = (userId, productID, rating, comment) => __awaiter(void 0, void 0, void 0, function* () {
+    // Check if user purchased the product
     const hasPurchased = yield Order_1.default.findOne({
-        userEmail,
+        user: userId,
         'items.productID': productID,
     });
-    const existingReview = yield Review_1.default.exists({ userEmail, productID });
-    if (existingReview) {
-        throw new customError_1.default('You have already reviewed this product', 400);
-    }
     if (!hasPurchased) {
         throw new customError_1.default('You can only review products you have purchased.', 403);
     }
+    // Check if user already reviewed the product
+    const existingReview = yield Review_1.default.exists({ user: userId, productID });
+    if (existingReview) {
+        throw new customError_1.default('You have already reviewed this product', 400);
+    }
+    // Create review
     const review = yield Review_1.default.create({
         productID,
-        userEmail,
+        user: userId,
         rating,
         comment,
     });
-    // Recalculate and update product's overall rating
+    // Update product rating
     yield (0, exports.recalculateProductRating)(productID);
     return review;
 });
 exports.createReview = createReview;
 //  Updates an existing review.
-const updateReview = (reviewID, userEmail, updatedData) => __awaiter(void 0, void 0, void 0, function* () {
-    const review = yield Review_1.default.findOneAndUpdate({ _id: reviewID, userEmail }, updatedData, { new: true });
+const updateReview = (reviewID, userId, updatedData) => __awaiter(void 0, void 0, void 0, function* () {
+    const review = yield Review_1.default.findOneAndUpdate({ _id: reviewID, user: userId }, updatedData, { new: true });
     if (!review) {
         throw new customError_1.default('Review not found', 403);
     }
@@ -68,10 +71,10 @@ const updateReview = (reviewID, userEmail, updatedData) => __awaiter(void 0, voi
 });
 exports.updateReview = updateReview;
 // Deletes a user's review by ID.
-const deleteReviewInDb = (reviewID, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    const review = yield Review_1.default.findOneAndDelete({ _id: reviewID, userEmail });
+const deleteReviewInDb = (reviewID, userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const review = yield Review_1.default.findOneAndDelete({ _id: reviewID, user: userId });
     if (!review) {
-        throw new customError_1.default('Review not found  ', 403);
+        throw new customError_1.default('Review not found', 403);
     }
     // Recalculate product rating after deletion
     yield (0, exports.recalculateProductRating)(review.productID.toString());
@@ -88,12 +91,17 @@ const findProductReviews = (productID_1, page_1, limit_1, ...args_1) => __awaite
 });
 exports.findProductReviews = findProductReviews;
 // Retrieves all reviews by a specific user.
-const findUserReviews = (userEmail_1, page_1, limit_1, ...args_1) => __awaiter(void 0, [userEmail_1, page_1, limit_1, ...args_1], void 0, function* (userEmail, page, limit, sortField = 'createdAt', sortOrder = 'dsc') {
+const findUserReviews = (userId_1, page_1, limit_1, ...args_1) => __awaiter(void 0, [userId_1, page_1, limit_1, ...args_1], void 0, function* (userId, page, limit, sortField = 'createdAt', sortOrder = 'dsc') {
     const sort = { [sortField]: sortOrder === 'asc' ? 1 : -1 };
-    return yield (0, paginate_1.default)(Review_1.default, { userEmail }, page, limit, sort, 'rating comment createdAt');
+    return yield (0, paginate_1.default)(Review_1.default, { user: userId }, page, limit, sort, 'rating comment createdAt', {
+        path: 'productID',
+        select: 'name images'
+    });
 });
 exports.findUserReviews = findUserReviews;
-const findUserReview = (userEmail, reviewId) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Review_1.default.findOne({ userEmail, _id: reviewId });
+const findUserReview = (userId, reviewId) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Review_1.default.findOne({ user: userId, _id: reviewId })
+        .select('rating comment createdAt productID')
+        .populate('productID', 'name images');
 });
 exports.findUserReview = findUserReview;

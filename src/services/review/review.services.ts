@@ -22,61 +22,79 @@ export const recalculateProductRating = async (productID: string) => {
 
 
 // added review 
-export const createReview = async (userEmail: string, productID: string, rating: number, comment: string) => {
+export const createReview = async (
+  userId: string,
+  productID: string,
+  rating: number,
+  comment: string
+) => {
+  // Check if user purchased the product
   const hasPurchased = await Order.findOne({
-    userEmail,
+    user: userId,
     'items.productID': productID,
   });
-  const existingReview = await Review.exists({ userEmail, productID });
-  if(existingReview){
-    throw new CustomError('You have already reviewed this product', 400);
-  }
-  
+
   if (!hasPurchased) {
     throw new CustomError('You can only review products you have purchased.', 403);
   }
 
+  // Check if user already reviewed the product
+  const existingReview = await Review.exists({ user: userId, productID });
+  if (existingReview) {
+    throw new CustomError('You have already reviewed this product', 400);
+  }
 
+  // Create review
   const review = await Review.create({
     productID,
-    userEmail,
+    user: userId,
     rating,
     comment,
   });
 
-  // Recalculate and update product's overall rating
+  // Update product rating
   await recalculateProductRating(productID);
 
   return review;
 };
 
 //  Updates an existing review.
-export const updateReview = async (reviewID: string, userEmail: string, updatedData: { rating?: number; comment?: string }) => {
-    const review = await Review.findOneAndUpdate({ _id: reviewID, userEmail }, updatedData, { new: true });
-  
-    if (!review) {
-      throw new CustomError('Review not found', 403);
-    }
-  
-    // Recalculate product rating after the update
-    await recalculateProductRating(review.productID.toString());
-  
-    return review;
-  };
+export const updateReview = async (
+  reviewID: string,
+  userId: string,
+  updatedData: { rating?: number; comment?: string }
+) => {
+  const review = await Review.findOneAndUpdate(
+    { _id: reviewID, user: userId },
+    updatedData,
+    { new: true }
+  );
+
+  if (!review) {
+    throw new CustomError('Review not found', 403);
+  }
+
+  // Recalculate product rating after the update
+  await recalculateProductRating(review.productID.toString());
+
+  return review;
+};
+
 
 // Deletes a user's review by ID.
-export const deleteReviewInDb = async (reviewID: string, userEmail: string) => {
-    const review = await Review.findOneAndDelete({ _id: reviewID, userEmail });
-  
-    if (!review) {
-      throw new CustomError('Review not found  ', 403);
-    }
-  
-    // Recalculate product rating after deletion
-    await recalculateProductRating(review.productID.toString());
-  
-    return review;
-  };
+export const deleteReviewInDb = async (reviewID: string, userId: string) => {
+  const review = await Review.findOneAndDelete({ _id: reviewID, user: userId });
+
+  if (!review) {
+    throw new CustomError('Review not found', 403);
+  }
+
+  // Recalculate product rating after deletion
+  await recalculateProductRating(review.productID.toString());
+
+  return review;
+};
+
 
 // Retrieves all reviews for a specific product.
  
@@ -106,7 +124,7 @@ export const findProductReviews = async (
 
 // Retrieves all reviews by a specific user.
 export const findUserReviews = async (
-  userEmail: string,
+  userId: string ,
   page: number,
   limit: number,
   sortField: string = 'createdAt',
@@ -114,9 +132,24 @@ export const findUserReviews = async (
 ) => {
   const sort = { [sortField]: sortOrder === 'asc' ? 1 : -1 };
 
-  return await paginate(Review, { userEmail }, page, limit, sort, 'rating comment createdAt');
+  return await paginate(
+    Review,
+    { user: userId },
+    page,
+    limit,
+    sort,
+    'rating comment createdAt',
+    {
+      path: 'productID',
+      select: 'name images'
+    }
+  );
 };
 
-export const findUserReview = async(userEmail:string,reviewId:string) =>{
-  return await Review.findOne({userEmail, _id: reviewId});
-}
+
+
+export const findUserReview = async (userId: string, reviewId: string) => {
+  return await Review.findOne({ user: userId, _id: reviewId })
+                     .select('rating comment createdAt productID')
+                     .populate('productID', 'name images');                 
+};
