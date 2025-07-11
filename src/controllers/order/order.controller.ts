@@ -49,17 +49,31 @@ export const getUserOrders = TryCatch(
     if (cachedOrders) {
       return res.json(JSON.parse(cachedOrders));
     }
-
+    
     // Use proper paginated service
-    const paginatedOrders = await findOrdersByUserEmail(
+    const { data, totalRecords, totalPages, prevPage, nextPage } = await findOrdersByUserEmail(
       userEmail,
       page,
       limit,
       sortOption
     );
 
-    await setCache(cacheKey, paginatedOrders, 60); // cache for 60 seconds
-    res.json(paginatedOrders);
+        // Response object
+    const response = {
+      success: true,
+      message: "All orders fetched successfully.",
+      data,
+      pagination: {
+        totalRecords,
+        totalPages,
+        prevPage,
+        nextPage,
+        currentPage: page,
+      },
+    };
+    
+    await setCache(cacheKey,response, 60); // cache for 60 seconds
+    res.status(200).json(response);
   }
 );
 
@@ -82,8 +96,12 @@ export const getUserSingleOrder = TryCatch(
       if (!order) {
         throw new CustomError("Order not found", 404);
       }
-      await setCache(cachedKey,order,60);
-      res.json({message:'Order retrieve successfully',order});
+      const response = {
+        message:'Order retrieve successfully',
+        order
+      };
+      await setCache(cachedKey, response,60);
+      res.status(200).json(response);
     }
   );
 

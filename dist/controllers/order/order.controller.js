@@ -51,9 +51,22 @@ exports.getUserOrders = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
         return res.json(JSON.parse(cachedOrders));
     }
     // Use proper paginated service
-    const paginatedOrders = yield (0, order_services_1.findOrdersByUserEmail)(userEmail, page, limit, sortOption);
-    yield (0, cache_1.setCache)(cacheKey, paginatedOrders, 60); // cache for 60 seconds
-    res.json(paginatedOrders);
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, order_services_1.findOrdersByUserEmail)(userEmail, page, limit, sortOption);
+    // Response object
+    const response = {
+        success: true,
+        message: "All orders fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    };
+    yield (0, cache_1.setCache)(cacheKey, response, 60); // cache for 60 seconds
+    res.status(200).json(response);
 }));
 exports.getUserSingleOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -71,8 +84,12 @@ exports.getUserSingleOrder = (0, TryCatch_1.TryCatch)((req, res, _next) => __awa
     if (!order) {
         throw new customError_1.default("Order not found", 404);
     }
-    yield (0, cache_1.setCache)(cachedKey, order, 60);
-    res.json({ message: 'Order retrieve successfully', order });
+    const response = {
+        message: 'Order retrieve successfully',
+        order
+    };
+    yield (0, cache_1.setCache)(cachedKey, response, 60);
+    res.status(200).json(response);
 }));
 // Update order status (Only vendor can update)
 exports.changeOrderStatus = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
