@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserReview = exports.getUserReviews = exports.deleteReview = exports.editReview = exports.getProductReviews = exports.addReview = void 0;
+exports.getUserReviewIds = exports.getUserReview = exports.getUserReviews = exports.deleteReview = exports.editReview = exports.getProductReviews = exports.addReview = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const review_services_1 = require("../../services/review/review.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
@@ -141,4 +141,13 @@ exports.getUserReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(
     };
     yield (0, cache_1.setCache)(cacheKey, reviewResponse, 60);
     return res.json(reviewResponse);
+}));
+exports.getUserReviewIds = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
+    const reviewIds = yield (0, review_services_1.getReviewIdsByUser)(userId);
+    res.status(200).json({
+        success: true,
+        data: reviewIds,
+    });
 }));

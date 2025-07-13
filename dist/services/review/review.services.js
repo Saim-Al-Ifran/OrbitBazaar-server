@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findUserReview = exports.findUserReviews = exports.findProductReviews = exports.deleteReviewInDb = exports.updateReview = exports.createReview = exports.recalculateProductRating = void 0;
+exports.getReviewIdsByUser = exports.findUserReview = exports.findUserReviews = exports.findProductReviews = exports.deleteReviewInDb = exports.updateReview = exports.createReview = exports.recalculateProductRating = void 0;
 const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
 const Review_1 = __importDefault(require("../../models/Review"));
@@ -105,3 +105,8 @@ const findUserReview = (userId, reviewId) => __awaiter(void 0, void 0, void 0, f
         .populate('productID', 'name images');
 });
 exports.findUserReview = findUserReview;
+const getReviewIdsByUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const reviews = yield Review_1.default.find({ user: userId }).select('_id');
+    return reviews.map((review) => review._id.toString());
+});
+exports.getReviewIdsByUser = getReviewIdsByUser;

@@ -6,6 +6,7 @@ import {
     findProductReviews,
     findUserReview,
     findUserReviews,
+    getReviewIdsByUser,
     updateReview
 } from '../../services/review/review.services';
 import CustomError from '../../utils/errors/customError';
@@ -171,5 +172,18 @@ export const getUserReview = TryCatch(
 
     await setCache(cacheKey, reviewResponse, 60);
     return res.json(reviewResponse);
+  }
+);
+
+
+export const getUserReviewIds = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const userId = req.user?._id as string;
+    const reviewIds = await getReviewIdsByUser(userId);
+
+    res.status(200).json({
+      success: true,
+      data: reviewIds,
+    });
   }
 );

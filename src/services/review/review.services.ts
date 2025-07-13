@@ -153,3 +153,8 @@ export const findUserReview = async (userId: string, reviewId: string) => {
                      .select('rating comment createdAt productID')
                      .populate('productID', 'name images');                 
 };
+
+export const getReviewIdsByUser = async (userId: string): Promise<string[]> => {
+  const reviews = await Review.find({ user: userId }).select('_id') as Array<{ _id: string }>;
+  return reviews.map((review) => review._id.toString());
+};
