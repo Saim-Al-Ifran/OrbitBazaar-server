@@ -155,6 +155,9 @@ export const findUserReview = async (userId: string, reviewId: string) => {
 };
 
 export const getReviewIdsByUser = async (userId: string): Promise<string[]> => {
-  const reviews = await Review.find({ user: userId }).select('_id') as Array<{ _id: string }>;
-  return reviews.map((review) => review._id.toString());
+    const reviews = await Review.find({ user: userId }).select('productID');
+    const productIds = reviews.map((review) => review.productID.toString());
+
+    // Remove duplicates
+    return [...new Set(productIds)];
 };

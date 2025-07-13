@@ -106,7 +106,9 @@ const findUserReview = (userId, reviewId) => __awaiter(void 0, void 0, void 0, f
 });
 exports.findUserReview = findUserReview;
 const getReviewIdsByUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const reviews = yield Review_1.default.find({ user: userId }).select('_id');
-    return reviews.map((review) => review._id.toString());
+    const reviews = yield Review_1.default.find({ user: userId }).select('productID');
+    const productIds = reviews.map((review) => review.productID.toString());
+    // Remove duplicates
+    return [...new Set(productIds)];
 });
 exports.getReviewIdsByUser = getReviewIdsByUser;

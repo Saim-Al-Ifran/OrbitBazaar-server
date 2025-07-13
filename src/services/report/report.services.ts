@@ -160,3 +160,12 @@ export const findReportByIdForVendor = async (vendorEmail: string, reportId: str
 
   return report;
 };
+
+
+export const getReportedProductIdsByUserEmail = async (userEmail: string): Promise<string[]> => {
+  const reports = await Report.find({ userEmail }).select('productID');
+  const productIds = reports.map((report) => report.productID.toString());
+
+  // Remove duplicates
+  return [...new Set(productIds)];
+};

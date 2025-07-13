@@ -11,6 +11,7 @@ import {
     findReportCountByProduct,
     findReportsByProduct,
     findReportsByVendor,
+    getReportedProductIdsByUserEmail,
     updateReport,
     updateReportStatus
 } from "../../services/report/report.services";
@@ -223,5 +224,19 @@ export const editReportStatus = TryCatch(
       const report = await findReportByIdForVendor(vendorEmail, reportId);
       await setCache(cachedKey,report,60);
       res.status(200).json(report);
+    }
+  );
+export const getUserReportedProductIds = TryCatch(
+    async (req: Request, res: Response, _next: NextFunction) => {
+      const userEmail = req.user?.email;
+      if (!userEmail) {
+        throw new CustomError("User not authenticated", 401);
+      }
+      const productIds = await getReportedProductIdsByUserEmail(userEmail);
+
+      res.status(200).json({
+        success: true,
+        data: productIds,
+      });
     }
   );

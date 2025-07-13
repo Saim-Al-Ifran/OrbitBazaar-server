@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findReportByIdForVendor = exports.updateReportStatus = exports.findReportCountByProduct = exports.findReportByUser = exports.findAllReportsByUser = exports.updateReport = exports.deleteReport = exports.findReportById = exports.findReportsByProduct = exports.findReportsByVendor = exports.createReport = void 0;
+exports.getReportedProductIdsByUserEmail = exports.findReportByIdForVendor = exports.updateReportStatus = exports.findReportCountByProduct = exports.findReportByUser = exports.findAllReportsByUser = exports.updateReport = exports.deleteReport = exports.findReportById = exports.findReportsByProduct = exports.findReportsByVendor = exports.createReport = void 0;
 const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
 const Report_1 = __importDefault(require("../../models/Report"));
@@ -138,3 +138,10 @@ const findReportByIdForVendor = (vendorEmail, reportId) => __awaiter(void 0, voi
     return report;
 });
 exports.findReportByIdForVendor = findReportByIdForVendor;
+const getReportedProductIdsByUserEmail = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
+    const reports = yield Report_1.default.find({ userEmail }).select('productID');
+    const productIds = reports.map((report) => report.productID.toString());
+    // Remove duplicates
+    return [...new Set(productIds)];
+});
+exports.getReportedProductIdsByUserEmail = getReportedProductIdsByUserEmail;

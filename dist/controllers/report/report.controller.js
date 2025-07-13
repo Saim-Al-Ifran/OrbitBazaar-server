@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getReportByIdForVendor = exports.editReportStatus = exports.getReportCountByProduct = exports.getSingleReportByUser = exports.getReportsByUser = exports.editReportByUser = exports.removeReportByUser = exports.getReportById = exports.getReportsByProduct = exports.getReportsByVendor = exports.addReport = void 0;
+exports.getUserReportedProductIds = exports.getReportByIdForVendor = exports.editReportStatus = exports.getReportCountByProduct = exports.getSingleReportByUser = exports.getReportsByUser = exports.editReportByUser = exports.removeReportByUser = exports.getReportById = exports.getReportsByProduct = exports.getReportsByVendor = exports.addReport = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const report_services_1 = require("../../services/report/report.services");
@@ -187,4 +187,16 @@ exports.getReportByIdForVendor = (0, TryCatch_1.TryCatch)((req, res, _next) => _
     const report = yield (0, report_services_1.findReportByIdForVendor)(vendorEmail, reportId);
     yield (0, cache_1.setCache)(cachedKey, report, 60);
     res.status(200).json(report);
+}));
+exports.getUserReportedProductIds = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default("User not authenticated", 401);
+    }
+    const productIds = yield (0, report_services_1.getReportedProductIdsByUserEmail)(userEmail);
+    res.status(200).json({
+        success: true,
+        data: productIds,
+    });
 }));

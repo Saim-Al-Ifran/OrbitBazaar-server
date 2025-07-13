@@ -8,6 +8,7 @@ import {
     getReportsByUser,
     getReportsByVendor,
     getSingleReportByUser,
+    getUserReportedProductIds,
     removeReportByUser
 } from '../../controllers/report/report.controller';
 import authorizeVendor from '../../middlewares/auth/authorizeVendor';
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.post('/reports', authenticate, addReport);
 router.get('/reports/vendor',authenticate,authorizeVendor,getReportsByVendor);
+router.get('/reports/user_reported_Id',authenticate,getUserReportedProductIds)
 router.get("/reports/vendor/:reportId", authenticate,authorizeVendor, getReportByIdForVendor  );
 router.get('/reports/user/:reportId', authenticate, getSingleReportByUser );
 router.delete('/reports/user/:reportId', authenticate, removeReportByUser);
