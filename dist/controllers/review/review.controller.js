@@ -103,9 +103,6 @@ exports.getUserReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter
         return res.json(JSON.parse(cachedReviews));
     }
     const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, review_services_1.findUserReviews)(userId, page, limit, sortField, sortOrder);
-    if (data.length === 0) {
-        throw new customError_1.default('No reviews found', 404);
-    }
     const reviewResponse = {
         success: true,
         message: "Reviews fetched successfully.",

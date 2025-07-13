@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getVendorOrders = exports.getAllOrders = exports.cancelOrder = exports.updateOrderStatus = exports.findOrderById = exports.findOrdersByUserEmail = exports.createOrder = void 0;
+exports.getUniquePurchasedProducts = exports.getVendorOrders = exports.getAllOrders = exports.cancelOrder = exports.updateOrderStatus = exports.findOrderById = exports.findOrdersByUserEmail = exports.createOrder = void 0;
 const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
 const paginate_1 = __importDefault(require("../../utils/paginate"));
@@ -68,3 +68,19 @@ const getVendorOrders = (vendorEmail, page, limit, sort) => __awaiter(void 0, vo
     "items.productID");
 });
 exports.getVendorOrders = getVendorOrders;
+const getUniquePurchasedProducts = (userEmail, page, limit, sort) => __awaiter(void 0, void 0, void 0, function* () {
+    // Fetch all orders for the user and populate only product IDs
+    const orders = yield Order_1.default.find({ userEmail }).select('items.productID');
+    const uniqueProductIds = new Set();
+    for (const order of orders) {
+        for (const item of order.items) {
+            const productId = item.productID.toString();
+            uniqueProductIds.add(productId);
+        }
+    }
+    const uniqueIdsArray = Array.from(uniqueProductIds);
+    // Use paginate utility to return products by unique IDs
+    const paginatedProducts = yield (0, paginate_1.default)(Product_1.default, { _id: { $in: uniqueIdsArray } }, page, limit, sort);
+    return paginatedProducts;
+});
+exports.getUniquePurchasedProducts = getUniquePurchasedProducts;

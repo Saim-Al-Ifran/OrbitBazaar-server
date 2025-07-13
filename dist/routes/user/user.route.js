@@ -18,6 +18,7 @@ router.delete('/super-admin/entity/:id', authenticate_1.default, authorizeSuperA
 router.patch('/super-admin/:id/role', authenticate_1.default, authorizeSuperAdmin_1.default, user_controller_1.updateUserRole);
 router.patch('/admin/vendors/:userId/status', authenticate_1.default, authorizeAdmin_1.default, user_controller_1.updateVendorRequestStatus);
 router.get('/user/profile', authenticate_1.default, user_controller_1.getUserProfile);
+router.get('/user/purchased-products', authenticate_1.default, user_controller_1.getUserPurchasedProducts);
 router.put('/user/profile-image', authenticate_1.default, uploadFile_1.default.single('image'), user_controller_1.updateUserProfileImage);
 router.put('/users/profile', authenticate_1.default, user_controller_1.updateUserProfileHandler);
 router.put('/user/change-password', authenticate_1.default, user_controller_1.changePasswordHandler);

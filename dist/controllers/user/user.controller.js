@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.changePasswordHandler = exports.updateUserProfileHandler = exports.updateUserProfileImage = exports.getUserProfile = exports.updateVendorRequestStatus = exports.updateUserRole = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
+exports.getUserPurchasedProducts = exports.deleteUser = exports.changePasswordHandler = exports.updateUserProfileHandler = exports.updateUserProfileImage = exports.getUserProfile = exports.updateVendorRequestStatus = exports.updateUserRole = exports.updateUserStatus = exports.createUser = exports.findAllUsers = void 0;
 const TryCatch_1 = require("../../middlewares/TryCatch");
 const user_services_1 = require("../../services/user/user.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const cache_1 = require("../../utils/cache");
+const order_services_1 = require("../../services/order/order.services");
 exports.findAllUsers = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const role = (_a = req.user) === null || _a === void 0 ? void 0 : _a.role;
@@ -263,4 +264,34 @@ exports.deleteUser = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(voi
     yield (0, user_services_1.deleteUserService)(requesterRole, id);
     yield (0, cache_1.deleteCacheByPattern)("users:role*");
     return res.status(200).json({ success: true, message: "User deleted successfully, Wishlist & Cart cleared" });
+}));
+exports.getUserPurchasedProducts = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    if (!userEmail) {
+        throw new customError_1.default('User email is required', 400);
+    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const sort = req.query.sort || "createdAt:desc";
+    // Sorting logic
+    const sortParam = sort || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption = {
+        [field]: order === "asc" ? 1 : -1,
+    };
+    const { data, totalRecords, totalPages, prevPage, nextPage } = yield (0, order_services_1.getUniquePurchasedProducts)(userEmail, page, limit, sortOption);
+    const purchasedProductResponse = {
+        success: true,
+        message: "Reviews fetched successfully.",
+        data,
+        pagination: {
+            totalRecords,
+            totalPages,
+            prevPage,
+            nextPage,
+            currentPage: page,
+        },
+    };
+    res.status(200).json(purchasedProductResponse);
 }));

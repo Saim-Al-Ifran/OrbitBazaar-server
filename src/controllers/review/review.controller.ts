@@ -126,10 +126,6 @@ export const getUserReviews = TryCatch(
   
       const { data, totalRecords, totalPages, prevPage, nextPage } = await findUserReviews(userId, page, limit, sortField, sortOrder);
 
-  
-      if (data.length === 0) {
-        throw new CustomError('No reviews found', 404);
-      }
       const reviewResponse = { 
         success: true,
         message: "Reviews fetched successfully.",

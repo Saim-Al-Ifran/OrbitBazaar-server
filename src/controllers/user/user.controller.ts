@@ -14,6 +14,7 @@ import {
 } from "../../services/user/user.services";
 import CustomError from "../../utils/errors/customError";
 import { deleteCache, deleteCacheByPattern, getCache, setCache } from "../../utils/cache";
+import { getUniquePurchasedProducts } from "../../services/order/order.services";
 
 export const findAllUsers = TryCatch(
     async (req: Request, res: Response, _next: NextFunction) => {
@@ -306,3 +307,44 @@ export const deleteUser = TryCatch(
     return res.status(200).json({success:true,message: "User deleted successfully, Wishlist & Cart cleared" });
   }
 )
+
+
+
+export const getUserPurchasedProducts = TryCatch(
+  async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
+    const userEmail = req.user?.email;
+    if (!userEmail) {
+      throw new CustomError('User email is required', 400);
+    }
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const sort = req.query.sort as string || "createdAt:desc";
+
+    // Sorting logic
+    const sortParam = (sort as string) || "createdAt:desc";
+    const [field, order] = sortParam.split(":");
+    const sortOption: Record<string, 1 | -1> = {
+      [field]: order === "asc" ? 1 : -1,
+    };
+
+    const { data, totalRecords, totalPages, prevPage, nextPage } = await getUniquePurchasedProducts(userEmail, page, limit, sortOption);
+    const purchasedProductResponse = { 
+      success: true,
+      message: "Reviews fetched successfully.",
+      data,
+      pagination: {
+        totalRecords,
+        totalPages,
+        prevPage,
+        nextPage,
+        currentPage: page,
+      },
+    };
+    res.status(200).json(purchasedProductResponse);
+  }
+);
+ 

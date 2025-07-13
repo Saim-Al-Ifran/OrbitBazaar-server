@@ -7,6 +7,7 @@ import {
     deleteUser,
     findAllUsers,
     getUserProfile,
+    getUserPurchasedProducts,
     updateUserProfileHandler,
     updateUserProfileImage,
     updateUserRole,
@@ -27,8 +28,10 @@ router.delete('/super-admin/entity/:id',authenticate,authorizeSuperAdmin,deleteU
 router.patch('/super-admin/:id/role',authenticate,authorizeSuperAdmin, updateUserRole );
 router.patch('/admin/vendors/:userId/status', authenticate,authorizeAdmin,updateVendorRequestStatus);
 router.get('/user/profile', authenticate,getUserProfile);
+router.get('/user/purchased-products', authenticate,getUserPurchasedProducts);
 router.put('/user/profile-image', authenticate,upload.single('image'),updateUserProfileImage);
 router.put('/users/profile',authenticate,updateUserProfileHandler);
 router.put('/user/change-password', authenticate, changePasswordHandler);
+
 
 export default router;

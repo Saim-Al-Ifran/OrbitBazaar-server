@@ -76,3 +76,37 @@ export const getVendorOrders = async (
     "items.productID"
   );
 };
+
+
+
+export const getUniquePurchasedProducts = async (
+  userEmail: string,
+  page: number,
+  limit: number,
+  sort: Record<string, 1 | -1>
+) => {
+  // Fetch all orders for the user and populate only product IDs
+  const orders = await Order.find({ userEmail }).select('items.productID');
+ 
+  const uniqueProductIds = new Set<string>();
+
+  for (const order of orders) {
+    for (const item of order.items) {
+      const productId = item.productID.toString();
+      uniqueProductIds.add(productId);
+    }
+  }
+
+  const uniqueIdsArray = Array.from(uniqueProductIds);
+
+  // Use paginate utility to return products by unique IDs
+  const paginatedProducts = await paginate(
+    Product,
+    { _id: { $in: uniqueIdsArray } },
+    page,
+    limit,
+    sort,
+  );
+
+  return paginatedProducts;
+};
