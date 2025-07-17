@@ -23,6 +23,7 @@ export const recalculateProductRating = async (productID: string) => {
 
 // added review 
 export const createReview = async (
+  userEmail: string,
   userId: string,
   productID: string,
   rating: number,
@@ -30,7 +31,7 @@ export const createReview = async (
 ) => {
   // Check if user purchased the product
   const hasPurchased = await Order.findOne({
-    user: userId,
+    userEmail:userEmail,
     'items.productID': productID,
   });
 

@@ -15,17 +15,31 @@ import { deleteCache, deleteCacheByPattern, getCache, setCache } from '../../uti
 export const addReview = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { productId, rating, comment } = req.body;
+    const userEmail = req.user?.email as string;
     const userId = (req.user as { _id: string })?._id;
 
-    if (!userId) {
+    if (!userEmail) {
       throw new CustomError("User not found", 404);
     }
 
-    const review = await createReview(userId, productId, rating, comment);
+    const review = await createReview(userEmail, userId, productId, rating, comment);
+
+    // Invalidate relevant cached pages
+    await deleteCacheByPattern("reviews_page_*"); // product and user reviews pagination
+    await deleteCacheByPattern(`reviews_*_${userId}`); // individual reviews for this user
+
+  
+    const cacheKey = `reviews_${review._id}_${userId}`;
+    await setCache(cacheKey, {
+      success: true,
+      message: "Review fetched successfully",
+      data: review
+    }, 60);
 
     res.status(201).json({ message: 'Review added successfully', review });
   }
 );
+
 
 export const getProductReviews = TryCatch(
     async (req: Request, res: Response, _next: NextFunction):Promise<Response>  => {

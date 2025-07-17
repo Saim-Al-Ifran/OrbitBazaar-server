@@ -18,13 +18,23 @@ const review_services_1 = require("../../services/review/review.services");
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
 const cache_1 = require("../../utils/cache");
 exports.addReview = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     const { productId, rating, comment } = req.body;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
-    if (!userId) {
+    const userEmail = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b._id;
+    if (!userEmail) {
         throw new customError_1.default("User not found", 404);
     }
-    const review = yield (0, review_services_1.createReview)(userId, productId, rating, comment);
+    const review = yield (0, review_services_1.createReview)(userEmail, userId, productId, rating, comment);
+    // Invalidate relevant cached pages
+    yield (0, cache_1.deleteCacheByPattern)("reviews_page_*"); // product and user reviews pagination
+    yield (0, cache_1.deleteCacheByPattern)(`reviews_*_${userId}`); // individual reviews for this user
+    const cacheKey = `reviews_${review._id}_${userId}`;
+    yield (0, cache_1.setCache)(cacheKey, {
+        success: true,
+        message: "Review fetched successfully",
+        data: review
+    }, 60);
     res.status(201).json({ message: 'Review added successfully', review });
 }));
 exports.getProductReviews = (0, TryCatch_1.TryCatch)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {

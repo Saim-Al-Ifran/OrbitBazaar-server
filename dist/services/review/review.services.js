@@ -33,10 +33,10 @@ const recalculateProductRating = (productID) => __awaiter(void 0, void 0, void 0
 });
 exports.recalculateProductRating = recalculateProductRating;
 // added review 
-const createReview = (userId, productID, rating, comment) => __awaiter(void 0, void 0, void 0, function* () {
+const createReview = (userEmail, userId, productID, rating, comment) => __awaiter(void 0, void 0, void 0, function* () {
     // Check if user purchased the product
     const hasPurchased = yield Order_1.default.findOne({
-        user: userId,
+        userEmail: userEmail,
         'items.productID': productID,
     });
     if (!hasPurchased) {
