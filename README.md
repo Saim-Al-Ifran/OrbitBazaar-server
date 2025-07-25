@@ -1,61 +1,142 @@
-# Express + TypeScript Starter Kit
 
-This is a boilerplate project for building backend applications using Express and TypeScript. It includes essential configurations, middleware, and tools to kickstart your development process.
+# 🏍️ Multi-Role E-Commerce Management System
 
-## Features
+A robust and scalable multi-role e-commerce platform empowering Super Admins, Admins, Vendors, and Users with dynamic dashboards, seamless product and order management, advanced reporting, and role-based access control for a powerful end-to-end management experience
 
-- **TypeScript**: Static type-checking along with modern JavaScript features.
-- **Express**: Fast, unopinionated, minimalist web framework for Node.js.
-- **Mongoose**: Elegant MongoDB object modeling for Node.js.
-- **Cloudinary**: Media management for handling image uploads and delivery.
-- **Helmet**: Secure your Express apps by setting various HTTP headers.
-- **Multer**: Middleware for handling `multipart/form-data`, primarily for file uploads.
-- **JSON Web Tokens (JWT)**: Secure authentication via tokens.
-- **Express Validator**: Validation middleware for handling and validating request data.
-- **Morgan**: HTTP request logger middleware.
-- **Compression**: Gzip compression for improved performance.
-- **CORS**: Cross-Origin Resource Sharing middleware.
-- **Cookie Parser**: Parse Cookie header and populate `req.cookies`.
+---
 
-## Getting Started
+## ✨ Features Overview
 
-### Prerequisites
+### 👑 Super Admin / Admin Dashboard
 
-- **Node.js**: Install the latest version of Node.js from [here](https://nodejs.org/).
-- **npm**: Node.js package manager, comes with Node.js installation.
+* Monthly Revenue & Signups Charts
+* Total Users, Vendors, Products, Orders, Revenue
+* Active/Inactive Vendor Management
+* **User Management**:
+  
+  **Super Admin Privileges**:
+  * Add/Delete/Block/Unblock **Users, Vendors, Admins**
+  * Assign Roles (User, Vendor, Admin)
+  
+  **Admin Privileges**:
+  * Delete/Block/Unblock **Users only**
+  
+  **Common Functionalities (Super Admin & Admin)**:
+  * Search, Sort, Pagination
 
-### Installation
+* **Seller Management** (Super Admin & Admin):
+  * Approve/Decline Seller Requests
+  * Activate/Block/Reactivate Sellers
+  * Search, Sort, Pagination
 
-1. **Clone the repository:**
-    ```bash
-    git clone https://github.com/Saim-Al-Ifran/express-typescript-starter-kit.git
-    ```
+* **Category Management** (Super Admin & Admin):
+  * Add, Update, Delete Categories
+  * Search, Sort, Pagination
 
-2. **Navigate to the project directory:**
-    ```bash
-    cd express-typescript-starter-kit
-    ```
+---
 
-3. **Install the dependencies:**
-    ```bash
-    npm install
-    ```
+### 🏪 Vendor Dashboard
 
-### Environment Variables
+* Dashboard Overview:
+  * Total Products, Featured Products, Views, Sales, Revenue
+  * Pending Reports & Monthly Revenue Chart
+* **Reports**:
+  * Retrieve User Reports (with Pagination, Sort, Filter)
+  * Change Report Status: Resolved/Pending/Rejected
+* **Orders**:
+  * Retrieve Vendor Orders (with Pagination, Sort)
+  * Update Order Status: Confirmed/Processing/Delivered/Cancelled
+* **Product Management**:
+  * Retrieve/Create/Update/Delete Products (Up to 5 Images)
+  * Archive/Unarchive, Feature/Unfeature Products
+  * Search, Sort, Filter (All, Featured, Archived)
 
-Create a `.env` file in the root directory and add the following variables:
+---
 
-```env
-# Server
-PORT=3000
+### 👤 User Dashboard
 
-# MongoDB
-MONGO_URI=mongodb://localhost:27017/mydatabase
+* Dashboard Overview:
+  * Total Orders, Pending Orders, Total Purchases, Reports Submitted
+  * Mini Graph (Orders/Purchases over 7/30 days)
+* **Profile Management**:
+  * Update Profile Image, Name, Phone Number
+  * Change Password (System-registered users only)
+* **Reports**:
+  * Retrieve/Edit/Delete Submitted Reports (with Pagination)
+* **Orders**:
+  * View Orders with Sorting & Pagination
+  * Detailed Order View
+* **Purchases & Reviews**:
+  * Retrieve Purchases (Sorting & Pagination)
+  * Submit Reports & Add Reviews
+  * Manage Submitted Reviews (View/Edit/Delete)
 
-# JWT Secret
-JWT_SECRET=your_jwt_secret_key
+---
 
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+### 🛒 User Activities
+
+* **Authenticated Users**:
+  * Add to Cart, Wishlist, Purchase Products
+  * Browse/Search/Filter Products
+* **Public (Non-Authenticated) Users**:
+  * Browse Products Freely
+  * Filter by Price or Category
+  * Search Results Page (Pagination, Sorting)
+  * View Featured Products (Pagination, Sorting)
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer              | Technology                                    |
+| ------------------ | --------------------------------------------- |
+| **Frontend**       | React, Redux Toolkit, Tailwind CSS, Typescript|
+| **Backend**        | Node.js, Express.js ,Typescript               |
+| **Database**       | MongoDB Atlas                                 |
+| **Caching**        | Redis Cloud                                   |
+| **File Storage**   | Cloudinary                                    |
+| **Authentication** | JWT (Access & Refresh Tokens)                 |
+| **Deployment**     | Firebase Hosting (Frontend), Render (Backend) |
+| **RBAC (Role-Based Access Control)** | Custom Middleware-based Access Layer |
+
+---
+
+## 🚀 Caching Strategy (Redis)
+
+Implemented **Redis Caching** across all critical modules:
+
+* Product Listings & Details
+* Orders & Reports Retrieval
+* Category Data
+* Vendor/Product Search Queries
+* Reduces DB Hits, Optimizes API Performance.
+
+---
+
+ 
+## 🔗 Live Demo
+
+Visit the live application:  
+🌐 [https://orbitbazaar-39cf5.web.app/](https://orbitbazaar-39cf5.web.app/)
+
+---
+
+## 📊 API Documentation
+
+* Swagger API Docs: [https://orbitbazaar-server.onrender.com/api-docs/](https://orbitbazaar-server.onrender.com/api-docs/)
+
+---
+
+## 📞 Contact
+
+* **Name:** Saim Al Ifran
+* **LinkedIn:** [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
+* **Email:** [your.email@example.com](mailto:your.email@example.com)
+
+---
+
+
+
+```
+🚀 Multi-role E-commerce System | Typescript | React | Redux Toolkit | Node.js | Express | MongoDB | Redis | Cloudinary | JWT | Firebase Hosting
+```
