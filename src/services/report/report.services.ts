@@ -98,7 +98,7 @@ export const findAllReportsByUser = async (
 
 // Get a specific  reports submitted by a  user
 export const findReportByUser = async (reportId: string, userEmail: string) => {
-  const report = await Report.findById(reportId);
+  const report = await Report.findById(reportId).populate({path: 'productID', select: 'name images'});
   
   if (!report) {
     throw new CustomError("Report not found", 404);

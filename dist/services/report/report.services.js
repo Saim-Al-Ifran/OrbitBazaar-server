@@ -85,7 +85,7 @@ const findAllReportsByUser = (userEmail, page, limit) => __awaiter(void 0, void 
 exports.findAllReportsByUser = findAllReportsByUser;
 // Get a specific  reports submitted by a  user
 const findReportByUser = (reportId, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
-    const report = yield Report_1.default.findById(reportId);
+    const report = yield Report_1.default.findById(reportId).populate({ path: 'productID', select: 'name images' });
     if (!report) {
         throw new customError_1.default("Report not found", 404);
     }
