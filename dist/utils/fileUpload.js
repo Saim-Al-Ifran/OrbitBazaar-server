@@ -21,12 +21,14 @@ const uploadFileToCloudinary = (file) => __awaiter(void 0, void 0, void 0, funct
         error.statusCode = 403; // TypeScript does not have a statusCode property on Error
         throw error;
     }
-    const publicIdWithoutExtension = file.originalname.replace(/\.[^/.]+$/, '');
+    // Generate a unique public ID for the file
+    const publicIdWithoutExtension = `${file.originalname.replace(/\.[^/.]+$/, '')}_${Date.now()}`;
     const b64 = buffer_1.Buffer.from(file.buffer).toString('base64');
     const dataURI = `data:${file.mimetype};base64,${b64}`;
-    return yield cloudinary_1.default.uploader.upload(dataURI, {
+    const result = yield cloudinary_1.default.uploader.upload(dataURI, {
         folder: 'obritBazaar/uploads',
         public_id: publicIdWithoutExtension,
     });
+    return result;
 });
 exports.uploadFileToCloudinary = uploadFileToCloudinary;

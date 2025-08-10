@@ -15,13 +15,15 @@ export const uploadFileToCloudinary = async (file: UploadedFile): Promise<Upload
     throw error;
   }
 
-  const publicIdWithoutExtension = file.originalname.replace(/\.[^/.]+$/, '');
+  // Generate a unique public ID for the file
+  const publicIdWithoutExtension = `${file.originalname.replace(/\.[^/.]+$/, '')}_${Date.now()}`;
 
   const b64 = Buffer.from(file.buffer).toString('base64');
   const dataURI = `data:${file.mimetype};base64,${b64}`;
 
-  return await cloudinary.uploader.upload(dataURI, {
+   const result = await cloudinary.uploader.upload(dataURI, {
     folder: 'obritBazaar/uploads',
     public_id: publicIdWithoutExtension,
   });
+  return result;
 };
