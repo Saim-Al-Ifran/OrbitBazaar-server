@@ -20,7 +20,7 @@ const product_services_1 = require("../product/product.services");
 const findCart = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     return yield Cart_1.default.findOne({ userEmail }).populate({
         path: "items.productID",
-        select: "price images name",
+        select: "price images name stock",
     });
 });
 exports.findCart = findCart;

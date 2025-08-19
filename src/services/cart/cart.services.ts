@@ -7,7 +7,7 @@ import { findProductById } from "../product/product.services";
 export const findCart = async (userEmail: string): Promise<ICart | null> => {
     return await Cart.findOne({ userEmail }).populate({
       path:"items.productID",
-      select: "price images name",
+      select: "price images name stock",
     });
   };
 
