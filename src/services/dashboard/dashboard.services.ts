@@ -2,6 +2,7 @@ import Order from "../../models/Order";
 import Product from "../../models/Product";
 import User from "../../models/User";
 import Report from "../../models/Report";
+import Review from "../../models/Review";
  
 
 export const getDashboardStatsService = async () => {
@@ -186,6 +187,67 @@ const chartData = monthLabels.map(month => ({
     totalSales,
     totalRevenue,
     pendingReports,
+    chartData,
+  };
+};
+
+
+export const getUserDashboardService = async (userId: string, userEmail: string) => {
+  // 1. Total Orders
+  const totalOrders = await Order.countDocuments({ userEmail });
+
+  // 2. Pending Orders (confirmed + processing)
+  const pendingOrders = await Order.countDocuments({
+    userEmail,
+    status: { $in: ["confirmed", "processing"] },
+  });
+
+  // 3. Total Spent
+  const totalSpentAgg = await Order.aggregate([
+    { $match: { userEmail, status: { $ne: "cancelled" } } },
+    { $group: { _id: null, total: { $sum: "$totalPrice" } } },
+  ]);
+  const totalSpent = totalSpentAgg.length > 0 ? totalSpentAgg[0].total : 0;
+
+  // 4. Reviews Submitted
+  const reviewsSubmitted = await Review.countDocuments({ user: userId });
+
+  // 5. Last 3 Orders
+  const recentOrders = await Order.find({ userEmail })
+    .sort({ createdAt: -1 })
+    .limit(3)
+    .select("items totalPrice status createdAt")
+    .populate("items.productID", "name images status createdAt");
+ 
+
+  // 6. Spending Trend (monthly)
+    const spendingTrend = await Order.aggregate([
+      { $match: { userEmail, status: { $ne: "cancelled" } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: { $toDate: "$createdAt" } },
+            month: { $month: { $toDate: "$createdAt" } },
+          },
+          totalSpent: { $sum: "$totalPrice" },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    const chartData = spendingTrend.map((entry) => ({
+      month: `${entry._id.month}-${entry._id.year}`,
+      total: entry.totalSpent,
+    }));
+
+ 
+
+  return {
+    totalOrders,
+    pendingOrders,
+    totalSpent,
+    reviewsSubmitted,
+    recentOrders,
     chartData,
   };
 };

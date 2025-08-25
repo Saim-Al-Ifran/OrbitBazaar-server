@@ -11,4 +11,5 @@ const dashboard_controller_1 = require("../../controllers/dashboard/dashboard.co
 const router = express_1.default.Router();
 router.get('/admin/dashboard/stats', authenticate_1.default, authorizeAdmin_1.default, dashboard_controller_1.getDashboardStats);
 router.get('/vendor/dashboard/stats', authenticate_1.default, authorizeVendor_1.default, dashboard_controller_1.getVendorDashboardStats);
+router.get('/user/dashboard/stats', authenticate_1.default, dashboard_controller_1.getUserDashboardStats);
 exports.default = router;

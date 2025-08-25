@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getDashboardStatsService, getVendorDashboardService } from '../../services/dashboard/dashboard.services';
+import { getDashboardStatsService, getUserDashboardService, getVendorDashboardService } from '../../services/dashboard/dashboard.services';
 import { TryCatch } from '../../middlewares/TryCatch';
  
 
@@ -24,3 +24,15 @@ export const getVendorDashboardStats = TryCatch(
     res.status(200).json(dashboardData);
  
 });
+
+export const getUserDashboardStats = TryCatch(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const userEmail = req.user?.email as string;
+    const userId = req.user?._id as string;
+    if (!userEmail) {
+      return res.status(400).json({ message: 'User email is required' });
+    }
+    const dashboardData = await getUserDashboardService(userId,userEmail);
+    res.status(200).json(dashboardData);
+  }
+);

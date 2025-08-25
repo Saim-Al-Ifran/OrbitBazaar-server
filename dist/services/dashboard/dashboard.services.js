@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getVendorDashboardService = exports.getDashboardStatsService = void 0;
+exports.getUserDashboardService = exports.getVendorDashboardService = exports.getDashboardStatsService = void 0;
 const Order_1 = __importDefault(require("../../models/Order"));
 const Product_1 = __importDefault(require("../../models/Product"));
 const User_1 = __importDefault(require("../../models/User"));
 const Report_1 = __importDefault(require("../../models/Report"));
+const Review_1 = __importDefault(require("../../models/Review"));
 const getDashboardStatsService = () => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const [totalUsers, totalVendors, totalProducts, totalOrders, activeVendors, deactiveVendors, revenueAgg, monthlyRevenue, monthlySignups] = yield Promise.all([
@@ -174,3 +175,53 @@ const getVendorDashboardService = (vendorEmail) => __awaiter(void 0, void 0, voi
     };
 });
 exports.getVendorDashboardService = getVendorDashboardService;
+const getUserDashboardService = (userId, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
+    // 1. Total Orders
+    const totalOrders = yield Order_1.default.countDocuments({ userEmail });
+    // 2. Pending Orders (confirmed + processing)
+    const pendingOrders = yield Order_1.default.countDocuments({
+        userEmail,
+        status: { $in: ["confirmed", "processing"] },
+    });
+    // 3. Total Spent
+    const totalSpentAgg = yield Order_1.default.aggregate([
+        { $match: { userEmail, status: { $ne: "cancelled" } } },
+        { $group: { _id: null, total: { $sum: "$totalPrice" } } },
+    ]);
+    const totalSpent = totalSpentAgg.length > 0 ? totalSpentAgg[0].total : 0;
+    // 4. Reviews Submitted
+    const reviewsSubmitted = yield Review_1.default.countDocuments({ user: userId });
+    // 5. Last 3 Orders
+    const recentOrders = yield Order_1.default.find({ userEmail })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .select("items totalPrice status createdAt")
+        .populate("items.productID", "name images status createdAt");
+    // 6. Spending Trend (monthly)
+    const spendingTrend = yield Order_1.default.aggregate([
+        { $match: { userEmail, status: { $ne: "cancelled" } } },
+        {
+            $group: {
+                _id: {
+                    year: { $year: { $toDate: "$createdAt" } },
+                    month: { $month: { $toDate: "$createdAt" } },
+                },
+                totalSpent: { $sum: "$totalPrice" },
+            },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+    const chartData = spendingTrend.map((entry) => ({
+        month: `${entry._id.month}-${entry._id.year}`,
+        total: entry.totalSpent,
+    }));
+    return {
+        totalOrders,
+        pendingOrders,
+        totalSpent,
+        reviewsSubmitted,
+        recentOrders,
+        chartData,
+    };
+});
+exports.getUserDashboardService = getUserDashboardService;
