@@ -130,8 +130,8 @@ Visit the live application:
 ## 📞 Contact
 
 * **Name:** Saim Al Ifran
-* **LinkedIn:** [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-* **Email:** [your.email@example.com](mailto:your.email@example.com)
+* **LinkedIn:** [linkedin.com/in/saimalifran](https://linkedin.com/in/saimalifran)
+* **Email:** [saim.alifran438@gmail.com](mailto:saim.alifran438@gmail.com)
 
 ---
 
